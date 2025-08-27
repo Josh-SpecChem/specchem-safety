@@ -17,6 +17,7 @@ export default function Home() {
             </div>
             <nav className="hidden md:flex items-center space-x-8">
               <a href="#" className="text-fg-primary hover:text-gold font-medium">Home</a>
+              <Link href="/navigator" className="text-fg-secondary hover:text-gold font-medium">Training Navigator</Link>
               <Link href="/lms/modules" className="text-fg-secondary hover:text-gold font-medium">Courses</Link>
               <Link href="/lms" className="text-fg-secondary hover:text-gold font-medium">My Progress</Link>
               <Link href="/lms/resources" className="text-fg-secondary hover:text-gold font-medium">Resources</Link>
