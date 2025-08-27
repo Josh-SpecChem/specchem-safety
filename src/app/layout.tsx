@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Merriweather } from "next/font/google";
+import { ProgressProvider } from "@/contexts/ProgressContext";
 import "./globals.css";
 
 const inter = Inter({ 
@@ -25,7 +26,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${merriweather.variable}`}>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <ProgressProvider>
+          {children}
+        </ProgressProvider>
+      </body>
     </html>
   );
 }
