@@ -13,9 +13,9 @@ const PlantSafetyProtocolsPage: React.FC = () => {
   const [showAssessment, setShowAssessment] = useState(false)
   
   // Get the specific module
-  const module = PLANT_TECHNICIAN_MODULES.find(m => m.id === 'plant-safety-protocols')
+  const moduleData = PLANT_TECHNICIAN_MODULES.find(m => m.id === 'plant-safety-protocols')
   
-  if (!module) {
+  if (!moduleData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -27,8 +27,8 @@ const PlantSafetyProtocolsPage: React.FC = () => {
   }
 
   const moduleProgress = progressState.moduleProgress[module.id]
-  const currentSection = module.content.sections[currentSectionIndex]
-  const totalSections = module.content.sections.length
+  const currentSection = moduleData.content.sections[currentSectionIndex]
+  const totalSections = moduleData.content.sections.length
   
   const isCurrentSectionCompleted = moduleProgress?.completedSections.includes(currentSection.id) || false
 
@@ -56,11 +56,11 @@ const PlantSafetyProtocolsPage: React.FC = () => {
     }
   }
 
-  if (showAssessment && module.content.assessment) {
+  if (showAssessment && moduleData.content.assessment) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Assessment 
-          assessment={module.content.assessment}
+        <Assessment
+          assessment={moduleData.content.assessment}
           moduleId={module.id}
           onComplete={() => {
             // Handle assessment completion - could redirect to completion page
@@ -87,17 +87,17 @@ const PlantSafetyProtocolsPage: React.FC = () => {
           
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">{module.title}</h1>
-              <p className="text-blue-100 text-lg mb-4">{module.description}</p>
+              <h1 className="text-3xl font-bold mb-2">{moduleData.title}</h1>
+              <p className="text-blue-100 text-lg mb-4">{moduleData.description}</p>
               
               <div className="flex items-center gap-6 text-sm">
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  <span>{module.duration}</span>
+                  <span>{moduleData.duration}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Award className="w-4 h-4" />
-                  <span className="capitalize">{module.difficulty}</span>
+                  <span className="capitalize">{moduleData.difficulty}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <BookOpen className="w-4 h-4" />
@@ -136,7 +136,7 @@ const PlantSafetyProtocolsPage: React.FC = () => {
         {/* Section Navigation */}
         <div className="bg-white border-b border-gray-200 p-4">
           <div className="flex gap-2 overflow-x-auto">
-            {module.content.sections.map((section, index) => (
+            {moduleData.content.sections.map((section, index) => (
               <button
                 key={section.id}
                 onClick={() => setCurrentSectionIndex(index)}
@@ -157,7 +157,7 @@ const PlantSafetyProtocolsPage: React.FC = () => {
               </button>
             ))}
             
-            {module.content.assessment && (
+            {moduleData.content.assessment && (
               <button
                 onClick={() => setShowAssessment(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors bg-gold text-white hover:bg-yellow-600"

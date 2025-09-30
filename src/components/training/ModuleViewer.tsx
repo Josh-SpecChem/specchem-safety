@@ -51,7 +51,7 @@ interface ModuleViewerProps {
     timeSpent: number
     status: 'not-started' | 'in-progress' | 'completed'
   }
-  onProgressUpdate: (progress: any) => void
+  onProgressUpdate: (progress: Record<string, unknown>) => void
 }
 
 export default function ModuleViewer({ moduleData, userProgress, onProgressUpdate }: ModuleViewerProps) {

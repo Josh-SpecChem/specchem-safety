@@ -39,7 +39,7 @@ This document provides a complete guide for setting up the SpecChem Safety Train
 
 ## Dependencies & Initial Setup
 
-### 1. Install Required Packages
+### 1. Install Required Packages ✅ COMPLETED
 
 ```bash
 # Core database packages
@@ -53,7 +53,7 @@ npm install zod date-fns
 npm install -D @types/node typescript
 ```
 
-### 2. Environment Variables
+### 2. Environment Variables ✅ COMPLETED
 
 Ensure your `.env.local` contains:
 ```bash
