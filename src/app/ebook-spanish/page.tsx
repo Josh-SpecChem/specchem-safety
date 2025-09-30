@@ -62,6 +62,15 @@ export default function EbookSpanishPage() {
     setShowQuizResults(prev => ({ ...prev, [questionId]: true }));
   };
 
+  const handleQuizReset = (questionId: string) => {
+    setQuizAnswers(prev => {
+      const newAnswers = { ...prev };
+      delete newAnswers[questionId];
+      return newAnswers;
+    });
+    setShowQuizResults(prev => ({ ...prev, [questionId]: false }));
+  };
+
   const QuizComponent = ({ quiz }: { quiz: QuizQuestion }) => {
     const userAnswer = quizAnswers[quiz.id];
     const showResult = showQuizResults[quiz.id];
@@ -153,11 +162,20 @@ export default function EbookSpanishPage() {
                 </div>
                 <p className="text-gray-700">{quiz.explanation}</p>
                 {!isCorrect && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    <strong>Respuesta correcta:</strong> {Array.isArray(quiz.correctAnswer) 
-                      ? quiz.correctAnswer.join(', ') 
-                      : quiz.correctAnswer}
-                  </p>
+                  <>
+                    <p className="text-sm text-gray-600 mt-2">
+                      <strong>Respuesta correcta:</strong> {Array.isArray(quiz.correctAnswer) 
+                        ? quiz.correctAnswer.join(', ') 
+                        : quiz.correctAnswer}
+                    </p>
+                    <Button 
+                      onClick={() => handleQuizReset(quiz.id)}
+                      variant="outline"
+                      className="mt-4 border-blue-600 text-blue-600 hover:bg-blue-50"
+                    >
+                      Intentar de Nuevo
+                    </Button>
+                  </>
                 )}
               </div>
             )}

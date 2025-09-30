@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   BookOpen, 
@@ -42,6 +42,8 @@ export default function EbookPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string | string[]>>({});
   const [showQuizResults, setShowQuizResults] = useState<Record<string, boolean>>({});
+  const [sectionCompleted, setSectionCompleted] = useState<Record<number, boolean>>({});
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const router = useRouter();
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -57,10 +59,92 @@ export default function EbookPage() {
     setSidebarOpen(false);
   };
 
+  // Check if a section is accessible (all previous sections completed)
+  const isSectionAccessible = (index: number) => {
+    if (index === 0) return true; // First section is always accessible
+    
+    // Check if all previous sections are completed
+    for (let i = 0; i < index; i++) {
+      if (!sectionCompleted[i]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleSectionNavigation = (index: number) => {
+    if (isSectionAccessible(index)) {
+      handleSectionChange(index);
+    }
+  };
+
+  // Mark sections without quizzes as completed automatically
+  useEffect(() => {
+    const currentSectionData = sections[currentSection];
+    if (currentSectionData && !currentSectionData.quiz) {
+      setSectionCompleted(prev => ({ ...prev, [currentSection]: true }));
+    }
+  }, [currentSection]);
+
   const handleQuizSubmit = (questionId: string, answer: string | string[]) => {
     setQuizAnswers(prev => ({ ...prev, [questionId]: answer }));
     setShowQuizResults(prev => ({ ...prev, [questionId]: true }));
+    
+    // Find the current section's quiz
+    const currentQuiz = sections[currentSection]?.quiz;
+    if (currentQuiz && currentQuiz.id === questionId) {
+      // Check if answer is correct
+      const isCorrect = Array.isArray(currentQuiz.correctAnswer) 
+        ? Array.isArray(answer) && 
+          currentQuiz.correctAnswer.length === answer.length &&
+          currentQuiz.correctAnswer.every(ans => answer.includes(ans))
+        : answer === currentQuiz.correctAnswer;
+      
+      if (isCorrect) {
+        setSectionCompleted(prev => ({ ...prev, [currentSection]: true }));
+      }
+    }
   };
+
+  const handleQuizReset = (questionId: string) => {
+    setQuizAnswers(prev => {
+      const newAnswers = { ...prev };
+      delete newAnswers[questionId];
+      return newAnswers;
+    });
+    setShowQuizResults(prev => ({ ...prev, [questionId]: false }));
+  };
+
+  const openLightbox = (src: string, alt: string) => {
+    setLightboxImage({ src, alt });
+  };
+
+  const closeLightbox = () => {
+    setLightboxImage(null);
+  };
+
+  const ClickableImage = ({ src, alt, className = "", caption }: { 
+    src: string; 
+    alt: string; 
+    className?: string; 
+    caption?: string;
+  }) => (
+    <div className="relative group">
+      <img 
+        src={src}
+        alt={alt}
+        className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 border-transparent hover:border-blue-300 w-full max-w-full h-auto ${className}`}
+        onClick={() => openLightbox(src, alt)}
+      />
+      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center cursor-pointer"
+           onClick={() => openLightbox(src, alt)}>
+        <div className="bg-white bg-opacity-90 px-2 py-1 rounded text-xs sm:text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          Click to enlarge
+        </div>
+      </div>
+      {caption && <p className="text-xs sm:text-sm text-gray-600 text-center mt-2">{caption}</p>}
+    </div>
+  );
 
   const QuizComponent = ({ quiz }: { quiz: QuizQuestion }) => {
     const userAnswer = quizAnswers[quiz.id];
@@ -72,41 +156,46 @@ export default function EbookPage() {
       : userAnswer === quiz.correctAnswer;
 
     return (
-      <Card className="my-8 border-2 border-blue-200 bg-blue-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-800">
-            <AlertTriangle className="h-5 w-5" />
+      <Card className="my-6 sm:my-8 border-2 border-blue-200 bg-blue-50">
+        <CardHeader className="pb-4 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 text-blue-800 text-lg sm:text-xl">
+            <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6" />
             Knowledge Check
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="font-medium text-gray-900">{quiz.question}</p>
+        <CardContent className="pt-0">
+          <div className="space-y-4 sm:space-y-6">
+            <p className="font-medium text-gray-900 text-base sm:text-lg leading-relaxed">{quiz.question}</p>
             
             {quiz.type === 'true-false' ? (
-              <div className="space-y-2">
+              <div className="space-y-3 sm:space-y-4">
                 {['True', 'False'].map((option) => (
-                  <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                  <label key={option} className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 min-h-[44px]">
                     <input
                       type="radio"
                       name={quiz.id}
                       value={option}
+                      checked={userAnswer === option}
                       disabled={showResult}
                       onChange={(e) => setQuizAnswers(prev => ({ ...prev, [quiz.id]: e.target.value }))}
-                      className="text-blue-600"
+                      className="text-blue-600 h-4 w-4 sm:h-5 sm:w-5"
                     />
-                    <span>{option}</span>
+                    <span className="text-base sm:text-lg font-medium text-gray-900">{option}</span>
                   </label>
                 ))}
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3 sm:space-y-4">
                 {quiz.options?.map((option, index) => (
-                  <label key={index} className="flex items-center space-x-2 cursor-pointer">
+                  <label key={index} className="flex items-start space-x-3 cursor-pointer p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 min-h-[44px]">
                     <input
                       type={Array.isArray(quiz.correctAnswer) ? "checkbox" : "radio"}
                       name={quiz.id}
                       value={String.fromCharCode(65 + index)} // A, B, C, D, etc.
+                      checked={Array.isArray(quiz.correctAnswer) 
+                        ? Array.isArray(userAnswer) && userAnswer.includes(String.fromCharCode(65 + index))
+                        : userAnswer === String.fromCharCode(65 + index)
+                      }
                       disabled={showResult}
                       onChange={(e) => {
                         if (Array.isArray(quiz.correctAnswer)) {
@@ -126,9 +215,11 @@ export default function EbookPage() {
                           setQuizAnswers(prev => ({ ...prev, [quiz.id]: e.target.value }));
                         }
                       }}
-                      className="text-blue-600"
+                      className="text-blue-600 h-4 w-4 sm:h-5 sm:w-5 mt-1"
                     />
-                    <span>{String.fromCharCode(65 + index)}. {option}</span>
+                    <span className="text-base sm:text-lg text-gray-900">
+                      <span className="font-semibold">{String.fromCharCode(65 + index)}.</span> {option}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -137,27 +228,36 @@ export default function EbookPage() {
             {!showResult && userAnswer && (
               <Button 
                 onClick={() => handleQuizSubmit(quiz.id, userAnswer)}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto min-h-[44px] text-base sm:text-lg font-medium px-6 py-3"
               >
                 Submit Answer
               </Button>
             )}
 
             {showResult && (
-              <div className={`p-4 rounded-lg ${isCorrect ? 'bg-green-100 border border-green-300' : 'bg-red-100 border border-red-300'}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle className={`h-5 w-5 ${isCorrect ? 'text-green-600' : 'text-red-600'}`} />
-                  <span className={`font-medium ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
+              <div className={`p-4 sm:p-6 rounded-lg ${isCorrect ? 'bg-green-100 border border-green-300' : 'bg-red-100 border border-red-300'}`}>
+                <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                  <CheckCircle className={`h-5 w-5 sm:h-6 sm:w-6 ${isCorrect ? 'text-green-600' : 'text-red-600'}`} />
+                  <span className={`font-medium text-base sm:text-lg ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
                     {isCorrect ? 'Correct!' : 'Incorrect'}
                   </span>
                 </div>
-                <p className="text-gray-700">{quiz.explanation}</p>
+                <p className="text-gray-700 text-base sm:text-lg leading-relaxed">{quiz.explanation}</p>
                 {!isCorrect && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    <strong>Correct answer:</strong> {Array.isArray(quiz.correctAnswer) 
-                      ? quiz.correctAnswer.join(', ') 
-                      : quiz.correctAnswer}
-                  </p>
+                  <>
+                    <p className="text-sm sm:text-base text-gray-600 mt-3 sm:mt-4">
+                      <strong>Correct answer:</strong> {Array.isArray(quiz.correctAnswer) 
+                        ? quiz.correctAnswer.join(', ') 
+                        : quiz.correctAnswer}
+                    </p>
+                    <Button 
+                      onClick={() => handleQuizReset(quiz.id)}
+                      variant="outline"
+                      className="mt-4 border-blue-600 text-blue-600 hover:bg-blue-50"
+                    >
+                      Try Again
+                    </Button>
+                  </>
                 )}
               </div>
             )}
@@ -173,15 +273,15 @@ export default function EbookPage() {
       title: 'Introduction & Overview',
       icon: BookOpen,
       content: (
-        <div className="space-y-8">
-          <div className="text-center py-12 bg-gray-50 rounded-xl">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="space-y-6 sm:space-y-8">
+          <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-xl">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 px-4">
               Function-Specific HazMat Training
             </h1>
-            <p className="text-xl text-gray-600 mb-6">
+            <p className="text-lg sm:text-xl text-gray-600 mb-6 px-4">
               Handling, Packaging, and Shipping DOT-Regulated Materials
             </p>
-            <Badge variant="outline" className="text-lg px-4 py-2">
+            <Badge variant="outline" className="text-base sm:text-lg px-4 py-2">
               SpecChem Professional Training
             </Badge>
           </div>
@@ -265,6 +365,16 @@ export default function EbookPage() {
                 <p className="text-gray-700 leading-relaxed">
                   UN ratings for packaging were developed so that transporting hazardous materials would be both safer and easier. If a material is DOT-regulated, it must be kept in UN-rated packaging, either for storage or for transport.
                 </p>
+
+                {/* UN Packaging Codes Breakdown Image */}
+                <div className="my-6">
+                  <img 
+                    src="/images/safety/packaging-un-codes-breakdown.jpg" 
+                    alt="UN packaging codes breakdown showing the systematic identification of packaging materials with detailed explanations of each element" 
+                    className="w-full rounded-lg border border-gray-200 shadow-sm"
+                  />
+                  <p className="text-sm text-gray-600 mt-2 text-center">UN packaging marking breakdown with element identification</p>
+                </div>
 
                 <div className="grid md:grid-cols-3 gap-4 mt-6">
                   <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
@@ -533,6 +643,16 @@ export default function EbookPage() {
                           <strong>Limitation:</strong> Shows regulation status but not specific packaging type
                         </p>
                       </div>
+                      
+                      {/* SDS Section 14 Example Images */}
+                      <div className="mt-4 space-y-3">
+                        <ClickableImage 
+                          src="/images/safety/info-sources-sds-section14-general.jpg" 
+                          alt="General SDS Section 14 transport information showing DOT, IATA, and IMDG classifications" 
+                          className="w-full rounded border border-gray-200"
+                          caption="Example SDS Section 14 - Transport Information"
+                        />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -582,6 +702,16 @@ export default function EbookPage() {
                         <CheckCircle className="h-4 w-4 text-green-600" />
                         <span className="text-sm text-gray-700 font-semibold">Proper closing instructions</span>
                       </div>
+                      
+                      {/* Excel Files Example Image */}
+                      <div className="mt-4 space-y-3">
+                        <ClickableImage 
+                          src="/images/safety/info-sources-excel-pails.jpg" 
+                          alt="Excel spreadsheet showing pail packaging specifications with color-coded entries and UN rating indicators" 
+                          className="w-full rounded border border-gray-200"
+                          caption="Excel file showing pail packaging specifications"
+                        />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -598,6 +728,16 @@ export default function EbookPage() {
                       <p className="text-sm text-gray-700 mb-2">✓ Identified as DOT-regulated per 49 CFR 172.01</p>
                       <p className="text-sm text-gray-700">✓ Shows required marking elements</p>
                     </div>
+                    
+                    {/* CureNSeal SDS Image */}
+                    <div className="mt-3">
+                      <ClickableImage 
+                        src="/images/safety/info-sources-sds-section14-curennseal.jpg" 
+                        alt="CureNSeal 25EX SDS Section 14 showing DOT regulation classification and transport information" 
+                        className="w-full rounded border border-gray-200"
+                        caption="CureNSeal 25EX SDS Section 14"
+                      />
+                    </div>
                   </div>
                   
                   <div>
@@ -606,6 +746,16 @@ export default function EbookPage() {
                       <p className="text-sm text-gray-700 mb-1">• <strong>Pails:</strong> UN-rated blue steel pails</p>
                       <p className="text-sm text-gray-700 mb-1">• <strong>Drums:</strong> UN-rated blue steel drums</p>
                       <p className="text-sm text-gray-700">• <strong>Tools:</strong> Proper drum wrench specifications</p>
+                    </div>
+                    
+                    {/* CureNSeal Excel File Image */}
+                    <div className="mt-3">
+                      <ClickableImage 
+                        src="/images/safety/info-sources-excel-curennseal.jpg" 
+                        alt="Excel file entry for CureNSeal 25EX showing specific packaging requirements and UN rating indicators" 
+                        className="w-full rounded border border-gray-200"
+                        caption="CureNSeal 25EX Excel file entry"
+                      />
                     </div>
                   </div>
                 </div>
@@ -720,7 +870,7 @@ export default function EbookPage() {
                   The basic description consists of four product characteristics which give quick information on the type of hazard presented by the material. As an aid in remembering the four characteristics, think of the acronym <strong>I-SHIP</strong>:
                 </p>
                 
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-white rounded-lg p-4 border border-gray-200 text-center">
                     <div className="text-2xl font-bold text-blue-600 mb-2">I</div>
                     <h4 className="font-semibold text-gray-900 mb-2">Identification Number</h4>
@@ -747,7 +897,7 @@ export default function EbookPage() {
               {/* CureNSeal Example */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">📋 Example: CureNSeal 25EX Basic Description</h3>
-                <div className="grid md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-white rounded p-3 border border-gray-200">
                     <h4 className="font-semibold text-gray-900 mb-1">Identification</h4>
                     <p className="text-2xl font-bold text-gray-700">UN 1139</p>
@@ -775,11 +925,29 @@ export default function EbookPage() {
                     <h4 className="font-semibold text-gray-900 mb-3">🔥 Class 3: Flammable Liquid</h4>
                     <p className="text-gray-700 mb-2">Square sticker using GHS pictograms</p>
                     <p className="text-sm text-gray-600">Most common at SpecChem</p>
+                    
+                    {/* Flammable Liquid Sticker Image */}
+                    <div className="mt-3">
+                      <ClickableImage 
+                        src="/images/safety/packaging-hazard-label-flammable.jpg" 
+                        alt="Class 3 Flammable Liquid hazard sticker with diamond shape and flame symbol" 
+                        className="w-32 mx-auto rounded border border-gray-200"
+                      />
+                    </div>
                   </div>
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                     <h4 className="font-semibold text-gray-900 mb-3">⚠️ Class 8: Corrosive</h4>
                     <p className="text-gray-700 mb-2">Second most common sticker type</p>
                     <p className="text-sm text-gray-600">Pre-printed on continuous rolls</p>
+                    
+                    {/* Corrosive Sticker Image */}
+                    <div className="mt-3">
+                      <ClickableImage 
+                        src="/images/safety/packaging-hazard-label-corrosive.jpg" 
+                        alt="Class 8 Corrosive hazard sticker with diamond shape and corrosive symbol" 
+                        className="w-32 mx-auto rounded border border-gray-200"
+                      />
+                    </div>
                   </div>
                 </div>
                 
@@ -802,6 +970,26 @@ export default function EbookPage() {
                   UN labels mark the packaging of DOT-regulated material with the I-SHIP information. 
                   Files for printing labels are on the corporate server in the same folder as product labels.
                 </p>
+
+                {/* UN Labels Sheet Image */}
+                <div className="my-6">
+                  <ClickableImage 
+                    src="/images/safety/packaging-un-labels-sheet.jpg" 
+                    alt="Sheet of UN1139 labels showing proper format with UN number, proper shipping name, and packing group information" 
+                    className="w-full max-w-md mx-auto rounded-lg border border-gray-200 shadow-sm"
+                    caption="Example UN labels sheet for UN1139 (Coating Solution)"
+                  />
+                </div>
+
+                {/* UN Label on Pail Example */}
+                <div className="my-6">
+                  <ClickableImage 
+                    src="/images/safety/packaging-un-label-on-pail.jpg" 
+                    alt="UN label properly placed on a pail showing correct positioning and size requirements" 
+                    className="w-full max-w-sm mx-auto rounded-lg border border-gray-200 shadow-sm"
+                    caption="UN label properly placed on pail"
+                  />
+                </div>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                   <h4 className="font-semibold text-blue-800 mb-4">Size Requirements (49 CFR Regulations)</h4>
@@ -897,6 +1085,26 @@ export default function EbookPage() {
                       <li>• On side displaying product label</li>
                       <li>• Maintain visibility</li>
                     </ul>
+                  </div>
+                </div>
+                
+                {/* Label Placement Examples */}
+                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                  <div className="text-center">
+                    <ClickableImage 
+                      src="/images/safety/packaging-label-placement-pails.jpg" 
+                      alt="Proper label placement on pails showing correct positioning of hazard stickers and UN labels" 
+                      className="w-full rounded border border-gray-200 mb-2"
+                      caption="Proper label placement on pails"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <ClickableImage 
+                      src="/images/safety/packaging-label-placement-drums.jpg" 
+                      alt="Proper label placement on drums showing correct positioning of hazard stickers and UN labels" 
+                      className="w-full rounded border border-gray-200 mb-2"
+                      caption="Proper label placement on drums"
+                    />
                   </div>
                 </div>
               </div>
@@ -1012,6 +1220,16 @@ export default function EbookPage() {
                           <p className="text-red-600">15 foot-pounds (3/4-inch steel bungs)</p>
                         </div>
                       </div>
+                      
+                      {/* Red Drum Wrench Image */}
+                      <div className="mt-4">
+                        <ClickableImage 
+                          src="/images/safety/closure-drum-wrench-red.jpg" 
+                          alt="Red handle drum wrench tool for steel bungs showing proper torque specifications" 
+                          className="w-full rounded border border-gray-200"
+                          caption="Red handle wrench for steel bungs"
+                        />
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -1033,8 +1251,56 @@ export default function EbookPage() {
                           <p className="text-yellow-600">9 foot-pounds (3/4-inch poly bungs)</p>
                         </div>
                       </div>
+                      
+                      {/* Yellow Drum Wrench Image */}
+                      <div className="mt-4">
+                        <ClickableImage 
+                          src="/images/safety/closure-drum-wrench-yellow.jpg" 
+                          alt="Yellow handle drum wrench tool for poly bungs showing proper torque specifications" 
+                          className="w-full rounded border border-gray-200"
+                          caption="Yellow handle wrench for poly bungs"
+                        />
+                      </div>
                     </CardContent>
                   </Card>
+                </div>
+
+                {/* Drum Types Images */}
+                <div className="grid md:grid-cols-3 gap-4 mt-6">
+                  <div className="text-center">
+                    <ClickableImage 
+                      src="/images/safety/closure-drum-steel-bungs.jpg" 
+                      alt="Steel drum with steel bungs showing proper closure configuration" 
+                      className="w-full rounded border border-gray-200 mb-2"
+                      caption="Steel drum with steel bungs"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <ClickableImage 
+                      src="/images/safety/closure-drum-poly-bungs.jpg" 
+                      alt="Steel drum with poly bungs showing proper closure configuration" 
+                      className="w-full rounded border border-gray-200 mb-2"
+                      caption="Steel drum with poly bungs"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <ClickableImage 
+                      src="/images/safety/closure-drum-poly-container.jpg" 
+                      alt="Poly drum container showing proper closure requirements" 
+                      className="w-full rounded border border-gray-200 mb-2"
+                      caption="Poly drum container"
+                    />
+                  </div>
+                </div>
+
+                {/* Sealed Drum Example */}
+                <div className="text-center mt-6">
+                  <ClickableImage 
+                    src="/images/safety/closure-drum-example-sealed.jpg" 
+                    alt="Properly sealed drum showing correct closure technique and final appearance" 
+                    className="w-full max-w-md mx-auto rounded border border-gray-200"
+                    caption="Example of properly sealed drum"
+                  />
                 </div>
 
                 <div className="bg-red-100 border-2 border-red-300 rounded-lg p-6">
@@ -1069,6 +1335,15 @@ export default function EbookPage() {
                           <strong>Spouted lid:</strong> Orient spout opposite product label to prevent damage
                         </p>
                       </div>
+                      
+                      {/* Step 1 Image */}
+                      <div className="mt-3">
+                        <ClickableImage 
+                          src="/images/safety/closure-pail-lid-placement.jpg" 
+                          alt="Pail with lid properly placed showing correct orientation and positioning" 
+                          className="w-full rounded border border-gray-200"
+                        />
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -1086,6 +1361,15 @@ export default function EbookPage() {
                           <strong>Critical:</strong> Align 16 lugs on crimper with 16 tabs on lid
                         </p>
                       </div>
+                      
+                      {/* Step 2 Image */}
+                      <div className="mt-3">
+                        <ClickableImage 
+                          src="/images/safety/closure-pail-crimper-tool.jpg" 
+                          alt="Pail crimper tool properly positioned over lid showing alignment of lugs and tabs" 
+                          className="w-full rounded border border-gray-200"
+                        />
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -1102,6 +1386,15 @@ export default function EbookPage() {
                         <p className="text-xs text-purple-700">
                           Apply firm, even pressure until handles reach end of motion
                         </p>
+                      </div>
+                      
+                      {/* Step 3 Result Image */}
+                      <div className="mt-3">
+                        <ClickableImage 
+                          src="/images/safety/closure-pail-example-sealed.jpg" 
+                          alt="Properly sealed pail showing completed crimping and final appearance" 
+                          className="w-full rounded border border-gray-200"
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1161,6 +1454,16 @@ export default function EbookPage() {
                           <p className="text-sm text-gray-600">Standard 1½ inch drive</p>
                         </div>
                       </div>
+                    </div>
+                    
+                    {/* Tote Wrenches Image */}
+                    <div className="mt-4">
+                      <ClickableImage 
+                        src="/images/safety/closure-tote-wrenches.png" 
+                        alt="Tote closure wrenches showing IBC wrench and socket torque wrench tools" 
+                        className="w-full rounded border border-gray-200"
+                        caption="Tote closure tools"
+                      />
                     </div>
                   </div>
 
@@ -1235,16 +1538,16 @@ export default function EbookPage() {
       title: 'Course Summary & Completion',
       icon: CheckCircle,
       content: (
-        <div className="space-y-8">
-          <div className="text-center py-12 bg-green-50 rounded-xl">
-            <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="space-y-6 sm:space-y-8">
+          <div className="text-center py-8 sm:py-12 bg-green-50 rounded-xl">
+            <CheckCircle className="h-12 w-12 sm:h-16 sm:w-16 text-green-600 mx-auto mb-4" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 px-4">
               Course Complete!
             </h1>
-            <p className="text-xl text-gray-600 mb-6">
+            <p className="text-lg sm:text-xl text-gray-600 mb-6 px-4">
               You have successfully completed the Function-Specific HazMat Training
             </p>
-            <Badge variant="outline" className="text-lg px-6 py-3 bg-green-100 border-green-300 text-gray-900">
+            <Badge variant="outline" className="text-base sm:text-lg px-4 sm:px-6 py-3 bg-green-100 border-green-300 text-gray-900">
               SpecChem Certified
             </Badge>
           </div>
@@ -1358,37 +1661,57 @@ export default function EbookPage() {
     }
   ];
 
-  const progress = ((currentSection + 1) / sections.length) * 100;
+  const progress = (Object.keys(sectionCompleted).filter(key => sectionCompleted[parseInt(key)]).length / sections.length) * 100;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header with Progress */}
       <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between h-12 sm:h-16">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden"
+                className="lg:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label={sidebarOpen ? "Close navigation" : "Open navigation"}
               >
                 {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
               </Button>
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-6 w-6 text-blue-600" />
-                <div>
-                  <h1 className="text-lg font-semibold text-gray-900">Function-Specific HazMat Training</h1>
-                  <p className="text-sm text-gray-500">Interactive Learning Module</p>
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-sm sm:text-lg font-semibold text-gray-900 truncate">
+                    Function-Specific HazMat Training
+                  </h1>
+                  <div className="hidden sm:block">
+                    <p className="text-xs sm:text-sm text-gray-500">Interactive Learning Module</p>
+                  </div>
+                  {/* Mobile Progress Bar */}
+                  <div className="sm:hidden flex items-center gap-2 mt-1">
+                    <Progress value={progress} className="h-1.5 flex-1 max-w-[120px]" />
+                    <span className="text-xs text-gray-600 font-medium whitespace-nowrap">
+                      {Math.round(progress)}%
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+              {/* Desktop Progress Bar */}
+              <div className="hidden sm:flex items-center gap-2">
+                <Progress value={progress} className="h-2 w-32 lg:w-48" />
+                <span className="text-sm text-gray-600 font-medium whitespace-nowrap">
+                  {Math.round(progress)}%
+                </span>
+              </div>
+              
               <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-gray-600" />
+                <Globe className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
                 <select 
-                  className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                  className="text-xs sm:text-sm border border-gray-300 rounded px-1 sm:px-2 py-1 bg-white min-w-[60px]"
                   onChange={(e) => {
                     if (e.target.value === 'es') {
                       router.push('/ebook-spanish');
@@ -1400,68 +1723,113 @@ export default function EbookPage() {
                   <option value="es">Español</option>
                 </select>
               </div>
-              <div className="hidden sm:block text-sm text-gray-600">
+              
+              <div className="hidden lg:block text-sm text-gray-600">
                 Section {currentSection + 1} of {sections.length}
-              </div>
-              <div className="w-32">
-                <Progress value={progress} className="h-2" />
-              </div>
-              <div className="text-sm font-medium text-gray-700">
-                {Math.round(progress)}%
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex max-w-7xl mx-auto">
+      <div className="flex max-w-7xl mx-auto relative">
         {/* Sidebar */}
-        <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:sticky top-16 left-0 z-30 w-80 h-screen bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out overflow-y-auto`}>
-          <div className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Table of Contents</h2>
-            <nav className="space-y-2">
-              {sections.map((section, index) => (
-                <button
-                  key={section.id}
-                  onClick={() => handleSectionChange(index)}
-                  className={`w-full text-left p-3 rounded-lg transition-colors ${
-                    currentSection === index
-                      ? 'bg-blue-100 text-blue-800 border-l-4 border-blue-500'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <section.icon className={`h-5 w-5 ${currentSection === index ? 'text-blue-600' : 'text-gray-400'}`} />
-                    <div>
-                      <div className="font-medium">{section.title}</div>
-                      <div className="text-sm text-gray-500">Section {index + 1}</div>
+        <div className={`${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 fixed lg:sticky top-12 sm:top-16 left-0 z-30 w-full max-w-sm sm:w-80 h-[calc(100vh-3rem)] sm:h-[calc(100vh-4rem)] bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out overflow-y-auto shadow-lg lg:shadow-none`}>
+          
+          {/* Mobile Close Button */}
+          <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+            <h2 className="text-lg font-semibold text-gray-900">Table of Contents</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(false)}
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="Close navigation"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+          
+          <div className="p-4 sm:p-6">
+            <h2 className="hidden lg:block text-lg font-semibold text-gray-900 mb-6">Table of Contents</h2>
+            <nav className="space-y-1 sm:space-y-2">
+              {sections.map((section, index) => {
+                const isAccessible = isSectionAccessible(index);
+                const isCompleted = sectionCompleted[index];
+                
+                return (
+                  <button
+                    key={section.id}
+                    onClick={() => handleSectionNavigation(index)}
+                    disabled={!isAccessible}
+                    className={`w-full text-left p-3 sm:p-3 rounded-lg transition-colors min-h-[44px] ${
+                      currentSection === index
+                        ? 'bg-blue-100 text-blue-800 border-l-4 border-blue-500'
+                        : isAccessible
+                        ? 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+                        : 'text-gray-400 cursor-not-allowed opacity-60'
+                    }`}
+                    title={!isAccessible ? "Complete previous sections to unlock" : ""}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex-shrink-0">
+                        <section.icon className={`h-5 w-5 ${
+                          currentSection === index 
+                            ? 'text-blue-600' 
+                            : isAccessible 
+                            ? 'text-gray-400' 
+                            : 'text-gray-300'
+                        }`} />
+                        {isCompleted && (
+                          <CheckCircle className="h-3 w-3 text-green-500 absolute -top-1 -right-1 bg-white rounded-full" />
+                        )}
+                        {!isAccessible && index > 0 && (
+                          <div className="h-3 w-3 bg-gray-300 rounded-full absolute -top-1 -right-1 flex items-center justify-center">
+                            <div className="h-1.5 w-1.5 bg-white rounded-full"></div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-sm sm:text-base leading-tight">{section.title}</div>
+                        <div className="text-xs sm:text-sm text-gray-500 mt-1">
+                          Section {index + 1}
+                          {isCompleted && <span className="text-green-600 ml-1">✓</span>}
+                          {!isAccessible && index > 0 && <span className="text-gray-400 ml-1">🔒</span>}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </nav>
 
-            <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-              <h3 className="font-medium text-blue-800 mb-2">Study Progress</h3>
-              <Progress value={progress} className="mb-2" />
-              <p className="text-sm text-blue-600">{Math.round(progress)}% Complete</p>
+            <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-blue-50 rounded-lg">
+              <h3 className="font-medium text-blue-800 mb-2 text-sm sm:text-base">Study Progress</h3>
+              <Progress value={progress} className="mb-2 h-2" />
+              <p className="text-xs sm:text-sm text-blue-600">{Math.round(progress)}% Complete</p>
+              <p className="text-xs text-gray-600 mt-1">
+                Section {currentSection + 1} of {sections.length}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Overlay for mobile */}
+        {/* Mobile Overlay */}
         {sidebarOpen && (
           <div 
-            className="lg:hidden fixed inset-0 z-20 bg-black bg-opacity-50"
+            className="lg:hidden fixed inset-0 z-20 bg-black bg-opacity-50 top-12 sm:top-16"
             onClick={() => setSidebarOpen(false)}
+            aria-label="Close navigation overlay"
           />
         )}
 
         {/* Main Content */}
-        <div className="flex-1 lg:ml-0">
+        <div className="flex-1 lg:ml-0 min-w-0">
           <div 
             ref={contentRef}
-            className="h-screen overflow-y-auto p-6 lg:p-12"
+            className="h-[calc(100vh-3rem)] sm:h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-6 lg:p-12"
           >
             <div className="max-w-4xl mx-auto">
               {sections[currentSection]?.content}
@@ -1471,27 +1839,33 @@ export default function EbookPage() {
               )}
 
               {/* Navigation */}
-              <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row justify-between items-center mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-200 gap-4 sm:gap-0">
                 <Button
                   variant="outline"
                   onClick={() => handleSectionChange(Math.max(0, currentSection - 1))}
                   disabled={currentSection === 0}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 min-h-[44px] min-w-[100px] w-full sm:w-auto"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Previous
                 </Button>
 
-                <div className="text-center">
+                <div className="text-center order-first sm:order-none">
                   <p className="text-sm text-gray-500">
                     Section {currentSection + 1} of {sections.length}
                   </p>
+                  {sections[currentSection]?.quiz && !sectionCompleted[currentSection] && (
+                    <p className="text-xs text-amber-600 mt-1">
+                      Complete the quiz to continue
+                    </p>
+                  )}
                 </div>
 
                 <Button
                   onClick={() => handleSectionChange(Math.min(sections.length - 1, currentSection + 1))}
-                  disabled={currentSection === sections.length - 1}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                  disabled={currentSection === sections.length - 1 || !sectionCompleted[currentSection]}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed min-h-[44px] min-w-[100px] w-full sm:w-auto"
+                  title={!sectionCompleted[currentSection] ? "Complete the current section to continue" : ""}
                 >
                   Next
                   <ArrowRight className="h-4 w-4" />
@@ -1501,6 +1875,33 @@ export default function EbookPage() {
           </div>
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      {lightboxImage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-2 sm:p-4"
+          onClick={closeLightbox}
+        >
+          <div className="relative max-w-7xl max-h-[95vh] sm:max-h-[90vh] w-full h-full flex items-center justify-center">
+            <img 
+              src={lightboxImage.src}
+              alt={lightboxImage.alt}
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              onClick={closeLightbox}
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full p-2 sm:p-3 transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Close lightbox"
+            >
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
+            <div className="absolute bottom-2 left-2 right-2 sm:bottom-4 sm:left-4 sm:right-4 bg-black bg-opacity-50 text-white p-2 sm:p-3 rounded-lg">
+              <p className="text-xs sm:text-sm">{lightboxImage.alt}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
