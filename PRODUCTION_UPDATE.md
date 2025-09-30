@@ -20,7 +20,7 @@ Your SpecChem Safety application has been verified and is ready for production d
 ```
 
 ### **Environment Configuration:**
-- ✅ Supabase URL: `https://radbukphijxenmgiljtu.supabase.co`
+- ✅ Supabase URL: `your_supabase_project_url`
 - ✅ Database Connection: Live and operational
 - ✅ Authentication: Fully configured
 - ✅ Environment Template: Updated with actual values
@@ -43,9 +43,9 @@ Your SpecChem Safety application has been verified and is ready for production d
 Add these to your Vercel project settings:
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://radbukphijxenmgiljtu.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhZGJ1a3BoaWp4ZW5tZ2lsanR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNDY1MzAsImV4cCI6MjA3NDgyMjUzMH0.TBOPPqBODsJSGeJkMI7mctVd2oPWMKAcsI74HGFRaJQ
-DATABASE_URL=postgresql://postgres.radbukphijxenmgiljtu:Cai1GxvtKKkzQY9c@aws-1-us-east-2.pooler.supabase.com:5432/postgres
+DATABASE_URL=your_database_connection_string
 SUPABASE_SERVICE_ROLE_KEY=[get-from-supabase-dashboard]
 OPENAI_API_KEY=[your-openai-api-key-here]
 ```

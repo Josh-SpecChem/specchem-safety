@@ -70,7 +70,7 @@ Your SpecChem Safety application has been successfully prepared and deployed to 
 
 ### **Required Environment Variables:**
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://radbukphijxenmgiljtu.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=[from-your-env]
 DATABASE_URL=[your-database-url]
 SUPABASE_SERVICE_ROLE_KEY=[keep-secure]

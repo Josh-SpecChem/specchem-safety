@@ -13,10 +13,10 @@ In Vercel dashboard, add these environment variables:
 
 ```bash
 # Required for production
-NEXT_PUBLIC_SUPABASE_URL=https://radbukphijxenmgiljtu.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhZGJ1a3BoaWp4ZW5tZ2lsanR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNDY1MzAsImV4cCI6MjA3NDgyMjUzMH0.TBOPPqBODsJSGeJkMI7mctVd2oPWMKAcsI74HGFRaJQ
 SUPABASE_SERVICE_ROLE_KEY=[your-service-role-key]
-DATABASE_URL=postgresql://postgres.radbukphijxenmgiljtu:Cai1GxvtKKkzQY9c@aws-1-us-east-2.pooler.supabase.com:5432/postgres
+DATABASE_URL=your_database_connection_string
 OPENAI_API_KEY=[your-openai-key]
 ```
 

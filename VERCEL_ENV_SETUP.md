@@ -6,17 +6,17 @@
 
 #### **1. Supabase Configuration (Public - Safe to use):**
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://radbukphijxenmgiljtu.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhZGJ1a3BoaWp4ZW5tZ2lsanR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNDY1MzAsImV4cCI6MjA3NDgyMjUzMH0.TBOPPqBODsJSGeJkMI7mctVd2oPWMKAcsI74HGFRaJQ
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 #### **2. Database Connection:**
 ```bash
-DATABASE_URL=postgresql://postgres.radbukphijxenmgiljtu:Cai1GxvtKKkzQY9c@aws-1-us-east-2.pooler.supabase.com:5432/postgres
+DATABASE_URL=your_database_connection_string
 ```
 
 #### **3. Service Role Key (Get from Supabase Dashboard):**
-1. Go to [your Supabase dashboard](https://supabase.com/dashboard/project/radbukphijxenmgiljtu)
+1. Go to your Supabase dashboard
 2. Navigate to **Settings** → **API**
 3. Copy the **service_role secret** key
 4. Add to Vercel as:
