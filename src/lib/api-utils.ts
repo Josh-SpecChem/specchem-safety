@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { apiResponseSchema, type ApiResponse } from './validations';
+import { apiResponseSchema, type ApiResponse } from './schemas';
 
 /**
  * API utilities for handling requests, responses, and error management
@@ -30,7 +30,7 @@ export function validateApiResponse<T>(
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new ApiError(
-        `Invalid API response: ${error.issues.map((e: any) => e.message).join(', ')}`, // eslint-disable-line @typescript-eslint/no-explicit-any
+        `Invalid API response: ${error.issues.map((e: { message: string }) => e.message).join(', ')}`,
         500,
         'VALIDATION_ERROR'
       );
@@ -223,7 +223,7 @@ export async function withRetry<T>(
 /**
  * Debounce utility for API calls (useful for search)
  */
-export function debounce<T extends (...args: any[]) => any>( // eslint-disable-line @typescript-eslint/no-explicit-any
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -294,4 +294,143 @@ export const cache = {
 export function createCacheKey(url: string, params?: Record<string, unknown>): string {
   const key = params ? `${url}_${JSON.stringify(params)}` : url;
   return key.replace(/[^a-zA-Z0-9_]/g, '_');
+}
+
+// ========================================
+// ENHANCED CACHING SYSTEM
+// ========================================
+
+export interface CacheConfig {
+  ttl: number; // Time to live in milliseconds
+  key: string;
+  invalidateOn?: string[]; // Keys to invalidate when this cache updates
+}
+
+export class EnhancedCache {
+  private cache = new Map<string, { data: unknown; expires: number }>();
+  
+  set<T>(key: string, data: T, config: CacheConfig): void {
+    this.cache.set(key, {
+      data,
+      expires: Date.now() + config.ttl
+    });
+  }
+  
+  get<T>(key: string): T | null {
+    const item = this.cache.get(key);
+    if (!item || Date.now() > item.expires) {
+      this.cache.delete(key);
+      return null;
+    }
+    return item.data;
+  }
+  
+  clear(pattern?: string): void {
+    if (pattern) {
+      for (const key of this.cache.keys()) {
+        if (key.includes(pattern)) {
+          this.cache.delete(key);
+        }
+      }
+    } else {
+      this.cache.clear();
+    }
+  }
+  
+  invalidate(invalidateKeys: string[]): void {
+    invalidateKeys.forEach(key => this.clear(key));
+  }
+}
+
+export const enhancedCache = new EnhancedCache();
+
+// ========================================
+// ENHANCED RETRY LOGIC
+// ========================================
+
+export async function withRetryEnhanced<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  let lastError: Error;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error as Error;
+      
+      if (attempt === maxRetries) {
+        throw lastError;
+      }
+      
+      // Don't retry on certain error types
+      if (error instanceof ApiError && [400, 401, 403, 404].includes(error.status)) {
+        throw lastError;
+      }
+      
+      // Exponential backoff with jitter
+      const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw lastError!;
+}
+
+// ========================================
+// STANDARDIZED HOOK RESPONSE TYPES
+// ========================================
+
+export interface HookState<T> {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
+export interface MutatingHookState<T> extends HookState<T> {
+  mutating: boolean;
+  mutate: (data: unknown) => Promise<boolean>;
+}
+
+// ========================================
+// REQUEST DEDUPLICATION
+// ========================================
+
+class RequestDeduplication {
+  private pendingRequests = new Map<string, Promise<any>>();
+
+  async deduplicate<T>(
+    key: string,
+    request: () => Promise<T>
+  ): Promise<T> {
+    // If request is already pending, return the existing promise
+    if (this.pendingRequests.has(key)) {
+      return this.pendingRequests.get(key)!;
+    }
+
+    // Start new request
+    const promise = request().finally(() => {
+      // Clean up when request completes
+      this.pendingRequests.delete(key);
+    });
+
+    this.pendingRequests.set(key, promise);
+    return promise;
+  }
+}
+
+export const requestDeduplication = new RequestDeduplication();
+
+// Enhanced apiGet with deduplication
+export async function apiGetDeduplicated<T>(
+  url: string,
+  schema: z.ZodType<T>
+): Promise<ApiResponse<T>> {
+  return requestDeduplication.deduplicate(
+    `GET:${url}`,
+    () => apiGet(url, schema)
+  );
 }

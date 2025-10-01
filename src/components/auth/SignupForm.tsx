@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { updateUserProfileSchema } from '@/lib/validations'
+import { updateUserProfileSchema } from '@/lib/schemas'
 
 interface RegistrationData {
   email: string

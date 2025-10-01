@@ -3,6 +3,7 @@ import { progress, enrollments, questionEvents, activityEvents } from './db/sche
 import { eq, and, desc } from 'drizzle-orm';
 import { getCurrentUserContext } from './rls';
 import { getCourseByRoute } from './courses';
+import type { QuestionResponseMeta, ActivityEventMeta } from '@/types';
 
 /**
  * Progress tracking utilities for SpecChem Safety Training
@@ -126,7 +127,7 @@ export async function recordQuestionEvent(
   questionKey: string,
   isCorrect: boolean,
   attemptIndex: number = 1,
-  responseMeta?: Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
+  responseMeta?: QuestionResponseMeta
 ): Promise<boolean> {
   const userContext = await getCurrentUserContext();
   const courseInfo = getCourseByRoute(route);
@@ -161,7 +162,7 @@ export async function recordQuestionEvent(
 export async function recordActivityEvent(
   route: string,
   eventType: 'view_section' | 'start_course' | 'complete_course',
-  meta?: Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
+  meta?: ActivityEventMeta
 ): Promise<boolean> {
   const userContext = await getCurrentUserContext();
   const courseInfo = getCourseByRoute(route);

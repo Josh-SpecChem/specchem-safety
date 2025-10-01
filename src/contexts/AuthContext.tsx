@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase/client'
-import { UserProfile } from '@/lib/validations'
+import { UserProfile } from '@/lib/schemas'
 
 interface AuthContextType {
   user: User | null

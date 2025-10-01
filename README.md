@@ -1,145 +1,95 @@
-# SpecChem LMS - Professional Training Platform
+# SpecChem Safety Training Platform
 
-A complete Learning Management System home page built with Next.js, TypeScript, Tailwind CSS, and shadcn/ui, following the **Industrial Knowledge Minimalism** design language.
+A comprehensive Learning Management System (LMS) for industrial chemical manufacturing safety training.
 
-## 🎯 Features
-
-- **Professional LMS Interface** - Designed specifically for industrial training and compliance
-- **Industrial Design Language** - Clean, modern aesthetic suitable for B2B manufacturing environments
-- **Full Responsive Design** - Optimized for desktop, tablet, and mobile devices
-- **Accessibility Compliant** - WCAG AA standards with keyboard navigation and screen reader support
-- **Performance Optimized** - Static generation with Next.js 15 and Turbopack
-
-## 🏗️ Tech Stack
-
-- **Next.js 15** with App Router
-- **TypeScript** with strict mode
-- **Tailwind CSS v4** for styling
-- **shadcn/ui** components library
-- **Lucide React** for icons
-- **Inter & Merriweather** fonts
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ```bash
+# Clone repository
+git clone [repository-url]
+cd specchem-safety
+
 # Install dependencies
 npm install
 
+# Set up environment
+cp .env.local.example .env.local
+# Edit .env.local with your values
+
+# Set up database
+npm run db:migrate
+npm run db:seed
+
 # Start development server
 npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+## 📚 Documentation
 
-## 📁 Project Structure
+Comprehensive documentation is available in the [`docs/`](./docs/) directory:
 
-```
-src/
-├── app/
-│   ├── globals.css         # Design tokens and global styles
-│   ├── layout.tsx          # Root layout with font loading
-│   └── page.tsx            # Home page composition
-├── components/
-│   ├── ui/
-│   │   └── Skeleton.tsx    # Loading states
-│   ├── Header.tsx          # Navigation header
-│   ├── HeroSection.tsx     # Main hero area
-│   ├── ComplianceWidget.tsx # Compliance status dashboard
-│   ├── FeaturedCourses.tsx # Course carousel
-│   ├── Announcements.tsx   # System announcements
-│   ├── ResourceLinks.tsx   # Quick access resources
-│   └── Footer.tsx          # Site footer
-└── lib/
-    └── utils.ts            # Utility functions
-```
+- **[Setup Guide](./docs/SETUP.md)** - Complete development setup
+- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Production deployment
+- **[API Documentation](./docs/API.md)** - API endpoints and usage
+- **[Architecture Overview](./docs/ARCHITECTURE.md)** - System architecture
 
-## 🎨 Design System
+### Implementation Plans
+Active technical implementation plans:
+- [Documentation Management Standardization](./docs/plans/documentation-management-standardization.md)
+- [Environment Deployment Standardization](./docs/plans/environment-deployment-standardization.md)
+- [Testing Infrastructure Standardization](./docs/plans/testing-infrastructure-standardization.md)
 
-### Colors
-- **Background**: `#FAFAFA` (base), `#FFFFFF` (elevated)
-- **Text**: `#0D0F12` (primary), `#49505A` (secondary), `#7A828D` (muted)
-- **Brand**: `#FF6A00` (primary orange)
-- **Accent**: `#1976D2` (cool blue)
-- **States**: Success `#16A34A`, Warning `#F59E0B`, Error `#DC2626`
+## 🛠️ Development
 
-### Typography
-- **Primary**: Inter (headings, UI)
-- **Reading**: Merriweather (long-form content)
-- **Code**: JetBrains Mono
-
-### Components
-All components follow the Industrial Knowledge Minimalism principles:
-- Clean, uncluttered layouts
-- Subtle shadows and rounded corners
-- Purposeful animations
-- Professional color palette
-- Excellent readability
-
-## 🎯 Page Sections
-
-1. **Header** - Logo, navigation, user menu
-2. **Hero Section** - Main call-to-action with animated background
-3. **Compliance Widget** - Status dashboard with progress tracking
-4. **Featured Courses** - Course cards with progress indicators
-5. **Announcements** - System updates and notifications
-6. **Resource Links** - Quick access to reference materials
-7. **Footer** - Links and company information
-
-## 🔧 Customization
-
-The design system uses CSS custom properties for theming. Modify the tokens in `globals.css`:
-
-```css
-:root {
-  --color-brand-primary: #FF6A00;
-  --color-accent-cool: #1976D2;
-  /* ... other tokens */
-}
+### Available Scripts
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run docs:audit   # Audit documentation
+npm run docs:maintain # Check documentation health
 ```
 
-## 📱 Responsive Design
+### Database Operations
+```bash
+npm run db:migrate   # Run database migrations
+npm run db:seed      # Seed database with initial data
+npm run db:verify    # Verify database setup
+```
 
-- **Mobile**: Stacked layout, touch-friendly interactions
-- **Tablet**: Hybrid layout with collapsible elements  
-- **Desktop**: Full layout with side rails and hover states
+## 🏗️ Architecture
 
-## ♿ Accessibility
+- **Frontend:** Next.js 15 with React 19
+- **Backend:** Supabase (PostgreSQL + Auth)
+- **ORM:** Drizzle ORM
+- **Validation:** Zod schemas
+- **Styling:** Tailwind CSS
+- **Deployment:** Vercel
 
-- WCAG AA compliant color contrast ratios
-- Keyboard navigation support
-- Screen reader optimized with ARIA labels
-- Focus indicators for all interactive elements
-- Skip-to-content functionality
+## 📋 Features
 
-## 🚀 Production Ready
+- **Multi-tenant Architecture:** Plant-based tenant isolation
+- **Role-based Access Control:** HR Admin, Dev Admin, Plant Manager, Employee
+- **Learning Management:** Course enrollment, progress tracking, certifications
+- **Analytics:** Comprehensive reporting and analytics
+- **Multi-language Support:** English and Spanish
 
-- Optimized bundle size (124KB total)
-- Static page generation
-- SEO optimized meta tags
-- Performance monitoring ready
-- Error boundary implementation
+## 🔒 Security
+
+- **Row-Level Security:** Database-level tenant isolation
+- **Authentication:** Supabase Auth with JWT tokens
+- **Authorization:** Multi-level role-based access control
+- **Data Validation:** Runtime validation with Zod schemas
+
+## 📞 Support
+
+For technical support or questions:
+- **Documentation:** See [`docs/`](./docs/) directory
+- **Issues:** Create GitHub issues for bugs or feature requests
+- **Development:** Follow implementation plans in [`docs/plans/`](./docs/plans/)
 
 ---
 
-Built for SpecChem's professional training needs with scalability and maintainability in mind.
+*Built for SpecChem - Industrial Chemical Manufacturing Safety Training*
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

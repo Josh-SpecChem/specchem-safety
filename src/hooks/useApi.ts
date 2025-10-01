@@ -4,20 +4,24 @@ import {
   apiPost, 
   apiPatch, 
   handleApiError, 
-  withRetry, 
-  cache, 
-  createCacheKey 
+  withRetryEnhanced, 
+  enhancedCache, 
+  createCacheKey,
+  CACHE_STRATEGY
 } from '@/lib/api-utils';
 import { 
   courseProgressSchema, 
   userProfileSchema,
   type CourseProgress,
   type UserProfile
-} from '@/lib/validations';
+} from '@/lib/schemas';
 
 /**
  * Custom hooks for API integration with SpecChem Safety Training database
  * Enhanced with Zod validation, error handling, caching, and retry logic
+ * 
+ * Note: These hooks maintain backward compatibility while using the new
+ * standardized patterns internally.
  */
 
 /**
@@ -35,20 +39,23 @@ export function useProgress() {
       
       // Try to get from cache first
       const cacheKey = createCacheKey('/api/progress');
-      const cached = cache.get<CourseProgress[]>(cacheKey);
+      const cached = enhancedCache.get<CourseProgress[]>(cacheKey);
       if (cached) {
         setProgress(cached);
         setLoading(false);
         return;
       }
       
-      const result = await withRetry(() => 
+      const result = await withRetryEnhanced(() => 
         apiGet('/api/progress', courseProgressSchema.array())
       );
       
       if (result.success && result.data) {
         setProgress(result.data);
-        cache.set(cacheKey, result.data, 2 * 60 * 1000); // Cache for 2 minutes
+        enhancedCache.set(cacheKey, result.data, {
+          ttl: CACHE_STRATEGY.progressData,
+          key: cacheKey,
+        });
       } else {
         setError(result.error || 'Failed to fetch progress');
       }
@@ -90,20 +97,23 @@ export function useCourseProgress(courseRoute: string) {
       
       // Try cache first
       const cacheKey = createCacheKey(url);
-      const cached = cache.get<CourseProgress>(cacheKey);
+      const cached = enhancedCache.get<CourseProgress>(cacheKey);
       if (cached) {
         setProgress(cached);
         setLoading(false);
         return;
       }
       
-      const result = await withRetry(() => 
+      const result = await withRetryEnhanced(() => 
         apiGet(url, courseProgressSchema)
       );
       
       if (result.success && result.data) {
         setProgress(result.data);
-        cache.set(cacheKey, result.data, 1 * 60 * 1000); // Cache for 1 minute
+        enhancedCache.set(cacheKey, result.data, {
+          ttl: CACHE_STRATEGY.progressData,
+          key: cacheKey,
+        });
       } else {
         setError(result.error || 'Failed to fetch course progress');
       }
@@ -126,7 +136,7 @@ export function useCourseProgress(courseRoute: string) {
       const coursePath = courseRoute.replace('/', '');
       const url = `/api/courses/${coursePath}/progress`;
       
-      const result = await withRetry(() => 
+      const result = await withRetryEnhanced(() => 
         apiPost(url, {
           progressPercent,
           currentSection,
@@ -138,8 +148,8 @@ export function useCourseProgress(courseRoute: string) {
         setProgress(result.data);
         
         // Clear relevant caches
-        cache.clear(createCacheKey(url));
-        cache.clear(createCacheKey('/api/progress'));
+        enhancedCache.clear(createCacheKey(url));
+        enhancedCache.clear(createCacheKey('/api/progress'));
         
         return true;
       } else {
@@ -180,7 +190,7 @@ export function useQuestionEvents(courseRoute: string) {
     questionKey: string,
     isCorrect: boolean,
     attemptIndex: number = 1,
-    responseMeta?: Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
+    responseMeta?: Record<string, string | number | boolean | null>
   ) => {
     try {
       setSubmitting(true);
@@ -234,20 +244,23 @@ export function useUserProfile() {
       
       // Try cache first
       const cacheKey = createCacheKey('/api/user/profile');
-      const cached = cache.get<UserProfile>(cacheKey);
+      const cached = enhancedCache.get<UserProfile>(cacheKey);
       if (cached) {
         setProfile(cached);
         setLoading(false);
         return;
       }
       
-      const result = await withRetry(() =>
+      const result = await withRetryEnhanced(() =>
         apiGet('/api/user/profile', userProfileSchema)
       );
       
       if (result.success && result.data) {
         setProfile(result.data);
-        cache.set(cacheKey, result.data, 5 * 60 * 1000); // Cache for 5 minutes
+        enhancedCache.set(cacheKey, result.data, {
+          ttl: CACHE_STRATEGY.userData,
+          key: cacheKey,
+        });
       } else {
         setError(result.error || 'Failed to fetch profile');
       }
@@ -267,7 +280,7 @@ export function useUserProfile() {
       setUpdating(true);
       setError(null);
       
-      const result = await withRetry(() =>
+      const result = await withRetryEnhanced(() =>
         apiPatch('/api/user/profile', updates, userProfileSchema)
       );
       
@@ -275,7 +288,7 @@ export function useUserProfile() {
         setProfile(result.data);
         
         // Clear profile cache
-        cache.clear(createCacheKey('/api/user/profile'));
+        enhancedCache.clear(createCacheKey('/api/user/profile'));
         
         return true;
       } else {

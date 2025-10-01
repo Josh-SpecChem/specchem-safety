@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { plants, profiles } from '@/lib/db/schema';
-import { plantSchema } from '@/lib/validations';
+import { plantSchema } from '@/lib/schemas';
 
 /**
  * Test API endpoint to verify Drizzle ORM and Zod validation are working

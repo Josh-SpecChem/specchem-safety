@@ -1,18 +1,10 @@
 import { createClient } from './supabase/server';
+import type { UserContext } from '@/types';
 
 /**
  * RLS (Row Level Security) utilities for SpecChem Safety Training
  * These functions help enforce tenant isolation and role-based access control
  */
-
-export interface UserContext {
-  userId: string;
-  plantId: string;
-  roles: Array<{
-    role: 'hr_admin' | 'dev_admin' | 'plant_manager';
-    plantId?: string;
-  }>;
-}
 
 /**
  * Get the current user's context including plant and roles
@@ -153,10 +145,9 @@ export async function getAccessiblePlants(): Promise<string[]> {
  * Apply tenant filtering to a Supabase query
  */
 export async function applyTenantFilter(
-  query: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  query: unknown,
   plantIdColumn: string = 'plant_id'
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<unknown> {
   const accessiblePlants = await getAccessiblePlants();
   
   if (accessiblePlants.length === 0) {
@@ -199,7 +190,7 @@ export async function validateTenantAccess(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const plantId = (data as any)[plantIdColumn] as string;
+  const plantId = (data as Record<string, unknown>)[plantIdColumn] as string;
   return accessiblePlants.includes(plantId);
 }
 

@@ -7,7 +7,7 @@
 
 import { db } from '../src/lib/db/index.js';
 import { plants } from '../src/lib/db/schema.js';
-import { plantSchema, userProfileSchema } from '../src/lib/validations.js';
+import { plantSchema, userProfileSchema } from '../src/lib/schemas.js';
 
 async function testDrizzleConnection() {
   console.log('🔍 Testing Drizzle ORM connection...');

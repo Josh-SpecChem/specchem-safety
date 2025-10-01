@@ -1,61 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { hasAdminRole, getCurrentUserContext } from '@/lib/rls';
 import { getPlantStats, getCourseStats } from '@/lib/db/operations';
+import { withAdminAuth } from '@/lib/api-auth';
+import { formatErrorResponse, DatabaseError } from '@/lib/errors';
 
 /**
  * GET /api/admin/analytics - Get plant and course analytics (admin only)
  */
 export async function GET(request: NextRequest) {
   try {
-    const userContext = await getCurrentUserContext();
-    
-    if (!userContext) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
+    return withAdminAuth(async (profile, adminRoles) => {
+      const searchParams = request.nextUrl.searchParams;
+      const plantId = searchParams.get('plantId');
+      const courseId = searchParams.get('courseId');
 
-    // Check admin permissions
-    const isAdmin = await hasAdminRole();
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
+      let analytics = {};
 
-    const searchParams = request.nextUrl.searchParams;
-    const plantId = searchParams.get('plantId');
-    const courseId = searchParams.get('courseId');
+      // Get plant stats
+      if (plantId) {
+        const plantStats = await getPlantStats(plantId);
+        analytics = { ...analytics, plantStats };
+      } else {
+        // If HR admin or dev admin, get stats for user's plant
+        const plantStats = await getPlantStats(profile.plantId);
+        analytics = { ...analytics, plantStats };
+      }
 
-    let analytics = {};
+      // Get course stats
+      if (courseId) {
+        const courseStats = await getCourseStats(courseId, plantId || profile.plantId);
+        analytics = { ...analytics, courseStats };
+      }
 
-    // Get plant stats
-    if (plantId) {
-      const plantStats = await getPlantStats(plantId);
-      analytics = { ...analytics, plantStats };
-    } else {
-      // If HR admin or dev admin, get stats for user's plant
-      const plantStats = await getPlantStats(userContext.plantId);
-      analytics = { ...analytics, plantStats };
-    }
-
-    // Get course stats
-    if (courseId) {
-      const courseStats = await getCourseStats(courseId, plantId || userContext.plantId);
-      analytics = { ...analytics, courseStats };
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: analytics,
-    });
+      return NextResponse.json({
+        success: true,
+        data: analytics,
+      });
+    }, 'hr_admin');
   } catch (error) {
-    console.error('Error fetching analytics:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch analytics' },
-      { status: 500 }
-    );
+    const errorResponse = formatErrorResponse(error as Error);
+    return NextResponse.json(errorResponse, { 
+      status: errorResponse.statusCode 
+    });
   }
 }

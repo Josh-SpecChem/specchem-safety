@@ -6,7 +6,7 @@ import {
   paginationSchema,
   enrollmentFiltersSchema,
   createProfileSchema
-} from '@/lib/validations';
+} from '@/lib/schemas';
 import { eq } from 'drizzle-orm';
 
 interface TestResult {
