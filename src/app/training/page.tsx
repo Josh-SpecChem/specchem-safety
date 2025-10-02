@@ -114,7 +114,7 @@ export default function TrainingOverviewPage() {
                             <div className="mb-4">
                               <span className="text-sm font-medium text-gray-700">Prerequisites: </span>
                               <span className="text-sm text-gray-600">
-                                {module.prerequisites.map((prereq, i) => {
+                                {module.prerequisites.map((prereq: any, i: number) => {
                                   const prereqModule = modules.find(m => m.id === prereq)
                                   return prereqModule ? prereqModule.title : prereq
                                 }).join(', ')}
@@ -124,20 +124,10 @@ export default function TrainingOverviewPage() {
 
                           {/* Learning Objectives */}
                           <div className="mb-4">
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">Learning Objectives:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              {module.learningObjectives.slice(0, 3).map((objective, i) => (
-                                <li key={i} className="flex items-start gap-2">
-                                  <span className="w-1.5 h-1.5 bg-federal-blue rounded-full mt-2"></span>
-                                  {objective}
-                                </li>
-                              ))}
-                              {module.learningObjectives.length > 3 && (
-                                <li className="text-xs text-gray-500 ml-3.5">
-                                  +{module.learningObjectives.length - 3} more objectives
-                                </li>
-                              )}
-                            </ul>
+                            <h4 className="text-sm font-medium text-gray-700 mb-2">Description:</h4>
+                            <p className="text-sm text-gray-600">
+                              {module.description}
+                            </p>
                           </div>
                         </div>
 

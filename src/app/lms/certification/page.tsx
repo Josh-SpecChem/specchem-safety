@@ -168,9 +168,9 @@ export default function CertificationPage() {
             <div className="space-y-4">
               {requiredModules.map((module) => {
                 const isCompleted = userProgress.completedModules.includes(module.slug);
-                const moduleProgress = userProgress.modules.find(m => m.moduleSlug === module.slug);
-                const completedLessons = moduleProgress?.completedLessons || [];
-                const progressPercent = Math.round((completedLessons.length / module.lessons.length) * 100);
+                const moduleProgress = userProgress.modules.find((m: any) => m.moduleSlug === module.slug);
+                const completedSections = moduleProgress?.completedSections || [];
+                const progressPercent = Math.round((completedSections.length / module.lessons.length) * 100);
                 
                 return (
                   <div key={module.slug} className="flex items-center justify-between p-4 border rounded-lg">
@@ -179,7 +179,7 @@ export default function CertificationPage() {
                       <div>
                         <h4 className="font-medium text-gray-900">{module.title}</h4>
                         <p className="text-sm text-gray-600">{module.description}</p>
-                        {!isCompleted && completedLessons.length > 0 && (
+                        {!isCompleted && completedSections.length > 0 && (
                           <div className="mt-2">
                             <div className="flex justify-between text-xs mb-1">
                               <span className="text-gray-500">Progress</span>
@@ -198,7 +198,7 @@ export default function CertificationPage() {
                         </div>
                       ) : (
                         <Badge variant="outline">
-                          {completedLessons.length > 0 ? 'In Progress' : 'Not Started'}
+                          {completedSections.length > 0 ? 'In Progress' : 'Not Started'}
                         </Badge>
                       )}
                     </div>

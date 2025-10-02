@@ -3,40 +3,40 @@
  * Ensures proper tenant isolation and access control for all database operations
  */
 
-import { eq, and, sql, or, like } from 'drizzle-orm';
-import { profiles, enrollments, progress, courses, plants, adminRoles } from '../db/schema';
-import { db } from '../db';
-import { DatabaseError, TenantAccessError } from '../errors';
-import type { UserContext } from '../rls';
-import type { 
-  UserFilters, 
-  EnrollmentFilters, 
-  ProgressFilters,
-  PaginatedResult,
-  ProfileWithDetails,
-  EnrollmentWithDetails,
-  ProgressWithDetails
+import type { UserContext } from '@/contracts';
+import { enrollments, profiles, progress } from '@/contracts';
+import { and, eq, like, or, sql } from 'drizzle-orm';
+import type { PgColumn, PgSelect } from 'drizzle-orm/pg-core';
+import type {
+    EnrollmentFilter as EnrollmentFilters,
+    EnrollmentWithDetails,
+    PaginatedResult,
+    ProfileWithDetails,
+    ProgressFilter as ProgressFilters,
+    ProgressWithDetails,
+    UserFilter as UserFilters
 } from '../../types/database';
+import { getDb } from './connection';
 
 /**
  * Apply tenant filtering to a Drizzle query based on user context
  */
-export function withTenantFilter<T>(
-  query: unknown,
+export function withTenantFilter<T extends PgSelect>(
+  query: T,
   userContext: UserContext,
-  plantIdColumn: string = 'plantId'
-) {
+  plantIdColumn: PgColumn = profiles.plantId // Default to profiles.plantId
+): T {
   // Apply tenant filtering based on user context
   if (userContext.accessiblePlants.length === 1) {
-    return query.where(eq(plantIdColumn, userContext.accessiblePlants[0]));
+    return (query as any).where(eq(plantIdColumn, userContext.accessiblePlants[0]));
   }
   
   if (userContext.accessiblePlants.length > 1) {
-    return query.where(sql`${plantIdColumn} = ANY(${userContext.accessiblePlants})`);
+    return (query as any).where(sql`${plantIdColumn} = ANY(${userContext.accessiblePlants})`);
   }
   
   // No access - return empty results
-  return query.where(eq(plantIdColumn, '00000000-0000-0000-0000-000000000000'));
+  return (query as any).where(eq(plantIdColumn, '00000000-0000-0000-0000-000000000000'));
 }
 
 /**
@@ -61,7 +61,7 @@ export async function getTenantUsers(
   const offset = (page - 1) * limit;
 
   // Build base query with relations
-  let query = db.query.profiles.findMany({
+  let query = getDb().query.profiles.findMany({
     with: {
       plant: true,
       adminRoles: true,
@@ -76,11 +76,11 @@ export async function getTenantUsers(
     orderBy: [profiles.lastName, profiles.firstName],
   });
 
-  // Apply tenant filtering
-  query = withTenantFilter(query, userContext, 'plantId');
-  
-  // Apply additional filters
+  // Apply tenant filtering and additional filters
   const conditions = [];
+  
+  // Always apply tenant filtering
+  conditions.push(eq(profiles.plantId, userContext.plantId));
   
   if (filters.status) {
     conditions.push(eq(profiles.status, filters.status));
@@ -96,24 +96,32 @@ export async function getTenantUsers(
     );
   }
 
-  if (conditions.length > 0) {
-    query = query.where(and(...conditions));
-  }
-
-  const profilesData = await query;
+  // Apply all conditions to the query
+  const profilesData = await getDb().query.profiles.findMany({
+    where: and(...conditions),
+    with: {
+      plant: true,
+      adminRoles: true,
+      enrollments: {
+        with: {
+          course: true,
+        },
+      },
+    },
+    limit,
+    offset,
+    orderBy: [profiles.lastName, profiles.firstName],
+  });
 
   // Get total count with same filters
-  let countQuery = db.select({ count: sql<number>`count(*)` }).from(profiles);
-  countQuery = withTenantFilter(countQuery, userContext, 'plantId');
+  const countResult = await getDb().select({ count: sql<number>`count(*)` })
+    .from(profiles)
+    .where(and(...conditions));
   
-  if (conditions.length > 0) {
-    countQuery = countQuery.where(and(...conditions));
-  }
-
-  const [{ count: total }] = await countQuery;
+  const total = countResult[0]?.count || 0;
 
   return {
-    data: profilesData as ProfileWithDetails[],
+    items: profilesData as ProfileWithDetails[],
     total,
     page,
     limit,
@@ -132,23 +140,11 @@ export async function getTenantEnrollments(
   const limit = filters.limit || 20;
   const offset = (page - 1) * limit;
 
-  // Build base query with relations
-  let query = db.query.enrollments.findMany({
-    with: {
-      profile: true,
-      course: true,
-      plant: true,
-    },
-    limit,
-    offset,
-    orderBy: [enrollments.enrolledAt],
-  });
-
-  // Apply tenant filtering
-  query = withTenantFilter(query, userContext, 'plantId');
-  
-  // Apply additional filters
+  // Apply tenant filtering and additional filters
   const conditions = [];
+  
+  // Always apply tenant filtering
+  conditions.push(eq(enrollments.plantId, userContext.plantId));
   
   if (filters.courseId) {
     conditions.push(eq(enrollments.courseId, filters.courseId));
@@ -162,24 +158,28 @@ export async function getTenantEnrollments(
     conditions.push(eq(enrollments.status, filters.status));
   }
 
-  if (conditions.length > 0) {
-    query = query.where(and(...conditions));
-  }
-
-  const enrollmentsData = await query;
+  // Execute query with all conditions
+  const enrollmentsData = await getDb().query.enrollments.findMany({
+    where: and(...conditions),
+    with: {
+      profile: true,
+      course: true,
+      plant: true,
+    },
+    limit,
+    offset,
+    orderBy: [enrollments.enrolledAt],
+  });
 
   // Get total count with same filters
-  let countQuery = db.select({ count: sql<number>`count(*)` }).from(enrollments);
-  countQuery = withTenantFilter(countQuery, userContext, 'plantId');
+  const countResult = await getDb().select({ count: sql<number>`count(*)` })
+    .from(enrollments)
+    .where(and(...conditions));
   
-  if (conditions.length > 0) {
-    countQuery = countQuery.where(and(...conditions));
-  }
-
-  const [{ count: total }] = await countQuery;
+  const total = countResult[0]?.count || 0;
 
   return {
-    data: enrollmentsData as EnrollmentWithDetails[],
+    items: enrollmentsData as EnrollmentWithDetails[],
     total,
     page,
     limit,
@@ -198,23 +198,11 @@ export async function getTenantProgress(
   const limit = filters.limit || 20;
   const offset = (page - 1) * limit;
 
-  // Build base query with relations
-  let query = db.query.progress.findMany({
-    with: {
-      profile: true,
-      course: true,
-      plant: true,
-    },
-    limit,
-    offset,
-    orderBy: [progress.lastActiveAt],
-  });
-
-  // Apply tenant filtering
-  query = withTenantFilter(query, userContext, 'plantId');
-  
-  // Apply additional filters
+  // Apply tenant filtering and additional filters
   const conditions = [];
+  
+  // Always apply tenant filtering
+  conditions.push(eq(progress.plantId, userContext.plantId));
   
   if (filters.courseId) {
     conditions.push(eq(progress.courseId, filters.courseId));
@@ -232,24 +220,28 @@ export async function getTenantProgress(
     conditions.push(sql`${progress.progressPercent} <= ${filters.maxProgress}`);
   }
 
-  if (conditions.length > 0) {
-    query = query.where(and(...conditions));
-  }
-
-  const progressData = await query;
+  // Execute query with all conditions
+  const progressData = await getDb().query.progress.findMany({
+    where: and(...conditions),
+    with: {
+      profile: true,
+      course: true,
+      plant: true,
+    },
+    limit,
+    offset,
+    orderBy: [progress.lastActiveAt],
+  });
 
   // Get total count with same filters
-  let countQuery = db.select({ count: sql<number>`count(*)` }).from(progress);
-  countQuery = withTenantFilter(countQuery, userContext, 'plantId');
+  const countResult = await getDb().select({ count: sql<number>`count(*)` })
+    .from(progress)
+    .where(and(...conditions));
   
-  if (conditions.length > 0) {
-    countQuery = countQuery.where(and(...conditions));
-  }
-
-  const [{ count: total }] = await countQuery;
+  const total = countResult[0]?.count || 0;
 
   return {
-    data: progressData as ProgressWithDetails[],
+    items: progressData as ProgressWithDetails[],
     total,
     page,
     limit,
@@ -293,7 +285,7 @@ export function hasAdminRoleInContext(
     return userContext.roles.length > 0;
   }
 
-  return userContext.roles.some(userRole => {
+  return userContext.roles.some((userRole: any) => {
     if (userRole.role !== role) {
       return false;
     }

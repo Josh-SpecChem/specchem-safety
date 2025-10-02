@@ -1,4 +1,4 @@
-import { SpecChemRole, TrainingModule, TrainingPath } from '@/types/navigator'
+import { SpecChemRole, TrainingModule, TrainingPath } from '@/types/domain'
 
 export const SPECCHEM_ROLES: SpecChemRole[] = [
   {
@@ -180,7 +180,18 @@ export const TRAINING_MODULES: TrainingModule[] = [
     duration: '30 minutes',
     difficulty: 'beginner',
     prerequisites: [],
-    content: 'Company overview, mission, values, and organizational introduction',
+    content: {
+      sections: [
+        {
+          id: 'company-overview',
+          title: 'Company Overview',
+          content: 'Company overview, mission, values, and organizational introduction',
+          estimatedReadTime: '30 minutes',
+          order: 1
+        }
+      ],
+      resources: []
+    },
     assessmentRequired: false,
     certificationEligible: false,
     lastUpdated: '2025-08-01'
@@ -193,7 +204,18 @@ export const TRAINING_MODULES: TrainingModule[] = [
     duration: '2 hours',
     difficulty: 'intermediate',
     prerequisites: ['welcome'],
-    content: 'Product lines, applications, technical specifications, and customer use cases',
+    content: {
+      sections: [
+        {
+          id: 'product-overview',
+          title: 'Product Overview',
+          content: 'Product lines, applications, technical specifications, and customer use cases',
+          estimatedReadTime: '45 minutes',
+          order: 1
+        }
+      ],
+      resources: []
+    },
     assessmentRequired: true,
     certificationEligible: true,
     lastUpdated: '2025-07-15'
@@ -206,7 +228,18 @@ export const TRAINING_MODULES: TrainingModule[] = [
     duration: '3 hours',
     difficulty: 'intermediate',
     prerequisites: ['welcome'],
-    content: 'Equipment safety protocols, operation procedures, and emergency shutdown',
+    content: {
+      sections: [
+        {
+          id: 'equipment-safety',
+          title: 'Equipment Safety',
+          content: 'Equipment safety protocols, operation procedures, and emergency shutdown',
+          estimatedReadTime: '60 minutes',
+          order: 1
+        }
+      ],
+      resources: []
+    },
     assessmentRequired: true,
     certificationEligible: true,
     lastUpdated: '2025-08-01'
@@ -219,7 +252,18 @@ export const TRAINING_MODULES: TrainingModule[] = [
     duration: '4 hours',
     difficulty: 'intermediate',
     prerequisites: ['welcome'],
-    content: 'OSHA regulations, workplace safety, incident reporting, and compliance requirements',
+    content: {
+      sections: [
+        {
+          id: 'compliance-overview',
+          title: 'Compliance Overview',
+          content: 'OSHA regulations, workplace safety, incident reporting, and compliance requirements',
+          estimatedReadTime: '90 minutes',
+          order: 1
+        }
+      ],
+      resources: []
+    },
     assessmentRequired: true,
     certificationEligible: true,
     lastUpdated: '2025-07-20'

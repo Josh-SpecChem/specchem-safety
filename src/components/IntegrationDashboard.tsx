@@ -15,19 +15,14 @@ import {
   Settings,
   AlertTriangle
 } from 'lucide-react'
-import { useProgress, useCourseProgress, useUserProfile } from '@/hooks/useApi'
+import { useProgress, useCourseProgress, useUserProfile } from '@/hooks/useStandardizedProgress'
 
 /**
  * Integration Status Dashboard
  * Demonstrates that all APIs, Drizzle ORM, and Zod validation are working
  */
 
-interface IntegrationStatus {
-  name: string
-  status: 'success' | 'warning' | 'error' | 'loading'
-  description: string
-  details?: string[]
-}
+import type { IntegrationStatus } from '@/types/ui'
 
 export default function IntegrationDashboard() {
   const [integrationTests, setIntegrationTests] = useState<IntegrationStatus[]>([
@@ -40,7 +35,7 @@ export default function IntegrationDashboard() {
   ])
 
   // Test our API hooks
-  const { progress, loading: progressLoading, error: progressError } = useProgress()
+  const { data: progress, loading: progressLoading, error: progressError } = useProgress()
   const { error: ebookError } = useCourseProgress('/ebook')
   const { profile, loading: profileLoading, error: profileError } = useUserProfile()
 
@@ -237,7 +232,7 @@ export default function IntegrationDashboard() {
               <div className="space-y-2">
                 <div className="text-sm font-medium">User Progress Loaded</div>
                 <div className="text-xs text-gray-500">
-                  Found {progress?.length || 0} course enrollments
+                  Found {Array.isArray(progress) ? progress.length : 0} course enrollments
                 </div>
                 <Badge variant="outline" className="text-xs">
                   API Status: Connected
@@ -268,10 +263,10 @@ export default function IntegrationDashboard() {
               <div className="space-y-2">
                 <div className="text-sm font-medium">Profile API Connected</div>
                 <div className="text-xs text-gray-500">
-                  User: {profile?.firstName} {profile?.lastName}
+                  User: {(profile as any)?.firstName} {(profile as any)?.lastName}
                 </div>
                 <Badge variant="outline" className="text-xs">
-                  Role: {profile?.role}
+                  Role: {(profile as any)?.role || 'User'}
                 </Badge>
               </div>
             )}

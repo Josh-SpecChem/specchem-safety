@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { getAllUserProgress } from '@/lib/progress';
 import { withContextAuth } from '@/lib/api-auth';
 

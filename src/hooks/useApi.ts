@@ -17,17 +17,34 @@ import {
 } from '@/lib/schemas';
 
 /**
- * Custom hooks for API integration with SpecChem Safety Training database
- * Enhanced with Zod validation, error handling, caching, and retry logic
+ * ⚠️ LEGACY HOOKS - DEPRECATED AND SCHEDULED FOR REMOVAL
  * 
- * Note: These hooks maintain backward compatibility while using the new
- * standardized patterns internally.
+ * These hooks are deprecated and will be removed in the next major version.
+ * All functionality has been migrated to the unified hook system.
+ * 
+ * MIGRATION REQUIRED:
+ * - useProgress() → useUnifiedProgress.useProgress()
+ * - useCourseProgress() → useUnifiedProgress.useCourseProgress()
+ * - useQuestionEvents() → useUnifiedProgress.useQuestionEvents()
+ * - useUserProfile() → useUnifiedProgress.useUserProfile()
+ * 
+ * See: /docs/hook-migration-audit-report.md for complete migration guide
+ * 
+ * @deprecated Use useUnifiedApi hooks instead
  */
 
 /**
  * Hook for managing user progress data
  */
 export function useProgress() {
+  // Deprecation warning
+  useEffect(() => {
+    console.warn(
+      '⚠️ DEPRECATION WARNING: useProgress is deprecated. Please migrate to useStandardizedApi hooks. ' +
+      'See migration guide: /docs/hook-migration-guide.md'
+    );
+  }, []);
+
   const [progress, setProgress] = useState<CourseProgress[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +99,14 @@ export function useProgress() {
  * Hook for managing course-specific progress
  */
 export function useCourseProgress(courseRoute: string) {
+  // Deprecation warning
+  useEffect(() => {
+    console.warn(
+      '⚠️ DEPRECATION WARNING: useCourseProgress is deprecated. Please migrate to useStandardizedApi hooks. ' +
+      'See migration guide: /docs/hook-migration-guide.md'
+    );
+  }, []);
+
   const [progress, setProgress] = useState<CourseProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -182,6 +207,14 @@ export function useCourseProgress(courseRoute: string) {
  * Hook for recording question responses
  */
 export function useQuestionEvents(courseRoute: string) {
+  // Deprecation warning
+  useEffect(() => {
+    console.warn(
+      '⚠️ DEPRECATION WARNING: useQuestionEvents is deprecated. Please migrate to useStandardizedApi hooks. ' +
+      'See migration guide: /docs/hook-migration-guide.md'
+    );
+  }, []);
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -232,6 +265,14 @@ export function useQuestionEvents(courseRoute: string) {
  * Hook for user profile management
  */
 export function useUserProfile() {
+  // Deprecation warning
+  useEffect(() => {
+    console.warn(
+      '⚠️ DEPRECATION WARNING: useUserProfile is deprecated. Please migrate to useStandardizedApi hooks. ' +
+      'See migration guide: /docs/hook-migration-guide.md'
+    );
+  }, []);
+
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);

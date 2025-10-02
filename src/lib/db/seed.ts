@@ -1,6 +1,6 @@
-import { db } from './index';
-import { plants, courses, profiles, enrollments, progress, adminRoles } from './schema';
+import { adminRoles, courses, enrollments, plants, profiles, progress } from '@/contracts';
 import { eq } from 'drizzle-orm';
+import { getDb } from './connection';
 
 /**
  * Database seeding utilities for SpecChem Safety Training
@@ -46,12 +46,12 @@ export async function seedPlants() {
   for (const plant of defaultPlants) {
     try {
       // Check if plant already exists
-      const existing = await db.query.plants.findFirst({
+      const existing = await getDb().query.plants.findFirst({
         where: eq(plants.name, plant.name),
       });
 
       if (!existing) {
-        await db.insert(plants).values({
+        await getDb().insert(plants).values({
           id: plant.id,
           name: plant.name,
           isActive: plant.isActive,
@@ -77,12 +77,12 @@ export async function seedCourses() {
   for (const course of primaryCourses) {
     try {
       // Check if course already exists
-      const existing = await db.query.courses.findFirst({
+      const existing = await getDb().query.courses.findFirst({
         where: eq(courses.slug, course.slug),
       });
 
       if (!existing) {
-        await db.insert(courses).values({
+        await getDb().insert(courses).values({
           id: course.id,
           slug: course.slug,
           title: course.title,
@@ -92,12 +92,12 @@ export async function seedCourses() {
         console.log(`   ✅ Created course: ${course.title}`);
       } else {
         // Update existing course to ensure it's published
-        await db
+        await getDb()
           .update(courses)
           .set({
             title: course.title,
             isPublished: course.isPublished,
-            updatedAt: new Date(),
+            updatedAt: new Date().toISOString(),
           })
           .where(eq(courses.id, existing.id));
         console.log(`   🔄 Updated course: ${course.title}`);
@@ -123,10 +123,13 @@ export async function createSampleAdmin(
   console.log('👤 Creating sample admin user...');
   
   try {
-    const defaultPlantId = plantId || defaultPlants[0].id; // Columbus, OH - Corporate
+    const defaultPlantId = plantId || defaultPlants[0]?.id; // Columbus, OH - Corporate
+    if (!defaultPlantId) {
+      throw new Error('No default plant available');
+    }
     
     // Create profile
-    const [profile] = await db.insert(profiles).values({
+    const [profile] = await getDb().insert(profiles).values({
       id: userId,
       plantId: defaultPlantId,
       firstName,
@@ -138,7 +141,7 @@ export async function createSampleAdmin(
     console.log(`   ✅ Created profile: ${firstName} ${lastName}`);
 
     // Make them an HR admin
-    await db.insert(adminRoles).values({
+    await getDb().insert(adminRoles).values({
       userId: userId,
       role: 'hr_admin',
       plantId: null, // Organization-wide admin
@@ -148,14 +151,14 @@ export async function createSampleAdmin(
 
     // Enroll in both courses
     for (const course of primaryCourses) {
-      await db.insert(enrollments).values({
+      await getDb().insert(enrollments).values({
         userId: userId,
         courseId: course.id,
         plantId: defaultPlantId,
         status: 'enrolled',
       });
 
-      await db.insert(progress).values({
+      await getDb().insert(progress).values({
         userId: userId,
         courseId: course.id,
         plantId: defaultPlantId,
@@ -183,8 +186,8 @@ export async function autoEnrollUser(userId: string, plantId: string) {
   try {
     for (const course of primaryCourses) {
       // Check if already enrolled
-      const existingEnrollment = await db.query.enrollments.findFirst({
-        where: (enrollments, { and, eq }) => and(
+      const existingEnrollment = await getDb().query.enrollments.findFirst({
+        where: (enrollments: any, { and, eq }: any) => and(
           eq(enrollments.userId, userId),
           eq(enrollments.courseId, course.id)
         ),
@@ -192,7 +195,7 @@ export async function autoEnrollUser(userId: string, plantId: string) {
 
       if (!existingEnrollment) {
         // Create enrollment
-        await db.insert(enrollments).values({
+        await getDb().insert(enrollments).values({
           userId,
           courseId: course.id,
           plantId,
@@ -200,7 +203,7 @@ export async function autoEnrollUser(userId: string, plantId: string) {
         });
 
         // Create initial progress
-        await db.insert(progress).values({
+        await getDb().insert(progress).values({
           userId,
           courseId: course.id,
           plantId,
@@ -248,9 +251,9 @@ export async function runDatabaseSeeding() {
  * Get seeded data summary
  */
 export async function getSeedingSummary() {
-  const plantsCount = await db.select().from(plants);
-  const coursesCount = await db.select().from(courses);
-  const profilesCount = await db.select().from(profiles);
+  const plantsCount = await getDb().select().from(plants);
+  const coursesCount = await getDb().select().from(courses);
+  const profilesCount = await getDb().select().from(profiles);
   
   return {
     plants: plantsCount.length,

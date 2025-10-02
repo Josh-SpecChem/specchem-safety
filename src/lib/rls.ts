@@ -1,15 +1,22 @@
-import { createClient } from './supabase/server';
-import type { UserContext } from '@/types';
-
 /**
- * RLS (Row Level Security) utilities for SpecChem Safety Training
- * These functions help enforce tenant isolation and role-based access control
+ * Legacy RLS (Row Level Security) utilities
+ * @deprecated Use the new unified auth system from '@/lib/auth' instead
+ * This file is maintained for backward compatibility during migration
  */
 
+import type { UserContext } from '@/types';
+import { AuthService } from './auth/index';
+import { createClient } from './supabase/server';
+
+// Create auth service instance
+const authService = new AuthService();
+
 /**
- * Get the current user's context including plant and roles
+ * @deprecated Use authService.getUserContext() instead
  */
 export async function getCurrentUserContext(): Promise<UserContext | null> {
+  console.warn('getCurrentUserContext is deprecated. Use authService.getUserContext() instead.');
+  
   const supabase = await createClient();
   
   const { data: { user }, error } = await supabase.auth.getUser();
@@ -38,17 +45,20 @@ export async function getCurrentUserContext(): Promise<UserContext | null> {
   return {
     userId: user.id,
     plantId: profile.plant_id,
+    accessiblePlants: [profile.plant_id],
     roles: profile.admin_roles || [],
   };
 }
 
 /**
- * Check if the current user has a specific admin role
+ * @deprecated Use authService.hasAdminRole() instead
  */
 export async function hasAdminRole(
   role?: 'hr_admin' | 'dev_admin' | 'plant_manager',
   plantId?: string
 ): Promise<boolean> {
+  console.warn('hasAdminRole is deprecated. Use authService.hasAdminRole() instead.');
+  
   const context = await getCurrentUserContext();
   
   if (!context) {
@@ -76,9 +86,11 @@ export async function hasAdminRole(
 }
 
 /**
- * Ensure the current user has access to a specific plant
+ * @deprecated Use authService.getAccessiblePlants() instead
  */
 export async function requirePlantAccess(plantId: string): Promise<boolean> {
+  console.warn('requirePlantAccess is deprecated. Use authService.getAccessiblePlants() instead.');
+  
   const context = await getCurrentUserContext();
   
   if (!context) {
@@ -104,9 +116,11 @@ export async function requirePlantAccess(plantId: string): Promise<boolean> {
 }
 
 /**
- * Get the list of plants the current user can access
+ * @deprecated Use authService.getAccessiblePlants() instead
  */
 export async function getAccessiblePlants(): Promise<string[]> {
+  console.warn('getAccessiblePlants is deprecated. Use authService.getAccessiblePlants() instead.');
+  
   const context = await getCurrentUserContext();
   
   if (!context) {
@@ -142,12 +156,14 @@ export async function getAccessiblePlants(): Promise<string[]> {
 }
 
 /**
- * Apply tenant filtering to a Supabase query
+ * @deprecated Use authService.applyTenantFilter() instead
  */
 export async function applyTenantFilter(
-  query: unknown,
+  query: any,
   plantIdColumn: string = 'plant_id'
-): Promise<unknown> {
+): Promise<any> {
+  console.warn('applyTenantFilter is deprecated. Use authService.applyTenantFilter() instead.');
+  
   const accessiblePlants = await getAccessiblePlants();
   
   if (accessiblePlants.length === 0) {
@@ -165,13 +181,15 @@ export async function applyTenantFilter(
 }
 
 /**
- * Validate that a record belongs to an accessible plant
+ * @deprecated Use authService.validateTenantAccess() instead
  */
 export async function validateTenantAccess(
   tableName: string,
   recordId: string,
   plantIdColumn: string = 'plant_id'
 ): Promise<boolean> {
+  console.warn('validateTenantAccess is deprecated. Use authService.validateTenantAccess() instead.');
+  
   const supabase = await createClient();
   const accessiblePlants = await getAccessiblePlants();
 
@@ -190,14 +208,16 @@ export async function validateTenantAccess(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const plantId = (data as Record<string, unknown>)[plantIdColumn] as string;
+  const plantId = (data as any)[plantIdColumn] as string;
   return accessiblePlants.includes(plantId);
 }
 
 /**
- * Get RLS context for debugging
+ * @deprecated Use authService.getRLSDebugInfo() instead
  */
 export async function getRLSDebugInfo() {
+  console.warn('getRLSDebugInfo is deprecated. Use authService.getRLSDebugInfo() instead.');
+  
   const context = await getCurrentUserContext();
   const accessiblePlants = await getAccessiblePlants();
   

@@ -3,12 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-
-interface ProtectedRouteProps {
-  children: React.ReactNode
-  requireAdmin?: boolean
-  fallbackPath?: string
-}
+import type { ProtectedRouteProps } from '@/types'
 
 export function ProtectedRoute({ 
   children, 
@@ -25,7 +20,7 @@ export function ProtectedRoute({
         return
       }
 
-      if (requireAdmin && profile && !['hr_admin', 'dev_admin'].includes(profile.role)) {
+      if (requireAdmin && profile && !(profile as any)?.adminRoles?.some((role: any) => ['hr_admin', 'dev_admin'].includes(role.role))) {
         router.push('/unauthorized')
         return
       }
@@ -40,7 +35,7 @@ export function ProtectedRoute({
     )
   }
 
-  if (!user || (requireAdmin && profile && !['hr_admin', 'dev_admin'].includes(profile.role))) {
+  if (!user || (requireAdmin && profile && !(profile as any)?.adminRoles?.some((role: any) => ['hr_admin', 'dev_admin'].includes(role.role)))) {
     return null
   }
 

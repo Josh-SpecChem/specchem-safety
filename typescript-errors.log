@@ -1,0 +1,159 @@
+src/components/admin/CreateUserForm.tsx(129,66): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/components/admin/CreateUserForm.tsx(140,65): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/components/admin/CreateUserForm.tsx(153,60): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/components/admin/CreateUserForm.tsx(165,63): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/components/admin/CreateUserForm.tsx(178,59): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/components/admin/CreateUserForm.tsx(191,62): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/components/admin/EnrollmentManagementContent.tsx(34,73): error TS2345: Argument of type '{ page: number; limit: number; status: "enrolled" | "in_progress" | "completed" | undefined; search: string; role?: string; department?: string; plantId?: string; courseId?: string; isActive?: boolean; offset?: number; dateRange?: { start: Date; end: Date; }; }' is not assignable to parameter of type '{ page: number; limit: number; plantId?: string | undefined; courseId?: string | undefined; userId?: string | undefined; status?: "enrolled" | "in_progress" | "completed" | undefined; dateRange?: { ...; } | undefined; }'.
+  Types of property 'dateRange' are incompatible.
+    Type '{ start: Date; end: Date; } | undefined' is not assignable to type '{ startDate?: string | undefined; endDate?: string | undefined; } | undefined'.
+      Type '{ start: Date; end: Date; }' has no properties in common with type '{ startDate?: string | undefined; endDate?: string | undefined; }'.
+src/components/admin/EnrollmentManagementContent.tsx(280,71): error TS2339: Property 'overdue' does not exist on type '{ total: number; completed: number; inProgress: number; enrolled: number; }'.
+src/components/admin/UserManagementContent.tsx(34,61): error TS2345: Argument of type '{ page: number; limit: number; status: "active" | "suspended" | undefined; role: "hr_admin" | "dev_admin" | "plant_manager" | undefined; search: string; department?: string; plantId?: string; courseId?: string; isActive?: boolean; offset?: number; dateRange?: { start: Date; end: Date; }; }' is not assignable to parameter of type '{ page: number; limit: number; plantId?: string | undefined; status?: "active" | "suspended" | undefined; role?: "hr_admin" | "dev_admin" | "plant_manager" | undefined; search?: string | undefined; dateRange?: { ...; } | undefined; }'.
+  Types of property 'dateRange' are incompatible.
+    Type '{ start: Date; end: Date; } | undefined' is not assignable to type '{ startDate?: string | undefined; endDate?: string | undefined; } | undefined'.
+      Type '{ start: Date; end: Date; }' has no properties in common with type '{ startDate?: string | undefined; endDate?: string | undefined; }'.
+src/components/auth/ForgotPasswordForm.tsx(109,60): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/components/auth/LoginForm.tsx(53,60): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/components/auth/LoginForm.tsx(66,63): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/components/auth/ResetPasswordForm.tsx(195,63): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/components/auth/ResetPasswordForm.tsx(208,70): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/components/auth/SignupForm.tsx(121,66): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/components/auth/SignupForm.tsx(132,65): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/components/auth/SignupForm.tsx(145,60): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/components/auth/SignupForm.tsx(157,63): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/components/auth/SignupForm.tsx(169,63): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/components/auth/SignupForm.tsx(182,70): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+src/hooks/useUnifiedAdmin.ts(14,3): error TS2724: '"@/types"' has no exported member named 'EnrollmentFilters'. Did you mean 'EnrollmentFilter'?
+src/hooks/useUnifiedAdmin.ts(15,3): error TS2724: '"@/types"' has no exported member named 'UserFilters'. Did you mean 'UserFilter'?
+src/hooks/useUnifiedApi.ts(72,15): error TS2322: Type 'unknown' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.
+src/hooks/useUnifiedApi.ts(127,15): error TS2322: Type 'unknown' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.
+src/hooks/useUnifiedApi.ts(128,9): error TS2322: Type 'T' is not assignable to type 'R | null'.
+src/hooks/useUnifiedApi.ts(177,15): error TS2322: Type 'unknown' is not assignable to type 'R'.
+  'R' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.
+src/hooks/useUnifiedForm.ts(31,51): error TS2339: Property 'shape' does not exist on type 'ZodType<T, unknown, $ZodTypeInternals<T, unknown>>'.
+src/hooks/useUsers.ts(6,26): error TS2739: Type '{}' is missing the following properties from type '{ page: number; limit: number; plantId?: string | undefined; status?: "active" | "suspended" | undefined; role?: "hr_admin" | "dev_admin" | "plant_manager" | undefined; search?: string | undefined; dateRange?: { ...; } | undefined; }': page, limit
+src/hooks/useUsers.ts(7,3): error TS2739: Type 'ApiState<{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; plant: { id: string; name: string; isActive: boolean; createdAt: string; updatedAt: string; }; }[]>' is missing the following properties from type 'UseUsersReturn': pagination, setPage
+src/hooks/useUsers.ts(11,5): error TS2554: Expected 1-3 arguments, but got 4.
+src/lib/api-utils.ts(325,5): error TS2322: Type 'unknown' is not assignable to type 'T | null'.
+src/lib/auth/middleware/admin-middleware.ts(11,14): error TS2415: Class 'AdminMiddleware' incorrectly extends base class 'AuthMiddleware'.
+  Types have separate declarations of a private property 'extractToken'.
+src/lib/auth/middleware/user-middleware.ts(11,14): error TS2415: Class 'UserMiddleware' incorrectly extends base class 'AuthMiddleware'.
+  Types have separate declarations of a private property 'extractToken'.
+src/lib/auth/unified-auth-middleware.ts(60,9): error TS2322: Type '{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; } | null' is not assignable to type '{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; } | undefined'.
+  Type 'null' is not assignable to type '{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; } | undefined'.
+src/lib/auth/unified-auth-middleware.ts(114,76): error TS2345: Argument of type 'AdminRole' is not assignable to parameter of type '"hr_admin" | "dev_admin" | "plant_manager" | undefined'.
+src/lib/auth/unified-auth-middleware.ts(131,9): error TS2322: Type '{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; } | null' is not assignable to type '{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; } | undefined'.
+  Type 'null' is not assignable to type '{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; } | undefined'.
+src/lib/auth/unified-auth-middleware.ts(302,7): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/auth/unified-auth-middleware.ts(325,37): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error | AuthenticationError | AuthorizationError'.
+src/lib/auth/unified-auth-middleware.ts(348,37): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error | AuthenticationError | AuthorizationError'.
+src/lib/auth/unified-auth-middleware.ts(374,37): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error | AuthenticationError | AuthorizationError'.
+src/lib/auth/unified-auth-middleware.ts(397,37): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error | AuthenticationError | AuthorizationError'.
+src/lib/auth/unified-auth-middleware.ts(422,37): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error | AuthenticationError | AuthorizationError'.
+src/lib/auth/unified-auth-middleware.ts(464,7): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/auth/unified-auth-middleware.ts(476,30): error TS2339: Property 'getUserAdminRoles' does not exist on type 'AuthService'.
+src/lib/db/builders/filter-builder.ts(98,34): error TS2551: Property 'startDateDate' does not exist on type '{ startDate?: string | undefined; endDate?: string | undefined; }'. Did you mean 'startDate'?
+src/lib/db/builders/filter-builder.ts(103,34): error TS2339: Property 'endDateDate' does not exist on type '{ startDate?: string | undefined; endDate?: string | undefined; }'.
+src/lib/db/builders/query-builder.ts(68,30): error TS2322: Type 'unknown' is not assignable to type 'SQL<unknown>'.
+src/lib/db/builders/query-builder.ts(239,80): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'SQLWrapper | undefined'.
+src/lib/db/builders/query-builder.ts(243,77): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'SQLWrapper | undefined'.
+src/lib/db/builders/query-builder.ts(246,43): error TS2322: Type 'unknown' is not assignable to type 'SQL<unknown> | undefined'.
+src/lib/db/builders/query-builder.ts(246,68): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'SQLWrapper | undefined'.
+src/lib/db/builders/query-builder.ts(255,24): error TS2345: Argument of type 'string' is not assignable to parameter of type 'SQLWrapper | AnyColumn'.
+src/lib/db/builders/query-builder.ts(268,7): error TS2322: Type 'PgSelectBase<string | undefined, Record<string, any> | (Record<string, Record<string, any>> & Record<string, any>), "multiple", Record<string, JoinNullability> & { ...; }, true, never, { ...; }[], { ...; } | { ...; }> | Omit<...>' is not assignable to type 'DatabaseQuery'.
+  Type 'Omit<PgSelectBase<any, any, any, any, false, never, ({ [x: string]: any; } | { [x: string]: any; } | { [x: string]: any; })[], any>, never>' is not assignable to type 'DatabaseQuery'.
+    Type 'Omit<PgSelectBase<any, any, any, any, false, never, ({ [x: string]: any; } | { [x: string]: any; } | { [x: string]: any; })[], any>, never>' is missing the following properties from type 'PgSelectBase<any, any, any, any, false, never, ({ [x: string]: any; } | { [x: string]: any; } | { [x: string]: any; })[], any>': config, joinsNotNullableMap, tableName, isPartialSelect, and 5 more.
+src/lib/db/builders/query-builder.ts(275,9): error TS2322: Type 'PgSelect | Omit<PgSelectBase<any, any, any, any, false, "where", ({ [x: string]: any; } | { [x: string]: any; } | { [x: string]: any; })[], any>, "where">' is not assignable to type 'DatabaseQuery'.
+  Type 'Omit<PgSelectBase<any, any, any, any, false, "where", ({ [x: string]: any; } | { [x: string]: any; } | { [x: string]: any; })[], any>, "where">' is not assignable to type 'DatabaseQuery'.
+    Type 'Omit<PgSelectBase<any, any, any, any, false, "where", ({ [x: string]: any; } | { [x: string]: any; } | { [x: string]: any; })[], any>, "where">' is missing the following properties from type 'PgSelectBase<any, any, any, any, false, never, ({ [x: string]: any; } | { [x: string]: any; } | { [x: string]: any; })[], any>': config, joinsNotNullableMap, tableName, isPartialSelect, and 6 more.
+src/lib/db/builders/query-builder.ts(280,42): error TS2339: Property 'select' does not exist on type 'DatabaseQuery'.
+  Property 'select' does not exist on type 'PgSelect'.
+src/lib/db/connection.ts(10,22): error TS2307: Cannot find module 'postgres' or its corresponding type declarations.
+src/lib/db/database-service.ts(536,33): error TS18048: 'enrollment' is possibly 'undefined'.
+src/lib/db/operations.ts(77,28): error TS2345: Argument of type '{ plantId: string; status: "active" | "suspended"; id: string; email: string; createdAt: string; updatedAt: string; firstName: string; lastName: string; jobTitle: string | null; } | undefined' is not assignable to parameter of type '{ plantId: string; status: "active" | "suspended"; id: string; email: string; createdAt: string; updatedAt: string; firstName: string; lastName: string; jobTitle: string | null; }'.
+  Type 'undefined' is not assignable to type '{ plantId: string; status: "active" | "suspended"; id: string; email: string; createdAt: string; updatedAt: string; firstName: string; lastName: string; jobTitle: string | null; }'.
+src/lib/db/operations.ts(99,3): error TS2322: Type 'DatabaseResponse<{ plantId: string; status: "active" | "suspended"; id: string; email: string; createdAt: string; updatedAt: string; firstName: string; lastName: string; jobTitle: string | null; plant: { ...; }; enrollments: { ...; }[]; adminRoles: { ...; }[]; } | undefined>' is not assignable to type 'DatabaseResponse<{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; plant: { ...; }; } | null>'.
+  Type 'DatabaseResult<{ plantId: string; status: "active" | "suspended"; id: string; email: string; createdAt: string; updatedAt: string; firstName: string; lastName: string; jobTitle: string | null; plant: { ...; }; enrollments: { ...; }[]; adminRoles: { ...; }[]; } | undefined>' is not assignable to type 'DatabaseResponse<{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; plant: { ...; }; } | null>'.
+    Type 'DatabaseResult<{ plantId: string; status: "active" | "suspended"; id: string; email: string; createdAt: string; updatedAt: string; firstName: string; lastName: string; jobTitle: string | null; plant: { ...; }; enrollments: { ...; }[]; adminRoles: { ...; }[]; } | undefined>' is not assignable to type 'DatabaseResult<{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; plant: { ...; }; } | null>'.
+      Type '{ plantId: string; status: "active" | "suspended"; id: string; email: string; createdAt: string; updatedAt: string; firstName: string; lastName: string; jobTitle: string | null; plant: { id: string; createdAt: string; updatedAt: string; name: string; isActive: boolean; }; enrollments: { ...; }[]; adminRoles: { ...; ...' is not assignable to type '{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; plant: { id: string; name: string; isActive: boolean; createdAt: string; updatedAt: string; }; } | null'.
+        Type 'undefined' is not assignable to type '{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; plant: { id: string; name: string; isActive: boolean; createdAt: string; updatedAt: string; }; } | null'.
+src/lib/db/operations.ts(185,14): error TS2339: Property 'total' does not exist on type '{ total: number; } | undefined'.
+src/lib/db/operations.ts(214,12): error TS2339: Property 'total' does not exist on type '{ total: number; } | undefined'.
+src/lib/db/operations.ts(334,14): error TS2339: Property 'total' does not exist on type '{ total: number; } | undefined'.
+src/lib/db/operations.ts(381,12): error TS2339: Property 'total' does not exist on type '{ total: number; } | undefined'.
+src/lib/db/operations.ts(496,14): error TS2339: Property 'total' does not exist on type '{ total: number; } | undefined'.
+src/lib/db/operations.ts(543,12): error TS2339: Property 'total' does not exist on type '{ total: number; } | undefined'.
+src/lib/db/operations.ts(600,21): error TS18048: 'enrollmentStats.totalEnrollments' is possibly 'undefined'.
+src/lib/db/operations.ts(601,57): error TS18048: 'enrollmentStats' is possibly 'undefined'.
+src/lib/db/operations.ts(639,21): error TS18048: 'enrollmentStats.totalEnrollments' is possibly 'undefined'.
+src/lib/db/operations.ts(640,57): error TS18048: 'enrollmentStats' is possibly 'undefined'.
+src/lib/db/operations/analytics.ts(183,35): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/lib/db/operations/analytics.ts(232,35): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/lib/db/operations/analytics.ts(310,31): error TS18048: 'userStats.totalUsers' is possibly 'undefined'.
+src/lib/db/operations/analytics.ts(310,109): error TS18048: 'userStats' is possibly 'undefined'.
+src/lib/db/operations/courses.ts(19,8): error TS2305: Module '"@/contracts"' has no exported member 'DatabaseResponse'.
+src/lib/db/operations/courses.ts(175,29): error TS2345: Argument of type '{ id: string; createdAt: string; updatedAt: string; slug: string; title: string; version: string; isPublished: boolean; } | undefined' is not assignable to parameter of type '{ id: string; createdAt: string; updatedAt: string; slug: string; title: string; version: string; isPublished: boolean; }'.
+  Type 'undefined' is not assignable to type '{ id: string; createdAt: string; updatedAt: string; slug: string; title: string; version: string; isPublished: boolean; }'.
+src/lib/db/operations/enrollments.ts(16,8): error TS2305: Module '"@/contracts"' has no exported member 'DatabaseResponse'.
+src/lib/db/operations/enrollments.ts(88,33): error TS2345: Argument of type '{ plantId: string; status: "enrolled" | "in_progress" | "completed"; id: string; createdAt: string; updatedAt: string; userId: string; courseId: string; enrolledAt: string; completedAt: string | null; } | undefined' is not assignable to parameter of type '{ plantId: string; status: "enrolled" | "in_progress" | "completed"; id: string; createdAt: string; updatedAt: string; userId: string; courseId: string; enrolledAt: string; completedAt: string | null; }'.
+  Type 'undefined' is not assignable to type '{ plantId: string; status: "enrolled" | "in_progress" | "completed"; id: string; createdAt: string; updatedAt: string; userId: string; courseId: string; enrolledAt: string; completedAt: string | null; }'.
+src/lib/db/operations/enrollments.ts(223,7): error TS2345: Argument of type 'PgRelationalQuery<{ plantId: string; status: "enrolled" | "in_progress" | "completed"; id: string; createdAt: string; updatedAt: string; userId: string; courseId: string; enrolledAt: string; completedAt: string | null; plant: { ...; }; profile: { ...; }; course: { ...; }; }[]>' is not assignable to parameter of type 'DatabaseQuery'.
+  Type 'PgRelationalQuery<{ plantId: string; status: "enrolled" | "in_progress" | "completed"; id: string; createdAt: string; updatedAt: string; userId: string; courseId: string; enrolledAt: string; completedAt: string | null; plant: { ...; }; profile: { ...; }; course: { ...; }; }[]>' is missing the following properties from type 'PgSelectBase<any, any, any, any, false, never, ({ [x: string]: any; } | { [x: string]: any; } | { [x: string]: any; })[], any>': joinsNotNullableMap, tableName, isPartialSelect, usedTables, and 27 more.
+src/lib/db/operations/enrollments.ts(235,5): error TS2322: Type 'PaginatedResult<unknown>' is not assignable to type 'PaginatedResult<{ id: string; userId: string; courseId: string; plantId: string; status: "enrolled" | "in_progress" | "completed"; enrolledAt: string; completedAt: string | null; createdAt: string; updatedAt: string; profile: { ...; }; course: { ...; }; plant: { ...; }; }>'.
+  Type 'unknown' is not assignable to type '{ id: string; userId: string; courseId: string; plantId: string; status: "enrolled" | "in_progress" | "completed"; enrolledAt: string; completedAt: string | null; createdAt: string; updatedAt: string; profile: { ...; }; course: { ...; }; plant: { ...; }; }'.
+src/lib/db/operations/users.ts(20,8): error TS2305: Module '"@/contracts"' has no exported member 'DatabaseResponse'.
+src/lib/db/operations/users.ts(134,30): error TS2345: Argument of type '{ plantId: string; status: "active" | "suspended"; id: string; email: string; createdAt: string; updatedAt: string; firstName: string; lastName: string; jobTitle: string | null; } | undefined' is not assignable to parameter of type '{ plantId: string; status: "active" | "suspended"; id: string; email: string; createdAt: string; updatedAt: string; firstName: string; lastName: string; jobTitle: string | null; }'.
+  Type 'undefined' is not assignable to type '{ plantId: string; status: "active" | "suspended"; id: string; email: string; createdAt: string; updatedAt: string; firstName: string; lastName: string; jobTitle: string | null; }'.
+src/lib/db/operations/users.ts(353,38): error TS2339: Property 'adminRoles' does not exist on type '{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; plant: { id: string; name: string; isActive: boolean; createdAt: string; updatedAt: string; }; }'.
+src/lib/db/operations/users.ts(353,57): error TS2339: Property 'adminRoles' does not exist on type '{ id: string; plantId: string; firstName: string; lastName: string; email: string; jobTitle: string | null; status: "active" | "suspended"; createdAt: string; updatedAt: string; plant: { id: string; name: string; isActive: boolean; createdAt: string; updatedAt: string; }; }'.
+src/lib/db/seed.ts(100,13): error TS2322: Type 'Date' is not assignable to type 'string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | undefined'.
+src/lib/db/seed.ts(126,39): error TS2532: Object is possibly 'undefined'.
+src/lib/db/wrappers/operation-wrapper.ts(107,48): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+src/lib/db/wrappers/operation-wrapper.ts(175,15): error TS2339: Property 'code' does not exist on type 'Error'.
+src/lib/db/wrappers/operation-wrapper.ts(176,15): error TS2339: Property 'code' does not exist on type 'Error'.
+src/lib/db/wrappers/operation-wrapper.ts(177,15): error TS2339: Property 'code' does not exist on type 'Error'.
+src/lib/db/wrappers/operation-wrapper.ts(246,5): error TS2322: Type 'unknown' is not assignable to type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.
+src/lib/db/wrappers/operation-wrapper.ts(309,38): error TS2339: Property 'stopOnError' does not exist on type 'OperationOptions'.
+src/lib/middleware/unified.ts(62,54): error TS2345: Argument of type 'User | null' is not assignable to parameter of type 'SupabaseUser'.
+  Type 'null' is not assignable to type 'SupabaseUser'.
+src/lib/middleware/unified.ts(95,8): error TS2339: Property 'from' does not exist on type 'SupabaseClient'.
+src/lib/middleware/unified.ts(180,23): error TS2551: Property 'plant_id' does not exist on type 'AdminRole'. Did you mean 'plantId'?
+src/lib/progress.ts(59,7): error TS2322: Type 'string' is not assignable to type 'Date'.
+src/lib/progress.ts(228,5): error TS2322: Type '{ courseId: string; courseSlug: string; progressPercent: number; currentSection: string | null; lastActiveAt: string; enrollmentStatus: "enrolled" | "in_progress" | "completed"; }[]' is not assignable to type 'CourseProgress[]'.
+  Type '{ courseId: string; courseSlug: string; progressPercent: number; currentSection: string | null; lastActiveAt: string; enrollmentStatus: "enrolled" | "in_progress" | "completed"; }' is not assignable to type 'CourseProgress'.
+    Types of property 'lastActiveAt' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+src/lib/rls.ts(45,3): error TS2741: Property 'accessiblePlants' is missing in type '{ userId: string; plantId: any; roles: { role: any; plant_id: any; }[]; }' but required in type 'UserContext'.
+src/lib/rls.ts(170,12): error TS18046: 'query' is of type 'unknown'.
+src/lib/rls.ts(175,12): error TS18046: 'query' is of type 'unknown'.
+src/lib/rls.ts(179,10): error TS18046: 'query' is of type 'unknown'.
+src/lib/rls.ts(210,20): error TS2352: Conversion of type 'GenericStringError' to type 'Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type '{ error: true; } & String'.
+src/lib/route-utils.ts(60,11): error TS2345: Argument of type '"hr_admin" | "dev_admin" | "plant_manager"' is not assignable to parameter of type 'AdminRole | undefined'.
+  Type 'string' is not assignable to type 'AdminRole'.
+src/lib/route-utils.ts(81,42): error TS2339: Property 'errors' does not exist on type 'ZodError<unknown>'.
+src/lib/route-utils.ts(81,53): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/lib/route-utils.ts(100,42): error TS2339: Property 'errors' does not exist on type 'ZodError<unknown>'.
+src/lib/route-utils.ts(100,53): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/lib/route-utils.ts(112,25): error TS2339: Property 'handleRouteError' does not exist on type 'typeof RouteUtils'.
+src/lib/utils/form-migration-utils.ts(64,55): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/utils/form-migration-utils.ts(68,7): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/utils/form-migration-utils.ts(71,57): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/utils/form-migration-utils.ts(72,56): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/utils/form-migration-utils.ts(107,22): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/utils/form-migration-utils.ts(314,3): error TS2322: Type '(string | undefined)[]' is not assignable to type 'string[]'.
+  Type 'string | undefined' is not assignable to type 'string'.
+    Type 'undefined' is not assignable to type 'string'.
+src/types/utils.ts(229,3): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.

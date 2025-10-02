@@ -64,7 +64,7 @@ export function Header() {
                 >
                   Resources
                 </Link>
-                {profile && ['hr_admin', 'dev_admin'].includes(profile.role) && (
+                {profile && (profile as any)?.adminRoles?.some((role: any) => ['hr_admin', 'dev_admin'].includes(role.role)) && (
                   <Link 
                     href="/admin" 
                     className="text-fg-secondary hover:text-brand-primary font-medium transition-colors"

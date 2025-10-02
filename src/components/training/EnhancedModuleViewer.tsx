@@ -20,40 +20,9 @@ import {
   Award,
   AlertCircle
 } from 'lucide-react'
-import { useCourseProgress, useQuestionEvents } from '@/hooks/useApi'
+import { useCourseProgress, useQuestionEvents } from '@/hooks/useStandardizedProgress'
 
-interface EnhancedModuleViewerProps {
-  courseRoute: string; // e.g., '/ebook' or '/ebook-spanish'
-  moduleData: {
-    id: string
-    title: string
-    description: string
-    duration: string
-    difficulty: 'beginner' | 'intermediate' | 'advanced'
-    sections: Array<{
-      id: string
-      title: string
-      content: string
-      estimatedReadTime: string
-      questions?: Array<{
-        id: string
-        question: string
-        options: string[]
-        correctAnswer: number
-        explanation?: string
-      }>
-    }>
-    learningObjectives: string[]
-    resources: Array<{
-      id: string
-      title: string
-      type: string
-      url: string
-      description: string
-    }>
-  }
-  onModuleComplete?: () => void
-}
+import type { EnhancedModuleViewerProps } from '@/types'
 
 export default function EnhancedModuleViewer({ 
   courseRoute, 
@@ -110,9 +79,10 @@ export default function EnhancedModuleViewer({
 
   // Initialize from API progress when available
   useEffect(() => {
-    if (progress && progress.currentSection) {
+    const courseProgress = progress as any
+    if (courseProgress && courseProgress.currentSection) {
       const sectionIndex = moduleData.sections.findIndex(
-        section => section.id === progress.currentSection
+        section => section.id === courseProgress.currentSection
       )
       if (sectionIndex >= 0) {
         setCurrentSectionIndex(sectionIndex)
@@ -121,9 +91,13 @@ export default function EnhancedModuleViewer({
   }, [progress, moduleData.sections])
 
   const handleSectionComplete = async () => {
+    if (!currentSection) return
+    
     const newProgressPercent = Math.round(((currentSectionIndex + 1) / moduleData.sections.length) * 100)
-    const nextSectionId = isLastSection ? currentSection.id : moduleData.sections[currentSectionIndex + 1].id
+    const nextSectionId = isLastSection ? currentSection.id : moduleData.sections[currentSectionIndex + 1]?.id
     const eventType = isLastSection ? 'complete_course' : 'view_section'
+    
+    if (!nextSectionId) return
 
     const success = await updateProgress(
       newProgressPercent,
@@ -144,7 +118,7 @@ export default function EnhancedModuleViewer({
   }
 
   const handleQuestionSubmit = async () => {
-    if (!currentQuestion || selectedAnswer === null) return
+    if (!currentQuestion || !currentSection || selectedAnswer === null) return
 
     const isCorrect = selectedAnswer === currentQuestion.correctAnswer
     const questionKey = currentQuestion.id
@@ -166,7 +140,7 @@ export default function EnhancedModuleViewer({
       {
         selectedAnswer,
         questionText: currentQuestion.question,
-        options: currentQuestion.options,
+        optionsCount: currentQuestion.options.length,
         timeSpent: Math.floor((Date.now() - sessionStartTime) / 1000)
       }
     )
@@ -207,6 +181,16 @@ export default function EnhancedModuleViewer({
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-lg text-gray-600">Loading course progress...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!currentSection) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">Section not found</p>
         </div>
       </div>
     )

@@ -3,44 +3,35 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useUnifiedForm } from '@/hooks/useUnifiedForm'
+import { forgotPasswordFormSchema } from '@/lib/schemas/unified-form-schemas'
+import { FormField, FormError, FormSuccess, FormSubmitButton, FormContainer } from '@/components/ui/unified-form'
+import type { ForgotPasswordForm } from '@/lib/schemas/unified-form-schemas'
 
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      setError('Please enter a valid email address')
-      setLoading(false)
-      return
-    }
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  const form = useUnifiedForm({
+    initialValues: {
+      email: ''
+    } as ForgotPasswordForm,
+    validationSchema: forgotPasswordFormSchema,
+    onSubmit: async (values: ForgotPasswordForm) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
         redirectTo: `${window.location.origin}/reset-password`
       })
 
       if (error) {
-        setError(error.message)
-      } else {
-        setSuccess(true)
+        throw new Error(error.message)
       }
-    } catch (err) {
-      console.error('Password reset error:', err)
-      setError('An unexpected error occurred. Please try again.')
-    } finally {
-      setLoading(false)
+
+      setSuccess(true)
+    },
+    onError: (error: Error) => {
+      console.error('Password reset error:', error)
     }
-  }
+  })
 
   if (success) {
     return (
@@ -70,25 +61,25 @@ export function ForgotPasswordForm() {
             </div>
           </div>
           <p className="text-sm text-gray-600 mb-6">
-            We&apos;ve sent password reset instructions to <strong>{email}</strong>. 
+            We&apos;ve sent password reset instructions to <strong>{form.values.email}</strong>. 
             Please check your inbox and follow the link to reset your password.
           </p>
           <div className="space-y-3">
-            <Button asChild className="w-full">
-              <Link href="/login">
-                Back to Login
-              </Link>
-            </Button>
-            <Button 
-              variant="outline" 
+            <Link
+              href="/login"
+              className="block w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center"
+            >
+              Back to Login
+            </Link>
+            <button
               onClick={() => {
                 setSuccess(false)
-                setEmail('')
+                form.resetForm()
               }}
-              className="w-full"
+              className="block w-full bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
             >
               Send Another Email
-            </Button>
+            </button>
           </div>
         </CardContent>
       </Card>
@@ -104,36 +95,31 @@ export function ForgotPasswordForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-              {error}
-            </div>
+        <FormContainer onSubmit={(e) => { e.preventDefault(); form.submitForm(); }}>
+          {form.errors.submit && (
+            <FormError error={form.errors.submit} />
           )}
           
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-gray-700">
-              Email Address
-            </label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={loading}
-              placeholder="Enter your email address"
-              className="w-full"
-            />
-          </div>
+          <FormField
+            name="email"
+            label="Email Address"
+            type="email"
+            value={form.values.email}
+            error={form.errors.email}
+            onChange={(value) => form.updateField('email', value as string)}
+            onBlur={() => form.validateField('email')}
+            placeholder="Enter your email address"
+            disabled={form.isSubmitting}
+            required
+          />
           
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={loading}
+          <FormSubmitButton
+            isSubmitting={form.isSubmitting}
+            disabled={!form.isDirty}
+            loadingText="Sending Email..."
           >
-            {loading ? 'Sending Email...' : 'Send Reset Email'}
-          </Button>
+            Send Reset Email
+          </FormSubmitButton>
           
           <div className="text-center text-sm text-gray-600">
             Remember your password?{' '}
@@ -154,7 +140,7 @@ export function ForgotPasswordForm() {
               Sign up
             </Link>
           </div>
-        </form>
+        </FormContainer>
       </CardContent>
     </Card>
   )

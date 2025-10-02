@@ -4,101 +4,41 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { updateUserProfileSchema } from '@/lib/schemas'
-
-interface RegistrationData {
-  email: string
-  password: string
-  confirmPassword: string
-  firstName: string
-  lastName: string
-  jobTitle?: string
-}
+import { useUnifiedForm } from '@/hooks/useUnifiedForm'
+import { signupFormSchema } from '@/lib/schemas/unified-form-schemas'
+import { FormField, FormError, FormSuccess, FormSubmitButton, FormContainer } from '@/components/ui/unified-form'
+import type { SignupForm } from '@/lib/schemas/unified-form-schemas'
 
 export function SignupForm() {
-  const [formData, setFormData] = useState<RegistrationData>({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
-    jobTitle: ''
-  })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  
   const router = useRouter()
 
-  const handleChange = (field: keyof RegistrationData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, [field]: e.target.value }))
-    setError('') // Clear error when user starts typing
-  }
-
-  const validateForm = (): string | null => {
-    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
-      return 'Please fill in all required fields'
-    }
-
-    if (formData.password.length < 8) {
-      return 'Password must be at least 8 characters long'
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      return 'Passwords do not match'
-    }
-
-    if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      return 'Please enter a valid email address'
-    }
-
-    // Validate profile data with Zod
-    try {
-      updateUserProfileSchema.parse({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        jobTitle: formData.jobTitle || undefined
-      })
-    } catch (err) {
-      console.error('Validation error:', err)
-      return 'Please check your profile information'
-    }
-
-    return null
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    const validationError = validateForm()
-    if (validationError) {
-      setError(validationError)
-      setLoading(false)
-      return
-    }
-
-    try {
-      // Sign up with Supabase Auth
+  const form = useUnifiedForm({
+    initialValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      firstName: '',
+      lastName: '',
+      jobTitle: ''
+    } as SignupForm,
+    validationSchema: signupFormSchema,
+    onSubmit: async (values: SignupForm) => {
       const { data, error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+        email: values.email,
+        password: values.password,
         options: {
           data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            job_title: formData.jobTitle || null
+            first_name: values.firstName,
+            last_name: values.lastName,
+            job_title: values.jobTitle || null
           }
         }
       })
 
       if (signUpError) {
-        setError(signUpError.message)
-        return
+        throw new Error(signUpError.message)
       }
 
       if (data.user) {
@@ -109,13 +49,11 @@ export function SignupForm() {
           router.push('/login?message=Please check your email to confirm your account')
         }, 2000)
       }
-    } catch (err) {
-      console.error('Signup error:', err)
-      setError('An unexpected error occurred. Please try again.')
-    } finally {
-      setLoading(false)
+    },
+    onError: (error: Error) => {
+      console.error('Signup error:', error)
     }
-  }
+  })
 
   if (success) {
     return (
@@ -123,7 +61,7 @@ export function SignupForm() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center text-green-600">Account Created!</CardTitle>
           <CardDescription className="text-center">
-            Please check your email to confirm your account before signing in.
+            Your account has been successfully created
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
@@ -144,14 +82,17 @@ export function SignupForm() {
               </svg>
             </div>
           </div>
-          <p className="text-sm text-gray-600 mb-4">
-            Redirecting to login page...
+          <p className="text-sm text-gray-600 mb-6">
+            Please check your email to verify your account before signing in.
           </p>
-          <Button asChild variant="outline">
-            <Link href="/login">
+          <div className="space-y-3">
+            <Link
+              href="/login"
+              className="block w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center"
+            >
               Go to Login
             </Link>
-          </Button>
+          </div>
         </CardContent>
       </Card>
     )
@@ -162,137 +103,96 @@ export function SignupForm() {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl text-center">Create Account</CardTitle>
         <CardDescription className="text-center">
-          Join the SpecChem Safety Training platform
+          Sign up to access your training dashboard
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-              {error}
-            </div>
+        <FormContainer onSubmit={(e) => { e.preventDefault(); form.submitForm(); }}>
+          {form.errors.submit && (
+            <FormError error={form.errors.submit} />
           )}
           
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="firstName" className="text-sm font-medium text-gray-700">
-                First Name *
-              </label>
-              <Input
-                id="firstName"
-                type="text"
-                value={formData.firstName}
-                onChange={handleChange('firstName')}
-                required
-                disabled={loading}
-                placeholder="John"
-                className="w-full"
-              />
-            </div>
+            <FormField
+              name="firstName"
+              label="First Name"
+              value={form.values.firstName}
+              error={form.errors.firstName}
+              onChange={(value) => form.updateField('firstName', value as string)}
+              onBlur={() => form.validateField('firstName')}
+              disabled={form.isSubmitting}
+              required
+            />
             
-            <div className="space-y-2">
-              <label htmlFor="lastName" className="text-sm font-medium text-gray-700">
-                Last Name *
-              </label>
-              <Input
-                id="lastName"
-                type="text"
-                value={formData.lastName}
-                onChange={handleChange('lastName')}
-                required
-                disabled={loading}
-                placeholder="Doe"
-                className="w-full"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-gray-700">
-              Email Address *
-            </label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange('email')}
+            <FormField
+              name="lastName"
+              label="Last Name"
+              value={form.values.lastName}
+              error={form.errors.lastName}
+              onChange={(value) => form.updateField('lastName', value as string)}
+              onBlur={() => form.validateField('lastName')}
+              disabled={form.isSubmitting}
               required
-              disabled={loading}
-              placeholder="john.doe@company.com"
-              className="w-full"
             />
           </div>
           
-          <div className="space-y-2">
-            <label htmlFor="jobTitle" className="text-sm font-medium text-gray-700">
-              Job Title
-            </label>
-            <Input
-              id="jobTitle"
-              type="text"
-              value={formData.jobTitle}
-              onChange={handleChange('jobTitle')}
-              disabled={loading}
-              placeholder="Safety Manager"
-              className="w-full"
-            />
-          </div>
+          <FormField
+            name="email"
+            label="Email"
+            type="email"
+            value={form.values.email}
+            error={form.errors.email}
+            onChange={(value) => form.updateField('email', value as string)}
+            onBlur={() => form.validateField('email')}
+            placeholder="Enter your email"
+            disabled={form.isSubmitting}
+            required
+          />
           
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-gray-700">
-              Password *
-            </label>
-            <Input
-              id="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange('password')}
-              required
-              disabled={loading}
-              placeholder="At least 8 characters"
-              className="w-full"
-              minLength={8}
-            />
-          </div>
+          <FormField
+            name="jobTitle"
+            label="Job Title"
+            value={form.values.jobTitle}
+            error={form.errors.jobTitle}
+            onChange={(value) => form.updateField('jobTitle', value as string)}
+            onBlur={() => form.validateField('jobTitle')}
+            placeholder="Enter your job title (optional)"
+            disabled={form.isSubmitting}
+          />
           
-          <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-              Confirm Password *
-            </label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange('confirmPassword')}
-              required
-              disabled={loading}
-              placeholder="Confirm your password"
-              className="w-full"
-              minLength={8}
-            />
-          </div>
+          <FormField
+            name="password"
+            label="Password"
+            type="password"
+            value={form.values.password}
+            error={form.errors.password}
+            onChange={(value) => form.updateField('password', value as string)}
+            onBlur={() => form.validateField('password')}
+            placeholder="At least 8 characters with uppercase, lowercase, and number"
+            disabled={form.isSubmitting}
+            required
+          />
           
-          <div className="space-y-4">
-            <div className="text-xs text-gray-600">
-              <p>By creating an account, you agree to our:</p>
-              <div className="mt-1 space-x-4">
-                <Link href="/terms" className="text-blue-600 hover:underline">
-                  Terms of Service
-                </Link>
-                <Link href="/privacy" className="text-blue-600 hover:underline">
-                  Privacy Policy
-                </Link>
-              </div>
-            </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={loading}
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </Button>
-          </div>
+          <FormField
+            name="confirmPassword"
+            label="Confirm Password"
+            type="password"
+            value={form.values.confirmPassword}
+            error={form.errors.confirmPassword}
+            onChange={(value) => form.updateField('confirmPassword', value as string)}
+            onBlur={() => form.validateField('confirmPassword')}
+            placeholder="Confirm your password"
+            disabled={form.isSubmitting}
+            required
+          />
+          
+          <FormSubmitButton
+            isSubmitting={form.isSubmitting}
+            disabled={!form.isDirty}
+            loadingText="Creating Account..."
+          >
+            Create Account
+          </FormSubmitButton>
           
           <div className="text-center text-sm text-gray-600">
             Already have an account?{' '}
@@ -303,7 +203,7 @@ export function SignupForm() {
               Sign in
             </Link>
           </div>
-        </form>
+        </FormContainer>
       </CardContent>
     </Card>
   )

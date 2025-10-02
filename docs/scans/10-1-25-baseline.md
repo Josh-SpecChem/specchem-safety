@@ -1,3026 +1,1619 @@
 # SpecChem Safety Training Platform - Baseline Repository Scan
 
 **Date:** October 1, 2025  
-**Purpose:** Comprehensive overview of repository structure, modules, and domain understanding
+**Purpose:** Comprehensive baseline analysis of existing codebase  
+**Scope:** Complete repository structure and domain analysis
 
 ## Top-Level Directory Structure
 
 ### Core Application Directories
+
 - **`src/`** - Main application source code
   - `app/` - Next.js 15 App Router pages and API routes
-  - `components/` - React components organized by feature
-  - `lib/` - Core utilities, database operations, and business logic
-  - `contexts/` - React context providers for state management
-  - `hooks/` - Custom React hooks for data fetching and state
-  - `types/` - TypeScript type definitions
-  - `data/` - Static data files and configuration
-  - `features/` - Feature-specific modules and logic
+  - `components/` - Reusable React components organized by feature
+  - `lib/` - Utility libraries, configurations, and shared services
+  - `types/` - TypeScript type definitions and schemas
+  - `hooks/` - Custom React hooks for state management
+  - `contexts/` - React context providers (Auth, Progress)
+  - `features/` - Feature-specific modules (LMS analytics)
+  - `data/` - Static data definitions (roles, modules)
 
 ### Configuration & Infrastructure
-- **`drizzle/`** - Database migration files and metadata
-- **`supabase/`** - Database initialization scripts and RLS policies
-- **`scripts/`** - Utility scripts for database seeding and testing
-- **`public/`** - Static assets including images, documents, and data files
-- **`docs/`** - Project documentation and guides
 
-### Build & Development Files
-- **`package.json`** - Dependencies and npm scripts
-- **`next.config.ts`** - Next.js configuration
-- **`drizzle.config.ts`** - Database ORM configuration
-- **`tailwind.config.ts`** - CSS framework configuration
-- **`tsconfig.json`** - TypeScript configuration
-- **`middleware.ts`** - Next.js middleware for auth and routing
+- **`drizzle/`** - Database schema definitions and migrations
+- **`supabase/`** - Database initialization scripts and RLS policies
+- **`scripts/`** - Automation scripts for maintenance and validation
+- **`docs/`** - Comprehensive documentation system
+- **`public/`** - Static assets (images, documents, data files)
+
+### Development & Testing
+
+- **`src/__tests__/`** - Unit and integration tests
+- **`src/__e2e__/`** - End-to-end Playwright tests
+- **`src/__fixtures__/`** - Test data and mock objects
 
 ## Key Modules and Their Purpose
 
-### Authentication & Authorization (`src/lib/auth.ts`, `src/contexts/AuthContext.tsx`)
-- **Purpose:** User authentication and role-based access control
-- **Features:** Supabase Auth integration, admin role checking, plant-based permissions
-- **Roles:** HR Admin, Dev Admin, Plant Manager, Employee
-- **Security:** Multi-level authorization with plant-specific access controls
+### Learning Management System (LMS)
 
-### Database Layer (`src/lib/db/`)
-- **Schema (`schema.ts`):** Complete PostgreSQL schema with 8 core tables
-- **Operations (`operations.ts`):** CRUD operations for all entities
-- **Relations (`relations.ts`):** Database relationship definitions
-- **Index (`index.ts`):** Database connection and client setup
+- **Core LMS Features:** Course enrollment, progress tracking, certification management
+- **Multi-tenant Architecture:** Plant-based tenant isolation with role-based access control
+- **Training Modules:** Comprehensive safety training content for industrial chemical manufacturing
+- **Analytics:** Progress tracking, completion rates, and compliance reporting
 
-### Validation & Type Safety (`src/lib/schemas.ts`)
-- **Purpose:** Consolidated Zod schemas for runtime validation and TypeScript types
-- **Coverage:** All database entities, API requests/responses, form validation
-- **Features:** Single source of truth matching actual database schema, comprehensive error handling
-- **Types:** 50+ exported TypeScript types for type safety
-- **Status:** ✅ Schema duplication resolved - consolidated from 4 duplicate files into single authoritative source
+### Authentication & Authorization
 
-### Learning Management System (`src/app/lms/`, `src/features/lms/`)
-- **Purpose:** Core training platform functionality
-- **Features:** Module viewing, progress tracking, certification management
-- **Components:** ModuleViewer, Assessment, EnhancedModuleViewer
-- **Integration:** Links to existing training content and resources
+- **Supabase Auth Integration:** JWT-based authentication with email/password
+- **Role-based Access Control:** HR Admin, Dev Admin, Plant Manager, Employee roles
+- **Multi-level Security:** API-level, database-level (RLS), and UI-level access control
+- **Profile Management:** User profile creation and updates with plant association
 
-### Admin Dashboard (`src/app/admin/`)
-- **Purpose:** Administrative interface for system management
-- **Features:** User management, course management, analytics, reports
-- **Access Control:** Role-based admin permissions
-- **Modules:** Analytics, Courses, Enrollments, Plants, Reports, Settings, Users
+### Admin Dashboard
 
-### Training Content (`src/data/roles.ts`, `src/types/navigator.ts`)
-- **Purpose:** Role-based training path definitions
-- **Roles:** 9 defined roles (Sales Rep, Plant Tech, Compliance Officer, etc.)
-- **Modules:** Training modules with prerequisites and assessments
-- **Paths:** Structured learning paths per role with completion criteria
+- **User Management:** Employee onboarding, role assignment, plant association
+- **Course Management:** Course creation, publishing, and version control
+- **Enrollment Management:** Bulk enrollment, progress monitoring, completion tracking
+- **Analytics & Reporting:** Comprehensive reporting dashboard for compliance and progress
 
-## Configuration, Contracts, and Migrations
+### Training Content System
 
-### Database Configuration
-- **ORM:** Drizzle ORM with PostgreSQL
-- **Migrations:** Located in `drizzle/` directory
-- **Schema:** Defined in `src/lib/db/schema.ts` with 8 tables
-- **Policies:** Row Level Security (RLS) policies in `supabase/rls-policies.sql`
+- **Role-specific Training Paths:** 9 defined roles (Sales Rep, Plant Tech, Compliance Officer, etc.)
+- **Modular Content:** Structured training modules with prerequisites and assessments
+- **Compliance Tracking:** OSHA compliance, safety certifications, and regulatory requirements
+- **Multi-language Support:** English and Spanish content support
 
-### API Contracts
-- **Routes:** RESTful API routes in `src/app/api/`
-- **Validation:** Zod schemas for request/response validation
-- **Types:** Auto-generated TypeScript types from schemas
-- **Error Handling:** Standardized API response format
+## Configuration Management
 
-### Environment & Deployment
-- **Environment:** `.env.local` for local development
-- **Deployment:** Vercel configuration in `vercel.json`
-- **Database:** Supabase PostgreSQL with connection pooling
-- **Auth:** Supabase Auth with SSR support
+### Centralized Configuration (`src/lib/config.ts`)
 
-## Domain Understanding from File and Folder Names
+- **Environment Variable Validation:** Comprehensive Zod schema validation
+- **Database Configuration:** PostgreSQL connection settings with SSL support
+- **Supabase Integration:** URL, keys, and service role configuration
+- **Feature Flags:** Analytics, debugging, testing, and LMS enablement
+- **External Services:** SMTP, OpenAI, Stripe API key management
 
-### Business Domain: Industrial Chemical Manufacturing
-- **Company:** SpecChem (Specialty Chemicals)
-- **Industry:** Chemical manufacturing with multiple plant locations
-- **Focus:** Safety training, compliance, and operational excellence
-- **Scale:** Multi-plant organization with role-based training needs
+### Database Configuration (`drizzle.config.ts`)
+
+- **Schema Management:** Centralized schema definitions in `drizzle/schema.ts`
+- **Migration System:** Automated database migration handling
+- **Connection Pooling:** Optimized database connection management
+
+### Build & Deployment Configuration
+
+- **Next.js Configuration:** Environment-specific settings, image optimization, TypeScript/ESLint handling
+- **Tailwind Configuration:** Decoupled styling configuration to avoid circular dependencies
+- **Vercel Deployment:** Production deployment configuration with environment variables
+
+## Database Schema & Migrations
+
+### Core Database Schema (`drizzle/schema.ts`)
+
+- **Multi-tenant Tables:** `plants`, `profiles`, `admin_roles` with plant-based isolation
+- **Learning Management:** `courses`, `enrollments`, `progress` with comprehensive tracking
+- **Analytics & Events:** `activity_events`, `question_events` for detailed user interaction tracking
+- **Enums:** `admin_role`, `enrollment_status`, `event_type`, `user_status` for type safety
+
+### Migration Management
+
+- **Drizzle Kit Integration:** Automated migration generation and execution
+- **Version Control:** Migration files tracked in `drizzle/` directory
+- **Rollback Support:** Structured migration system with rollback capabilities
+
+### Row-Level Security (RLS)
+
+- **Tenant Isolation:** Plant-based data isolation at database level
+- **Policy Management:** Comprehensive RLS policies in `supabase/rls-policies.sql`
+- **User Triggers:** Automated profile creation and role assignment
+
+## Domain Context Analysis
+
+### Business Domain: Industrial Chemical Manufacturing Safety
+
+- **Company:** SpecChem - Industrial chemical manufacturing company
+- **Primary Purpose:** Comprehensive safety training platform for chemical manufacturing operations
+- **Target Users:** Plant technicians, safety coordinators, compliance officers, sales representatives
 
 ### Core Business Functions
-1. **Safety Training** - OSHA compliance, equipment safety, emergency procedures
-2. **Product Knowledge** - Chemical products, applications, technical specifications
-3. **Compliance Management** - Regulatory requirements, audit procedures, documentation
-4. **Role-Based Learning** - Tailored training paths for different job functions
-5. **Multi-Plant Operations** - Plant-specific training and management
-
-### User Roles & Responsibilities
-- **Sales Representatives** - Customer-facing, product knowledge, safety compliance
-- **Plant Technicians** - Equipment operation, safety protocols, maintenance
-- **Compliance Officers** - Regulatory oversight, audit management, documentation
-- **Safety Coordinators** - Safety program leadership, emergency response
-- **Quality Assurance** - Product testing, process improvement, standards compliance
-- **Field Service** - On-site customer support, installation, troubleshooting
-- **Laboratory Technicians** - Product testing, research, data analysis
-- **Administrative Staff** - Office operations, policy support, communication
-
-### Technical Architecture Patterns
-- **Multi-tenant** - Plant-based data isolation and access control
-- **Role-based Access Control (RBAC)** - Hierarchical permissions system
-- **Event-driven** - Activity and question event tracking for analytics
-- **Progressive Web App** - Modern web application with offline capabilities
-- **Type-safe** - End-to-end TypeScript with runtime validation
-
-### Compliance & Regulatory Focus
-- **OSHA Compliance** - Workplace safety training and certification
-- **Product Safety** - Chemical handling, SDS management, safety protocols
-- **Documentation** - Comprehensive record-keeping for audits and compliance
-- **Certification** - Training completion tracking and certification management
-- **Multi-language** - English and Spanish support for diverse workforce
-
-## Key Technical Decisions
-
-### Modern Tech Stack
-- **Next.js 15** with App Router for modern React development
-- **TypeScript** for type safety and developer experience
-- **Drizzle ORM** for type-safe database operations
-- **Supabase** for authentication and database hosting
-- **Tailwind CSS** for consistent, maintainable styling
-- **Zod** for runtime validation and schema definition
-
-### Scalability Considerations
-- **Multi-plant architecture** - Designed for enterprise-scale operations
-- **Role-based permissions** - Flexible access control system
-- **Event tracking** - Comprehensive analytics and reporting capabilities
-- **Modular design** - Feature-based organization for maintainability
-- **API-first** - RESTful API design for potential mobile/third-party integration
-
-This repository represents a mature, enterprise-grade Learning Management System specifically designed for industrial chemical manufacturing, with strong emphasis on safety, compliance, and role-based training delivery.
-
----
-
-# Schema Consolidation Resolution
-
-**Date:** October 1, 2025  
-**Status:** ✅ COMPLETED  
-**Purpose:** Resolve schema duplication issues identified in baseline analysis
-
-## Problem Identified
-
-The baseline analysis revealed significant schema duplication across multiple validation files:
-
-- **`src/lib/validations.ts`** (459 lines) - Main validation file
-- **`src/lib/db-contracts.ts`** (410 lines) - Database-specific contracts  
-- **`src/lib/validations/index.ts`** (247 lines) - Simplified validation schemas
-- **`src/lib/validations.ts.backup`** (387 lines) - Backup with outdated schemas
-
-**Issues Found:**
-- Triple schema definition with slight variations
-- Type mismatches (`z.date()` vs `z.string().datetime()`)
-- Inconsistent naming conventions (`plantSchema` vs `DbPlantSchema`)
-- Backup file drift with outdated definitions
-
-## Resolution Implemented
-
-### 1. Database Schema Verification
-- Used Drizzle introspection to confirm actual database structure
-- Verified 8 tables, 64 columns, 4 enums, 12 indexes, 15 foreign keys
-- Confirmed timestamp fields use `string` mode in database
-
-### 2. Consolidated Schema Creation
-Created `src/lib/schemas.ts` as single source of truth with:
-- **Exact Database Matching:** All schemas match actual database structure
-- **Complete Entity Coverage:** All 8 core entities with CRUD variants
-- **Type Consistency:** Standardized `z.string().datetime()` for all timestamps
-- **Backward Compatibility:** Added aliases for existing code
-- **Composite Schemas:** Relations and complex data structures
-- **API Schemas:** Response formats and pagination
-- **Form Validation:** Frontend form schemas
-- **Analytics Schemas:** Reporting and performance data
-
-### 3. Import Updates
-Updated all files to use consolidated schema:
-- `src/lib/api-utils.ts`
-- `src/contexts/AuthContext.tsx`
-- `src/components/auth/SignupForm.tsx`
-- `src/app/api/test/drizzle-zod/route.ts`
-- `src/lib/db/operations.ts`
-- `src/hooks/useApi.ts`
-- `src/app/api/test/comprehensive/route.ts`
-- `scripts/test-integrations.js`
-
-### 4. Duplicate File Removal
-Removed all duplicate schema files:
-- ✅ `src/lib/validations.ts` (459 lines)
-- ✅ `src/lib/db-contracts.ts` (410 lines)
-- ✅ `src/lib/validations/index.ts` (247 lines)
-- ✅ `src/lib/validations.ts.backup` (387 lines)
-- ✅ `src/lib/validations/` directory
-
-## Impact Achieved
-
-- **Eliminated:** 1,503 lines of duplicate schema code
-- **Consolidated:** 4 separate schema files into 1 authoritative source
-- **Improved:** Type safety and maintainability
-- **Fixed:** Inconsistent validation patterns across application
-- **Standardized:** All timestamp handling to use string format
-- **Enhanced:** Backward compatibility with existing code
-
-## Key Features of Consolidated Schema
-
-### Schema Organization
-```typescript
-// Base entity schemas (matching database exactly)
-export const plantSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(1, 'Plant name is required'),
-  isActive: z.boolean().default(true),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-});
-
-// CRUD variants
-export const createPlantSchema = z.object({...});
-export const updatePlantSchema = z.object({...});
-
-// Composite schemas with relations
-export const profileWithPlantSchema = profileSchema.extend({
-  plant: plantSchema,
-});
-
-// Backward compatibility aliases
-export const courseProgressSchema = progressSchema;
-export const userProfileSchema = profileSchema;
-export type UserProfile = Profile;
-```
 
-### Type Safety Improvements
-- **Runtime Validation:** All data validated against actual database schema
-- **TypeScript Integration:** Complete type inference from Zod schemas
-- **API Contract Enforcement:** Standardized request/response validation
-- **Form Validation:** Client-side validation with server-side verification
-
-## Remaining Considerations
-
-While schema duplication has been resolved, TypeScript compilation revealed additional type consistency issues that should be addressed in future work:
-
-1. **Date/String Type Mismatches:** Some files still use `Date` objects where database expects strings
-2. **Role Property Access:** Components expect `profile.role` but database stores roles in `adminRoles` array
-3. **Missing Type Definitions:** Some components need updated type definitions
-
-These are separate from the schema duplication issue and represent broader type consistency improvements needed across the application.
-
----
-
-# Authentication & Authorization Analysis
-
-**Date:** October 1, 2025  
-**Purpose:** Comprehensive analysis of authentication and authorization systems
-
-## Authentication & Authorization Overview
-
-The SpecChem Safety Training Platform implements a comprehensive multi-tenant authentication and authorization system built on Supabase Auth with Row-Level Security (RLS) policies. The system supports role-based access control with plant-based tenant isolation.
-
-## Core Authentication Components
-
-### 1. Authentication Context (`src/contexts/AuthContext.tsx`)
-**Purpose:** Client-side authentication state management and user session handling
-
-**Key Functions:**
-- `signIn(email, password)` - User login with Supabase Auth
-- `signUp(email, password, userData)` - User registration with metadata
-- `signOut()` - Session termination
-- `updateProfile(updates)` - Profile modification
-- `fetchProfile(userId)` - Profile data retrieval
-
-**Features:**
-- Real-time auth state changes via `onAuthStateChange`
-- Automatic profile fetching on login
-- Error handling and loading states
-- Session persistence across page refreshes
-
-### 2. Server-Side Auth Utilities (`src/lib/auth.ts`)
-**Purpose:** Server-side authentication helpers and role checking
-
-**Key Functions:**
-- `getCurrentUser()` - Get authenticated user from Supabase
-- `getCurrentProfile()` - Get user profile with plant and role data
-- `requireAuth()` - Enforce authentication (redirects to login)
-- `requireProfile()` - Enforce profile existence
-- `checkAdminRole(userId, role?, plantId?)` - Role-based access checking
-- `requireAdminRole(role?, plantId?)` - Enforce admin permissions
-- `getUserPlantId(userId)` - Get user's plant assignment
-- `requireUserInPlant(userId, plantId)` - Enforce plant-based access
-
-**Role Hierarchy:**
-- `hr_admin` - Organization-wide HR administration
-- `dev_admin` - Organization-wide development administration  
-- `plant_manager` - Plant-specific management (can be assigned to specific plants)
-- `employee` - Regular user (default role)
-
-## Login/Signup Flow Implementation
-
-### Login Flow
-1. **Client Form** (`src/components/auth/LoginForm.tsx`)
-   - Email/password validation
-   - Calls `AuthContext.signIn()`
-   - Error handling and loading states
-
-2. **Authentication Process**
-   - Supabase Auth `signInWithPassword()`
-   - Session creation and cookie management
-   - Automatic profile fetching via `fetchProfile()`
-
-3. **Middleware Protection** (`middleware.ts`)
-   - Session validation on every request
-   - Automatic redirect to `/login` for unauthenticated users
-   - Excludes auth-related paths from protection
-
-4. **Server-Side Validation**
-   - `requireAuth()` functions in protected routes
-   - Profile verification and role checking
-
-### Signup Flow
-1. **Client Form** (`src/components/auth/SignupForm.tsx`)
-   - Comprehensive form validation (email, password, names, job title)
-   - Zod schema validation for profile data
-   - Password confirmation and strength requirements
-
-2. **Registration Process**
-   - Supabase Auth `signUp()` with user metadata
-   - Email confirmation requirement
-   - Automatic profile creation via database trigger
-
-3. **Database Trigger** (`supabase/user-triggers.sql`)
-   - `handle_new_user()` function executes on user creation
-   - Creates profile record with default plant assignment
-   - Auto-enrolls in required courses
-   - Creates initial progress records
-
-### Password Reset Flow
-1. **Forgot Password** (`src/components/auth/ForgotPasswordForm.tsx`)
-   - Email validation and submission
-   - Supabase `resetPasswordForEmail()` with redirect URL
-   - Success confirmation and email instructions
-
-2. **Reset Password** (`src/components/auth/ResetPasswordForm.tsx`)
-   - Token validation from URL parameters
-   - Session establishment with reset tokens
-   - Password update via `supabase.auth.updateUser()`
-   - Automatic redirect to login after success
-
-## Role Definitions and Enforcement
-
-### Role Structure
-**Database Schema** (`src/lib/db/schema.ts`):
-```sql
--- Admin roles enum
-adminRole = pgEnum("admin_role", ['hr_admin', 'dev_admin', 'plant_manager'])
-
--- Admin roles table
-admin_roles: {
-  id: uuid (primary key)
-  userId: uuid (foreign key to profiles)
-  role: adminRole
-  plantId: uuid (optional, for plant-specific roles)
-}
-```
+- **Safety Training:** OSHA compliance, equipment safety, emergency procedures
+- **Product Knowledge:** Chemical product training for sales and technical staff
+- **Compliance Management:** Regulatory compliance tracking and certification management
+- **Multi-plant Operations:** Support for multiple manufacturing facilities with tenant isolation
 
-### Role Enforcement Mechanisms
-
-#### 1. Server-Side Role Checking (`src/lib/auth.ts`)
-```typescript
-// Check if user has specific admin role
-export async function checkAdminRole(
-  userId: string, 
-  requiredRole?: 'hr_admin' | 'dev_admin' | 'plant_manager', 
-  plantId?: string
-): Promise<boolean>
-
-// Enforce admin role with redirect
-export async function requireAdminRole(
-  requiredRole?: 'hr_admin' | 'dev_admin' | 'plant_manager', 
-  plantId?: string
-): Promise<User>
-```
+### Regulatory Compliance Focus
 
-#### 2. API Route Protection
-**Admin API Routes** (`src/app/api/admin/`):
-- User management (`users/route.ts`)
-- Course management (`courses/route.ts`)
-- Analytics and reporting
-
-**Protection Pattern:**
-```typescript
-// 1. Check authentication
-const { data: { user }, error: authError } = await supabase.auth.getUser();
-if (authError || !user) return 401;
-
-// 2. Check admin role
-const { data: profile } = await supabase
-  .from('profiles')
-  .select('role')
-  .eq('id', user.id)
-  .single();
-
-if (!profile || !['hr_admin', 'dev_admin'].includes(profile.role)) {
-  return 403;
-}
-```
+- **OSHA Compliance:** Workplace safety training and certification
+- **Chemical Safety:** Hazardous materials handling and safety protocols
+- **Documentation Requirements:** Comprehensive record-keeping for regulatory audits
+- **Certification Tracking:** Employee certification status and renewal management
 
-#### 3. Client-Side Protection (`src/components/ProtectedRoute.tsx`)
-```typescript
-// Component-level role enforcement
-<ProtectedRoute requireAdmin={true}>
-  <AdminDashboard />
-</ProtectedRoute>
-```
+### User Role Specialization
 
-## Row-Level Security (RLS) Implementation
+- **Sales Representatives:** Product knowledge, customer safety protocols, sales compliance
+- **Plant Technicians:** Equipment operation, safety procedures, emergency response
+- **Compliance Officers:** Regulatory framework, audit procedures, documentation standards
+- **Safety Coordinators:** Safety leadership, emergency management, incident investigation
+- **Quality Assurance:** Quality standards, testing procedures, process improvement
+- **Field Service:** On-site customer support, installation services, technical troubleshooting
+- **Laboratory Technicians:** Lab safety, testing protocols, data analysis
 
-### RLS Policies (`supabase/rls-policies.sql`)
+## Technical Architecture Insights
 
-#### Helper Functions
-```sql
--- Get current user's plant ID
-CREATE FUNCTION get_user_plant_id() RETURNS uuid;
+### Modern Full-Stack Application
 
--- Check admin roles
-CREATE FUNCTION is_admin_user() RETURNS boolean;
-CREATE FUNCTION is_hr_admin() RETURNS boolean;
-CREATE FUNCTION is_plant_manager(target_plant_id uuid) RETURNS boolean;
-CREATE FUNCTION is_dev_admin() RETURNS boolean;
-```
+- **Frontend:** Next.js 15 with React 19, Tailwind CSS, TypeScript
+- **Backend:** Supabase (PostgreSQL) with Drizzle ORM
+- **Authentication:** Supabase Auth with JWT tokens
+- **Deployment:** Vercel with automatic CI/CD
 
-#### Table-Level Policies
-
-**Plants Table:**
-- All authenticated users can view active plants
-- Only HR/Dev admins can manage plants
-
-**Profiles Table:**
-- Users can view their own profile and profiles in their plant
-- Plant managers can view profiles in their managed plants
-- HR/Dev admins have full access
-- Users can update their own profile
-- Admins can manage all profiles
-
-**Enrollments Table:**
-- Users can view their own enrollments
-- Plant-based access for managers
-- Tenant isolation enforced (users only see their plant's data)
-
-**Progress Table:**
-- Users can view/update their own progress
-- Plant managers can view progress in their plants
-- System can create progress records
-
-**Activity/Question Events:**
-- Users can create their own events
-- Admins can view events in their scope
-- Tenant isolation enforced
-
-### RLS Utilities (`src/lib/rls.ts`)
-**Purpose:** Application-level RLS helpers and tenant filtering
-
-**Key Functions:**
-- `getCurrentUserContext()` - Get user context with plant and roles
-- `hasAdminRole(role?, plantId?)` - Check specific admin permissions
-- `requirePlantAccess(plantId)` - Enforce plant-based access
-- `getAccessiblePlants()` - Get list of accessible plants
-- `applyTenantFilter(query, plantIdColumn)` - Apply tenant filtering to queries
-- `validateTenantAccess(tableName, recordId)` - Validate record access
-
-## Middleware and Helper Functions
-
-### Next.js Middleware (`middleware.ts`)
-**Purpose:** Request-level authentication and session management
-
-**Features:**
-- Session refresh on every request
-- Automatic redirect to login for unauthenticated users
-- Excludes auth-related paths from protection
-- Development headers for RLS debugging
-
-**Protected Paths:** All routes except:
-- `/login`, `/signup`, `/forgot-password`, `/reset-password`
-- `/auth/*` (auth callbacks)
-- `/api/auth/*` (auth API routes)
-- Static assets
-
-### Supabase Middleware (`src/lib/supabase/middleware.ts`)
-**Purpose:** Supabase SSR session management
-
-**Features:**
-- Server-side Supabase client creation
-- Cookie-based session management
-- Automatic session refresh
-- Request/response cookie handling
-
-### Supabase Client Configuration
-**Server Client** (`src/lib/supabase/server.ts`):
-- Server-side Supabase client with cookie support
-- Used in API routes and server components
-
-**Client Client** (`src/lib/supabase/client.ts`):
-- Client-side Supabase client
-- Used in React components and client-side operations
-
-## API Authentication Patterns
-
-### Auth Callback Routes
-**`/api/auth/callback/route.ts`:**
-- Handles OAuth callback from Supabase
-- Exchanges authorization code for session
-- Redirects to appropriate destination
-
-**`/api/auth/confirm/route.ts`:**
-- Handles email confirmation tokens
-- Verifies OTP tokens for account activation
-- Redirects after successful confirmation
-
-### User Profile API
-**`/api/user/profile/route.ts`:**
-- GET: Retrieve current user's profile
-- PATCH: Update user profile information
-- Uses `getCurrentProfile()` for authentication
-- Validates input and updates database
-
-### Admin API Protection
-All admin API routes follow the same pattern:
-1. Extract and validate Supabase user
-2. Check admin role from profile
-3. Apply plant-based filtering for plant managers
-4. Execute authorized operations
-5. Return appropriate responses
-
-## Security Features
-
-### Multi-Tenant Isolation
-- **Plant-based data segregation** - Users only access their plant's data
-- **RLS policies** - Database-level tenant isolation
-- **Application-level filtering** - Additional tenant checks in application code
-
-### Role-Based Access Control
-- **Hierarchical permissions** - HR Admin > Dev Admin > Plant Manager > Employee
-- **Plant-specific roles** - Plant managers can be assigned to specific plants
-- **Granular permissions** - Different access levels for different operations
-
-### Session Management
-- **Secure cookies** - HttpOnly, Secure, SameSite cookies
-- **Automatic refresh** - Session tokens refreshed automatically
-- **Logout handling** - Proper session cleanup on logout
-
-### Input Validation
-- **Zod schemas** - Runtime validation for all inputs
-- **Type safety** - TypeScript types generated from schemas
-- **SQL injection prevention** - Parameterized queries via Drizzle ORM
-
-## Authentication Flow Diagram
+### Enterprise-Grade Features
 
-```
-User Login Request
-       ↓
-LoginForm Component
-       ↓
-AuthContext.signIn()
-       ↓
-Supabase Auth.signInWithPassword()
-       ↓
-Session Created + Cookies Set
-       ↓
-Middleware Validates Session
-       ↓
-Profile Fetched Automatically
-       ↓
-User Redirected to Dashboard
-```
+- **Multi-tenancy:** Plant-based tenant isolation with RLS
+- **Comprehensive Testing:** Unit, integration, and E2E test coverage
+- **Documentation System:** Extensive documentation with maintenance automation
+- **Type Safety:** Full TypeScript coverage with Zod validation
+- **Performance:** Optimized with caching, CDN, and database indexing
 
-## Authorization Decision Tree
+### Development Maturity
 
-```
-Is User Authenticated?
-├─ No → Redirect to /login
-└─ Yes → Check Required Role
-    ├─ No Role Required → Allow Access
-    └─ Role Required → Check User's Roles
-        ├─ Has Required Role → Allow Access
-        └─ Missing Role → Redirect to /unauthorized
-```
+- **Standardized Patterns:** Consistent API routes, component structure, and error handling
+- **Automation Scripts:** Database seeding, validation, documentation maintenance
+- **Code Quality:** ESLint, TypeScript strict mode, comprehensive testing
+- **Monitoring:** Analytics integration and error tracking capabilities
 
-## Key Security Considerations
+## Summary
 
-1. **Defense in Depth** - Multiple layers of security (RLS, application logic, middleware)
-2. **Principle of Least Privilege** - Users only get minimum required permissions
-3. **Tenant Isolation** - Plant-based data segregation prevents cross-tenant access
-4. **Session Security** - Secure cookie handling and automatic refresh
-5. **Input Validation** - Comprehensive validation at all entry points
-6. **Error Handling** - Secure error messages without information leakage
+This is a mature, enterprise-grade Learning Management System specifically designed for industrial chemical manufacturing safety training. The codebase demonstrates sophisticated architecture with multi-tenant support, comprehensive role-based access control, and extensive compliance tracking capabilities. The system is built with modern technologies and follows best practices for scalability, security, and maintainability.
 
-This authentication and authorization system provides enterprise-grade security suitable for a multi-tenant industrial training platform with strict compliance requirements.
+The domain expertise is clearly focused on chemical manufacturing safety, with detailed role definitions, compliance requirements, and training modules that reflect deep understanding of industrial safety regulations and operational requirements.
 
----
+## Authentication and Authorization System Analysis
 
-# Multi-Tenancy Architecture Analysis
+### Core Authentication Modules
 
-**Date:** October 1, 2025  
-**Purpose:** Comprehensive analysis of multi-tenancy implementation and tenant isolation
+#### Authentication Service (`src/lib/auth/core/auth-service.ts`)
 
-## Multi-Tenancy Overview
+- **Centralized Auth Logic:** Core authentication service handling token validation, user role determination, and permission management
+- **Token Management:** JWT token authentication with Supabase integration
+- **Role Resolution:** Automatic role determination from admin_roles table with priority hierarchy (hr_admin > dev_admin > plant_manager > user)
+- **Permission System:** Granular permission checking with plant-based access control
+- **User Context:** Comprehensive user context retrieval including accessible plants and tenant information
 
-The SpecChem Safety Training Platform implements **plant-based multi-tenancy** where each plant location serves as a tenant boundary. This design ensures complete data isolation between different plant locations while allowing appropriate cross-tenant access for administrative roles.
+#### Authentication Context (`src/contexts/AuthContext.tsx`)
 
-## Tenant Scoping Columns
+- **Client-Side State Management:** React context provider for authentication state across the application
+- **Session Management:** Automatic session handling with Supabase auth state changes
+- **Profile Integration:** User profile fetching and management with plant association
+- **Error Handling:** Comprehensive error handling for authentication failures
 
-### Primary Tenant Identifier: `plantId`
-**Column:** `plant_id` (UUID)  
-**Purpose:** Primary tenant isolation column used across all tenant-scoped tables
+### Login/Signup Flow Implementation
 
-### Tables with Tenant Scoping:
+#### Signup Process
 
-#### 1. **Core Tenant-Scoped Tables**
-- **`profiles`** - `plant_id` (NOT NULL) - Users belong to specific plants
-- **`enrollments`** - `plant_id` (NOT NULL) - Course enrollments scoped to plants
-- **`progress`** - `plant_id` (NOT NULL) - Learning progress scoped to plants
-- **`question_events`** - `plant_id` (NOT NULL) - Analytics events scoped to plants
-- **`activity_events`** - `plant_id` (NOT NULL) - Activity tracking scoped to plants
+1. **User Registration:** `signUp()` function in AuthContext handles email/password registration
+2. **Metadata Storage:** User metadata (first_name, last_name, job_title) stored in Supabase auth
+3. **Automatic Profile Creation:** Database trigger (`supabase/user-triggers.sql`) automatically creates profile on user signup
+4. **Default Plant Assignment:** New users assigned to "Columbus, OH - Corporate" plant by default
+5. **Auto-Enrollment:** Automatic enrollment in default courses (Function-Specific HazMat Training)
+6. **Progress Initialization:** Initial progress records created for enrolled courses
 
-#### 2. **Admin Role Scoping**
-- **`admin_roles`** - `plant_id` (NULLABLE) - Admin roles can be plant-specific or organization-wide
-  - `NULL` = Organization-wide admin (HR Admin, Dev Admin)
-  - `UUID` = Plant-specific admin (Plant Manager)
+#### Login Process
 
-#### 3. **Non-Tenant Tables**
-- **`plants`** - Master tenant table (no tenant scoping needed)
-- **`courses`** - Global course catalog (no tenant scoping needed)
+1. **Credential Validation:** `signIn()` function validates email/password with Supabase
+2. **Session Establishment:** JWT token issued and stored in client
+3. **Profile Fetching:** User profile automatically fetched after successful authentication
+4. **State Update:** AuthContext state updated with user and profile information
+5. **Route Protection:** Middleware automatically protects authenticated routes
 
-### Tenant Scoping Pattern:
-```sql
--- Every tenant-scoped table includes:
-plant_id uuid NOT NULL REFERENCES plants(id)
+#### Authentication Callback (`src/app/api/auth/callback/route.ts`)
 
--- With corresponding indexes for performance:
-CREATE INDEX idx_[table]_plant_id ON [table](plant_id);
-CREATE INDEX idx_[table]_user_plant ON [table](user_id, plant_id);
-```
+- **OAuth Flow:** Handles Supabase auth callback for OAuth providers
+- **Session Exchange:** Exchanges authorization code for session
+- **Redirect Handling:** Proper redirect handling for development and production environments
+- **Error Management:** Graceful error handling with redirect to error page
 
-## Row-Level Security (RLS) Implementation
-
-### RLS Helper Functions
-```sql
--- Get current user's plant ID
-CREATE FUNCTION get_user_plant_id() RETURNS uuid;
-
--- Admin role checking functions
-CREATE FUNCTION is_admin_user() RETURNS boolean;
-CREATE FUNCTION is_hr_admin() RETURNS boolean;
-CREATE FUNCTION is_plant_manager(target_plant_id uuid) RETURNS boolean;
-CREATE FUNCTION is_dev_admin() RETURNS boolean;
-```
+### Role Definition and Enforcement
 
-### RLS Policy Patterns
+#### Role Hierarchy (`src/lib/auth/types/auth-types.ts`)
 
-#### 1. **User Data Access Pattern**
-```sql
--- Users can view their own data
-USING (user_id = auth.uid())
+- **UserRole Enum:** `'hr_admin' | 'dev_admin' | 'plant_manager' | 'user'`
+- **Permission System:** Granular permissions including read, write, delete, manage_users, manage_courses
+- **Role Priority:** Hierarchical role resolution with hr_admin having highest priority
 
--- Users can view data in their plant (with admin check)
-USING (plant_id = get_user_plant_id() AND is_admin_user())
+#### Database Role Management (`drizzle/schema.ts`)
 
--- Plant managers can view data in their managed plants
-USING (is_plant_manager(plant_id) OR is_hr_admin() OR is_dev_admin())
-```
+- **Admin Roles Table:** `admin_roles` table with user_id, role, plant_id relationships
+- **Role Enums:** `admin_role` enum with hr_admin, dev_admin, plant_manager values
+- **Unique Constraints:** Prevents duplicate role assignments per user/plant combination
 
-#### 2. **Data Creation Pattern**
-```sql
--- Users can only create data in their own plant
-WITH CHECK (
-  user_id = auth.uid() AND 
-  plant_id = get_user_plant_id()
-)
-
--- Admins can create data across plants
-WITH CHECK (
-  is_admin_user() OR
-  (user_id = auth.uid() AND plant_id = get_user_plant_id())
-)
-```
+#### Role Enforcement
 
-#### 3. **Cross-Tenant Access Rules**
-- **HR Admins & Dev Admins:** Full cross-tenant access
-- **Plant Managers:** Access to their assigned plants only
-- **Regular Users:** Access to their own plant only
-- **System Operations:** Admin-level access for automated processes
-
-### RLS Policy Examples
-
-#### Profiles Table Policies:
-```sql
--- Users can view their own profile
-CREATE POLICY "Users can view their own profile"
-  ON profiles FOR SELECT
-  USING (id = auth.uid());
-
--- Users can view profiles in their plant
-CREATE POLICY "Users can view profiles in their plant"
-  ON profiles FOR SELECT
-  USING (plant_id = get_user_plant_id());
-
--- Plant managers can view profiles in their managed plants
-CREATE POLICY "Plant managers can view profiles in their plants"
-  ON profiles FOR SELECT
-  USING (is_plant_manager(plant_id) OR is_hr_admin() OR is_dev_admin());
-```
+- **API Level:** `authenticateAdmin()` function enforces role-based access in API routes
+- **Middleware Level:** `requireRole()` and `requirePermission()` functions in AuthMiddleware
+- **Database Level:** RLS policies enforce role-based data access
+- **UI Level:** Component-level role checking for conditional rendering
 
-#### Enrollments Table Policies:
-```sql
--- Users can view their own enrollments
-CREATE POLICY "Users can view their own enrollments"
-  ON enrollments FOR SELECT
-  USING (user_id = auth.uid());
-
--- Admins can create enrollments with tenant validation
-CREATE POLICY "Admins can create enrollments"
-  ON enrollments FOR INSERT
-  WITH CHECK (
-    (is_plant_manager(plant_id) OR is_hr_admin() OR is_dev_admin()) AND
-    plant_id = get_user_plant_id() OR is_hr_admin() OR is_dev_admin()
-  );
-```
+### Row-Level Security (RLS) Implementation
 
-## Application-Level Tenant Filtering
+#### RLS Policies (`supabase/rls-policies.sql`)
 
-### RLS Utilities (`src/lib/rls.ts`)
+- **Comprehensive Coverage:** RLS enabled on all tables (plants, profiles, admin_roles, courses, enrollments, progress, events)
+- **Helper Functions:** Custom SQL functions for role checking:
+  - `get_user_plant_id()` - Gets current user's plant ID
+  - `is_admin_user()` - Checks if user has any admin role
+  - `is_hr_admin()` - Checks for HR admin role
+  - `is_plant_manager()` - Checks for plant manager role with plant-specific access
+  - `is_dev_admin()` - Checks for dev admin role
 
-#### Core Functions:
-```typescript
-// Get user context with plant and roles
-export async function getCurrentUserContext(): Promise<UserContext | null>
+#### Tenant Isolation
 
-// Check admin permissions with plant scope
-export async function hasAdminRole(
-  role?: 'hr_admin' | 'dev_admin' | 'plant_manager',
-  plantId?: string
-): Promise<boolean>
+- **Plant-Based Security:** All data access filtered by user's plant_id
+- **Multi-Tenant Architecture:** Complete data isolation between plants
+- **Cross-Tenant Prevention:** Policies prevent users from accessing other plant's data
+- **Admin Override:** HR and Dev admins can access all plants for management purposes
 
-// Enforce plant access
-export async function requirePlantAccess(plantId: string): Promise<boolean>
+#### Policy Examples
 
-// Get accessible plants for current user
-export async function getAccessiblePlants(): Promise<string[]>
+- **Profiles:** Users can view their own profile and profiles in their plant
+- **Enrollments:** Users can view their own enrollments, plant managers can view plant enrollments
+- **Courses:** Published courses viewable by all, course management restricted to admins
+- **Progress:** Users can view/update their own progress, plant-based access for managers
 
-// Apply tenant filtering to Supabase queries
-export async function applyTenantFilter(
-  query: any,
-  plantIdColumn: string = 'plant_id'
-): Promise<any>
-```
+### Custom Middleware and Helper Functions
 
-#### Tenant Filtering Implementation:
-```typescript
-// Single plant access
-if (accessiblePlants.length === 1) {
-  return query.eq(plantIdColumn, accessiblePlants[0]);
-}
-
-// Multiple plants access
-if (accessiblePlants.length > 1) {
-  return query.in(plantIdColumn, accessiblePlants);
-}
-
-// No access - return empty results
-return query.eq(plantIdColumn, '00000000-0000-0000-0000-000000000000');
-```
+#### Main Middleware (`middleware.ts`)
 
-### Database Operations (`src/lib/db/operations.ts`)
-
-#### Tenant-Aware Query Patterns:
-```typescript
-// Plant-scoped profile queries
-export async function getProfilesByPlant(
-  plantId: string, 
-  pagination: PaginationParams
-) {
-  return await db.query.profiles.findMany({
-    where: eq(profiles.plantId, plantId), // Explicit tenant filtering
-    // ... rest of query
-  });
-}
-
-// Plant-scoped analytics
-export async function getPlantStats(plantId: string) {
-  return await db
-    .select({ /* stats */ })
-    .from(enrollments)
-    .where(eq(enrollments.plantId, plantId)); // Tenant filtering
-}
-```
+- **Orchestration:** Coordinates authentication, authorization, and debugging middleware
+- **Route Matching:** Comprehensive route matching configuration for protected paths
+- **Response Handling:** Proper response handling with Supabase session management
 
-## Queries/Components Missing Tenant Filters
+#### Authentication Middleware (`src/lib/middleware/auth.ts`)
 
-### 1. **API Routes with Inconsistent Tenant Filtering**
+- **Session Management:** Handles Supabase client creation and session validation
+- **Cookie Management:** Proper cookie handling for session persistence
+- **User Extraction:** Extracts user information from Supabase session
 
-#### Admin API Routes (`src/app/api/admin/`)
-**Issue:** Some admin routes rely solely on RLS without explicit tenant validation
+#### Authorization Middleware (`src/lib/middleware/authorization.ts`)
 
-**Examples:**
-- `src/app/api/admin/enrollments/route.ts` - Uses Supabase client without explicit tenant filtering
-- `src/app/api/admin/users/route.ts` - Relies on RLS policies only
+- **Route Protection:** Protects routes based on authentication status
+- **Public Path Handling:** Allows access to public paths (login, signup, static assets)
+- **Redirect Logic:** Redirects unauthenticated users to login with return URL
 
-**Recommendation:** Add explicit tenant validation using `requirePlantAccess()` or `applyTenantFilter()`
+#### API Authentication (`src/lib/auth/api-auth.ts`)
 
-#### Course Progress API (`src/app/api/courses/[course]/progress/route.ts`)
-**Issue:** Uses `getCurrentUserContext()` but doesn't validate plant access for cross-plant operations
+- **Standardized Patterns:** Consistent authentication patterns for API routes
+- **Wrapper Functions:** `withUserAuth()`, `withAdminAuth()`, `withContextAuth()` for route protection
+- **Error Handling:** Standardized error responses for authentication failures
+- **Response Formatting:** Consistent API response format across all routes
 
-**Current Implementation:**
-```typescript
-const userContext = await getCurrentUserContext();
-// Missing: plant access validation for admin operations
-```
+#### Advanced Middleware (`src/lib/auth/middleware/`)
 
-**Recommendation:** Add plant access validation for admin-level operations
+- **AuthMiddleware Class:** Base class for authentication middleware with token extraction
+- **UserMiddleware:** Extended middleware for user-specific authentication with tenant context
+- **Permission Checking:** Granular permission validation with plant access control
+- **Context Injection:** User context injection into request headers for downstream use
 
-### 2. **Database Operations Missing Tenant Context**
+### Security Features
 
-#### Progress Operations (`src/lib/progress.ts`)
-**Issue:** Some operations don't explicitly validate tenant context
+#### Multi-Layer Security
 
-**Examples:**
-```typescript
-// Missing tenant validation in some operations
-export async function getAllUserProgress(): Promise<CourseProgress[]> {
-  const userContext = await getCurrentUserContext();
-  // Should validate userContext.plantId for all queries
-}
-```
+1. **API Level:** Route protection with authentication middleware
+2. **Database Level:** RLS policies enforce data access control
+3. **UI Level:** Component-level access control and conditional rendering
+4. **Session Level:** Secure session management with JWT tokens
 
-**Recommendation:** Add explicit tenant validation to all database operations
+#### Token Management
 
-### 3. **Client-Side Components**
+- **JWT Tokens:** Short-lived access tokens (1 hour default) with automatic refresh
+- **Refresh Tokens:** Secure refresh token handling for session persistence
+- **Token Validation:** Server-side token validation with Supabase integration
+- **Session Storage:** Secure cookie-based session storage
 
-#### Admin Components (`src/components/admin/`)
-**Issue:** Components assume RLS will handle tenant filtering without client-side validation
+#### Error Handling
 
-**Examples:**
-- `UserManagementContent.tsx` - Hardcoded plant options instead of dynamic loading
-- `EnrollmentManagementContent.tsx` - No client-side tenant validation
+- **Authentication Errors:** Custom error classes for different authentication failures
+- **Authorization Errors:** Specific error handling for insufficient permissions
+- **Graceful Degradation:** Proper error responses without exposing sensitive information
+- **Logging:** Comprehensive error logging for debugging and monitoring
 
-**Recommendation:** 
-- Load accessible plants dynamically
-- Add client-side tenant validation
-- Implement proper error handling for cross-tenant access attempts
+### Integration Points
 
-### 4. **Missing Tenant Validation Patterns**
+#### Supabase Integration
 
-#### Areas Needing Improvement:
-1. **API Route Protection:** Add `requirePlantAccess()` calls
-2. **Database Operations:** Explicit tenant filtering in all queries
-3. **Client Components:** Dynamic plant loading and validation
-4. **Error Handling:** Proper tenant access error messages
-5. **Testing:** Tenant isolation test coverage
+- **Auth Service:** Direct integration with Supabase Auth service
+- **Database Integration:** Seamless integration with PostgreSQL through Supabase
+- **Real-time Updates:** Auth state changes automatically propagated through Supabase
+- **OAuth Support:** Built-in support for OAuth providers through Supabase
 
-## Tenant Isolation Security Model
+#### Next.js Integration
 
-### Access Control Matrix:
+- **App Router:** Full integration with Next.js 15 App Router
+- **Server Components:** Server-side authentication with Supabase server client
+- **Client Components:** Client-side authentication with Supabase client
+- **Middleware:** Next.js middleware integration for route protection
 
-| Role | Own Plant | Other Plants | Cross-Tenant Admin |
-|------|-----------|--------------|-------------------|
-| **Employee** | ✅ Full Access | ❌ No Access | ❌ No Access |
-| **Plant Manager** | ✅ Full Access | ✅ Assigned Plants Only | ❌ No Access |
-| **HR Admin** | ✅ Full Access | ✅ All Plants | ✅ Full Access |
-| **Dev Admin** | ✅ Full Access | ✅ All Plants | ✅ Full Access |
+This authentication and authorization system provides enterprise-grade security with comprehensive multi-tenant support, role-based access control, and robust security policies at every layer of the application.
 
-### Tenant Isolation Guarantees:
+## Multi-Tenancy Implementation Analysis
 
-1. **Database Level:** RLS policies prevent cross-tenant data access
-2. **Application Level:** Tenant filtering utilities enforce additional validation
-3. **API Level:** Route-level tenant access checks
-4. **Client Level:** Dynamic plant loading based on user permissions
+### Tenant Scoping Columns
 
-### Security Considerations:
+#### Primary Tenant Identifier: `plant_id`
 
-1. **Defense in Depth:** Multiple layers of tenant isolation
-2. **Principle of Least Privilege:** Users only access their plant's data
-3. **Audit Trail:** All tenant access attempts logged
-4. **Performance:** Optimized indexes for tenant-scoped queries
-5. **Scalability:** Efficient tenant filtering for large datasets
+- **Core Tenant Column:** `plant_id` (UUID) is the primary tenant scoping column across all tables
+- **Database Schema:** Every tenant-aware table includes `plant_id` as a foreign key to the `plants` table
+- **Consistent Naming:** Uses `plant_id` in database schema and `plantId` in TypeScript interfaces
 
-## Multi-Tenancy Best Practices Implemented
+#### Tables with Tenant Scoping
 
-### ✅ **Correctly Implemented:**
-- Plant-based tenant scoping with `plant_id` column
-- Comprehensive RLS policies with helper functions
-- Application-level tenant filtering utilities
-- Proper foreign key relationships
-- Optimized database indexes for tenant queries
-- Role-based cross-tenant access control
+- **`profiles`** - Users belong to specific plants via `plant_id`
+- **`enrollments`** - Course enrollments scoped by `plant_id`
+- **`progress`** - Learning progress tracked per plant
+- **`admin_roles`** - Admin roles can be plant-specific (optional `plant_id`)
+- **`question_events`** - User interaction events scoped by `plant_id`
+- **`activity_events`** - Activity tracking scoped by `plant_id`
 
-### ⚠️ **Areas for Improvement:**
-- Consistent tenant validation across all API routes
-- Client-side tenant validation and dynamic plant loading
-- Comprehensive tenant isolation testing
-- Explicit tenant filtering in all database operations
-- Better error handling for tenant access violations
+#### Tenant Hierarchy
 
-### 🔧 **Recommended Enhancements:**
-1. Add `requirePlantAccess()` to all admin API routes
-2. Implement dynamic plant loading in admin components
-3. Add tenant validation to all database operations
-4. Create comprehensive tenant isolation test suite
-5. Add tenant access audit logging
-6. Implement tenant-specific error messages
+- **Plants Table:** Root tenant entities with `is_active` flag for tenant lifecycle management
+- **Default Plant:** "Columbus, OH - Corporate" serves as default plant for new users
+- **Plant Assignment:** New users automatically assigned to default plant via database trigger
 
-This multi-tenancy architecture provides robust tenant isolation suitable for enterprise-scale industrial training platforms with strict compliance requirements.
+### RLS Policy Implementation and Enforcement
 
----
+#### Comprehensive RLS Coverage
 
-# Drizzle Schema & Database Structure Analysis
+- **All Tables Protected:** RLS enabled on all tenant-aware tables
+- **Helper Functions:** Custom SQL functions for role and tenant checking:
+  - `get_user_plant_id()` - Retrieves current user's plant ID
+  - `is_admin_user()` - Checks for any admin role
+  - `is_hr_admin()` - Checks for HR admin role
+  - `is_plant_manager(target_plant_id)` - Checks for plant manager role with plant-specific access
+  - `is_dev_admin()` - Checks for dev admin role
 
-**Date:** October 1, 2025  
-**Purpose:** Comprehensive analysis of Drizzle ORM schema definitions, migrations, and database structure
+#### Tenant Isolation Policies
 
-## Database Schema Overview
+- **User-Level Access:** Users can only access data within their assigned plant
+- **Admin Override:** HR and Dev admins can access all plants for management purposes
+- **Plant Manager Scope:** Plant managers can access data within their assigned plants
+- **Cross-Tenant Prevention:** Policies explicitly prevent cross-tenant data access
 
-The SpecChem Safety Training Platform uses **Drizzle ORM** with **PostgreSQL** (Supabase) for type-safe database operations. The schema implements a multi-tenant architecture with plant-based tenant isolation and comprehensive learning management functionality.
+#### Policy Examples by Table
 
-### Schema Statistics
-- **Tables:** 8 core tables
-- **Enums:** 4 custom PostgreSQL enums
-- **Foreign Keys:** 15 relationships
-- **Indexes:** 12 performance-optimized indexes
-- **Unique Constraints:** 6 data integrity constraints
-- **Migration:** Single migration file (`0000_productive_black_queen.sql`)
+- **Profiles:** Users view own profile + plant profiles, admins view all
+- **Enrollments:** Users view own enrollments, plant managers view plant enrollments
+- **Progress:** Users view/update own progress, plant-based access for managers
+- **Events:** Users create own events, admins view events within their scope
 
-## Enums/States Defined
+### Application-Level Tenant Filtering
 
-### 1. `admin_role` Enum
-**Purpose:** Administrative role hierarchy for access control
-```sql
-CREATE TYPE "admin_role" AS ENUM('hr_admin', 'dev_admin', 'plant_manager')
-```
-- `hr_admin` - Organization-wide HR administration
-- `dev_admin` - Organization-wide development administration  
-- `plant_manager` - Plant-specific management (can be assigned to specific plants)
-
-### 2. `enrollment_status` Enum
-**Purpose:** Course enrollment progress states
-```sql
-CREATE TYPE "enrollment_status" AS ENUM('enrolled', 'in_progress', 'completed')
-```
-- `enrolled` - User enrolled but hasn't started
-- `in_progress` - User has started the course
-- `completed` - User has completed the course
-
-### 3. `event_type` Enum
-**Purpose:** User activity tracking event types
-```sql
-CREATE TYPE "event_type" AS ENUM('view_section', 'start_course', 'complete_course')
-```
-- `view_section` - User viewed a course section
-- `start_course` - User started a course
-- `complete_course` - User completed a course
-
-### 4. `user_status` Enum
-**Purpose:** User account status management
-```sql
-CREATE TYPE "user_status" AS ENUM('active', 'suspended')
-```
-- `active` - User account is active
-- `suspended` - User account is suspended
-
-## Tables Defined
-
-### 1. `plants` - Tenant Master Table
-**Purpose:** Multi-tenant plant/facility management
-```sql
-CREATE TABLE "plants" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  "name" text NOT NULL,
-  "is_active" boolean DEFAULT true NOT NULL,
-  "created_at" timestamp DEFAULT now() NOT NULL,
-  "updated_at" timestamp DEFAULT now() NOT NULL,
-  CONSTRAINT "plants_name_unique" UNIQUE("name")
-);
-```
-**Key Features:**
-- Primary tenant boundary table
-- Unique plant names for identification
-- Soft delete via `is_active` flag
-- No tenant scoping (defines tenants)
-
-### 2. `profiles` - User Profile Extension
-**Purpose:** Extends Supabase auth.users with business data
-```sql
-CREATE TABLE "profiles" (
-  "id" uuid PRIMARY KEY NOT NULL,  -- Links to auth.users.id
-  "plant_id" uuid NOT NULL,         -- Tenant scoping
-  "first_name" text NOT NULL,
-  "last_name" text NOT NULL,
-  "email" text NOT NULL,
-  "job_title" text,
-  "status" "user_status" DEFAULT 'active' NOT NULL,
-  "created_at" timestamp DEFAULT now() NOT NULL,
-  "updated_at" timestamp DEFAULT now() NOT NULL
-);
-```
-**Key Features:**
-- Tenant-scoped (`plant_id` NOT NULL)
-- Links to Supabase auth.users
-- Job title for role-based training
-- Status management for account control
-
-### 3. `admin_roles` - Role-Based Access Control
-**Purpose:** Hierarchical admin permissions with plant-specific scoping
-```sql
-CREATE TABLE "admin_roles" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  "user_id" uuid NOT NULL,
-  "role" "admin_role" NOT NULL,
-  "plant_id" uuid,  -- NULL = organization-wide, UUID = plant-specific
-  "created_at" timestamp DEFAULT now() NOT NULL,
-  "updated_at" timestamp DEFAULT now() NOT NULL,
-  CONSTRAINT "admin_roles_user_role_plant_unique" UNIQUE("user_id","role","plant_id")
-);
-```
-**Key Features:**
-- Many-to-many relationship between users and roles
-- Plant-specific roles (plant_id nullable)
-- Unique constraint prevents duplicate role assignments
-- Cascade delete on user removal
-
-### 4. `courses` - Course Catalog
-**Purpose:** Global course definitions and metadata
-```sql
-CREATE TABLE "courses" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  "slug" text NOT NULL,
-  "title" text NOT NULL,
-  "version" text DEFAULT '1.0' NOT NULL,
-  "is_published" boolean DEFAULT false NOT NULL,
-  "created_at" timestamp DEFAULT now() NOT NULL,
-  "updated_at" timestamp DEFAULT now() NOT NULL,
-  CONSTRAINT "courses_slug_unique" UNIQUE("slug")
-);
-```
-**Key Features:**
-- Global course catalog (no tenant scoping)
-- Version control for course updates
-- Publication status for content management
-- Unique slug for URL-friendly identifiers
-
-### 5. `enrollments` - Course Enrollment Management
-**Purpose:** User course enrollment with tenant isolation
-```sql
-CREATE TABLE "enrollments" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  "user_id" uuid NOT NULL,
-  "course_id" uuid NOT NULL,
-  "plant_id" uuid NOT NULL,  -- Tenant scoping
-  "status" "enrollment_status" DEFAULT 'enrolled' NOT NULL,
-  "enrolled_at" timestamp DEFAULT now() NOT NULL,
-  "completed_at" timestamp,
-  "created_at" timestamp DEFAULT now() NOT NULL,
-  "updated_at" timestamp DEFAULT now() NOT NULL,
-  CONSTRAINT "enrollments_user_course_unique" UNIQUE("user_id","course_id")
-);
-```
-**Key Features:**
-- Tenant-scoped enrollments
-- One enrollment per user per course
-- Status tracking through enrollment lifecycle
-- Completion timestamp for analytics
-
-### 6. `progress` - Learning Progress Tracking
-**Purpose:** Detailed course progress with section-level tracking
-```sql
-CREATE TABLE "progress" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  "user_id" uuid NOT NULL,
-  "course_id" uuid NOT NULL,
-  "plant_id" uuid NOT NULL,  -- Tenant scoping
-  "progress_percent" integer DEFAULT 0 NOT NULL,
-  "current_section" text,
-  "last_active_at" timestamp DEFAULT now() NOT NULL,
-  "created_at" timestamp DEFAULT now() NOT NULL,
-  "updated_at" timestamp DEFAULT now() NOT NULL,
-  CONSTRAINT "progress_user_course_unique" UNIQUE("user_id","course_id")
-);
-```
-**Key Features:**
-- Tenant-scoped progress tracking
-- Percentage-based progress calculation
-- Current section tracking for resume functionality
-- Last activity timestamp for engagement analytics
-
-### 7. `activity_events` - User Activity Analytics
-**Purpose:** Comprehensive activity tracking for analytics and reporting
-```sql
-CREATE TABLE "activity_events" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  "user_id" uuid NOT NULL,
-  "course_id" uuid NOT NULL,
-  "plant_id" uuid NOT NULL,  -- Tenant scoping
-  "event_type" "event_type" NOT NULL,
-  "meta" jsonb,  -- Flexible metadata storage
-  "occurred_at" timestamp DEFAULT now() NOT NULL,
-  "created_at" timestamp DEFAULT now() NOT NULL
-);
-```
-**Key Features:**
-- Tenant-scoped event tracking
-- JSONB metadata for flexible event data
-- Event type categorization
-- Timestamp tracking for analytics
-
-### 8. `question_events` - Assessment Analytics
-**Purpose:** Detailed question response tracking for learning analytics
-```sql
-CREATE TABLE "question_events" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  "user_id" uuid NOT NULL,
-  "course_id" uuid NOT NULL,
-  "plant_id" uuid NOT NULL,  -- Tenant scoping
-  "section_key" text NOT NULL,
-  "question_key" text NOT NULL,
-  "is_correct" boolean NOT NULL,
-  "attempt_index" integer DEFAULT 1 NOT NULL,
-  "response_meta" jsonb,  -- Flexible response data
-  "answered_at" timestamp DEFAULT now() NOT NULL,
-  "created_at" timestamp DEFAULT now() NOT NULL
-);
-```
-**Key Features:**
-- Tenant-scoped question tracking
-- Section and question key identification
-- Correctness tracking with attempt counting
-- JSONB metadata for response details
-
-## Relationships Between Tables
-
-### Primary Relationships (Foreign Keys)
-
-#### 1. **Plants → All Tenant-Scoped Tables**
-```sql
--- Plants is the tenant master table
-plants.id → profiles.plant_id
-plants.id → enrollments.plant_id  
-plants.id → progress.plant_id
-plants.id → activity_events.plant_id
-plants.id → question_events.plant_id
-plants.id → admin_roles.plant_id (nullable)
-```
+#### Tenant-Aware Database Operations (`src/lib/db/tenant-operations.ts`)
 
-#### 2. **Profiles → All User-Related Tables**
-```sql
--- Profiles extends auth.users and links to all user data
-profiles.id → enrollments.user_id
-profiles.id → progress.user_id
-profiles.id → activity_events.user_id
-profiles.id → question_events.user_id
-profiles.id → admin_roles.user_id
-```
+- **`withTenantFilter()` Function:** Applies tenant filtering to Drizzle queries based on user context
+- **Multi-Plant Support:** Handles users with access to multiple plants using `ANY()` SQL operator
+- **Fallback Protection:** Returns empty results for users with no plant access
+- **Consistent Application:** All tenant-aware operations use this helper function
 
-#### 3. **Courses → All Course-Related Tables**
-```sql
--- Courses link to all course-related data
-courses.id → enrollments.course_id
-courses.id → progress.course_id
-courses.id → activity_events.course_id
-courses.id → question_events.course_id
-```
+#### User Context Management (`src/lib/rls.ts`)
 
-### Relationship Patterns
+- **`getAccessiblePlants()` Function:** Determines which plants a user can access based on roles
+- **Role-Based Access:** HR admins access all plants, plant managers access assigned plants, users access own plant
+- **Context Injection:** User context injected into request headers for downstream use
 
-#### **One-to-Many Relationships:**
-- `plants` → `profiles` (one plant has many users)
-- `plants` → `enrollments` (one plant has many enrollments)
-- `plants` → `progress` (one plant has many progress records)
-- `plants` → `activity_events` (one plant has many events)
-- `plants` → `question_events` (one plant has many question events)
-- `plants` → `admin_roles` (one plant has many admin roles)
+#### Middleware Integration
 
-- `profiles` → `enrollments` (one user has many enrollments)
-- `profiles` → `progress` (one user has many progress records)
-- `profiles` → `activity_events` (one user has many events)
-- `profiles` → `question_events` (one user has many question events)
-- `profiles` → `admin_roles` (one user has many admin roles)
+- **`UserMiddleware.requirePlantAccess()`** - Validates user access to specific plant
+- **`AdminMiddleware.requireAdminWithPlantAccess()`** - Admin access with plant validation
+- **Context Headers:** `x-accessible-plants` header contains JSON array of accessible plant IDs
 
-- `courses` → `enrollments` (one course has many enrollments)
-- `courses` → `progress` (one course has many progress records)
-- `courses` → `activity_events` (one course has many events)
-- `courses` → `question_events` (one course has many question events)
+### Potential Missing Tenant Filters
 
-#### **Many-to-One Relationships:**
-- `enrollments` → `profiles` (many enrollments belong to one user)
-- `enrollments` → `courses` (many enrollments belong to one course)
-- `enrollments` → `plants` (many enrollments belong to one plant)
+#### Identified Gaps
 
-- `progress` → `profiles` (many progress records belong to one user)
-- `progress` → `courses` (many progress records belong to one course)
-- `progress` → `plants` (many progress records belong to one plant)
+1. **Test Routes:** `src/app/api/test/drizzle-zod/route.ts` performs direct database queries without tenant filtering
+2. **Analytics Operations:** Some analytics queries may bypass tenant filtering in favor of performance
+3. **Legacy Operations:** `src/lib/db/operations.ts` contains some operations that rely on manual `plantId` filtering rather than automatic tenant context
 
-- `activity_events` → `profiles` (many events belong to one user)
-- `activity_events` → `courses` (many events belong to one course)
-- `activity_events` → `plants` (many events belong to one plant)
+#### Areas Requiring Attention
 
-- `question_events` → `profiles` (many question events belong to one user)
-- `question_events` → `courses` (many question events belong to one course)
-- `question_events` → `plants` (many question events belong to one plant)
+- **Direct Database Queries:** Any direct `db.select()`, `db.query.*` calls should use tenant-aware helpers
+- **API Route Templates:** Standardized route templates should enforce tenant context validation
+- **Analytics Queries:** Complex analytics operations need tenant-aware aggregation
+- **Bulk Operations:** Batch operations should validate tenant access for all affected records
 
-- `admin_roles` → `profiles` (many admin roles belong to one user)
-- `admin_roles` → `plants` (many admin roles belong to one plant, nullable)
+#### Recommended Improvements
 
-## Constraints and Invariants Enforced
+1. **Mandatory Tenant Context:** All database operations should require user context
+2. **Query Interception:** Implement query-level tenant filtering at the ORM level
+3. **Validation Middleware:** Add tenant validation to all API route templates
+4. **Audit Logging:** Track tenant access patterns for security monitoring
 
-### 1. **Unique Constraints**
-```sql
--- Prevent duplicate plant names
-CONSTRAINT "plants_name_unique" UNIQUE("name")
+### Tenant Security Architecture
 
--- Prevent duplicate course slugs
-CONSTRAINT "courses_slug_unique" UNIQUE("slug")
+#### Multi-Layer Protection
 
--- Prevent duplicate user-course enrollments
-CONSTRAINT "enrollments_user_course_unique" UNIQUE("user_id","course_id")
+1. **Database Level:** RLS policies enforce tenant isolation at the SQL level
+2. **Application Level:** Tenant-aware operations validate access before queries
+3. **API Level:** Middleware validates tenant access for all requests
+4. **UI Level:** Components filter data based on user's accessible plants
 
--- Prevent duplicate user-course progress
-CONSTRAINT "progress_user_course_unique" UNIQUE("user_id","course_id")
+#### Security Features
 
--- Prevent duplicate admin role assignments
-CONSTRAINT "admin_roles_user_role_plant_unique" UNIQUE("user_id","role","plant_id")
-```
+- **Automatic Filtering:** Tenant filtering applied automatically based on user context
+- **Role-Based Override:** Admin roles can access multiple tenants for management
+- **Audit Trail:** All tenant access logged through activity events
+- **Validation Layers:** Multiple validation points prevent tenant data leakage
 
-### 2. **Foreign Key Constraints**
-```sql
--- Cascade deletes for user-related data
-ON DELETE CASCADE: enrollments, progress, activity_events, question_events, admin_roles
+#### Tenant Lifecycle Management
 
--- Restrict deletes for plant-related data
-ON DELETE NO ACTION: plant_id references (prevents accidental plant deletion)
+- **Plant Activation:** `is_active` flag controls plant availability
+- **User Assignment:** Automatic plant assignment via database triggers
+- **Role Propagation:** Admin roles can be plant-specific or global
+- **Data Migration:** Tenant data isolation prevents accidental cross-tenant operations
 
--- Restrict deletes for course-related data  
-ON DELETE CASCADE: course references (allows course deletion with cleanup)
-```
+This multi-tenancy implementation provides robust tenant isolation with comprehensive security policies, though some areas require attention to ensure complete tenant filtering coverage across all database operations.
 
-### 3. **Data Integrity Constraints**
-- **NOT NULL Constraints:** All primary keys, tenant IDs, and required business fields
-- **Default Values:** Timestamps default to `now()`, status fields have sensible defaults
-- **Enum Constraints:** All enum fields restricted to predefined values
-- **UUID Primary Keys:** All tables use UUID primary keys for distributed system compatibility
-
-### 4. **Tenant Isolation Constraints**
-- **Plant ID Requirements:** All tenant-scoped tables require `plant_id` NOT NULL
-- **Cross-Tenant Prevention:** Unique constraints prevent cross-tenant data conflicts
-- **Referential Integrity:** Foreign keys ensure tenant consistency across related tables
-
-## Performance Indexes
-
-### 1. **Tenant-Based Indexes**
-```sql
--- Plant-based query optimization
-CREATE INDEX "profiles_plant_id_idx" ON "profiles" ("plant_id");
-CREATE INDEX "enrollments_plant_course_idx" ON "enrollments" ("plant_id","course_id");
-CREATE INDEX "progress_plant_course_idx" ON "progress" ("plant_id","course_id");
-CREATE INDEX "activity_events_plant_course_event_idx" ON "activity_events" ("plant_id","course_id","event_type");
-CREATE INDEX "question_events_plant_course_question_idx" ON "question_events" ("plant_id","course_id","question_key");
-```
+## Drizzle Schema and Database Structure Analysis
 
-### 2. **User-Based Indexes**
-```sql
--- User-based query optimization
-CREATE INDEX "admin_roles_user_id_idx" ON "admin_roles" ("user_id");
-CREATE INDEX "activity_events_user_event_idx" ON "activity_events" ("user_id","event_type");
-CREATE INDEX "question_events_user_question_idx" ON "question_events" ("user_id","question_key");
-```
+### Database Schema Overview
 
-### 3. **Analytics Indexes**
-```sql
--- Time-based analytics optimization
-CREATE INDEX "activity_events_occurred_at_idx" ON "activity_events" ("occurred_at");
-CREATE INDEX "question_events_answered_at_idx" ON "question_events" ("answered_at");
-CREATE INDEX "enrollments_status_idx" ON "enrollments" ("status");
-```
+#### Core Tables Defined
 
-### 4. **Lookup Indexes**
-```sql
--- Email-based user lookup
-CREATE INDEX "profiles_email_idx" ON "profiles" ("email");
-```
+1. **`plants`** - Root tenant entities (manufacturing facilities)
+2. **`profiles`** - User profiles linked to plants
+3. **`courses`** - Training courses with versioning
+4. **`enrollments`** - User-course enrollment relationships
+5. **`progress`** - Learning progress tracking
+6. **`admin_roles`** - Role assignments for users
+7. **`activity_events`** - User activity tracking
+8. **`question_events`** - Question response tracking
 
-## ERD-Level Overview (Plain Text)
+#### Enums and State Management
 
-```
-                    PLANTS (Tenant Master)
-                         │
-                         │ 1:N
-                         ▼
-                    PROFILES (Users)
-                         │
-                         │ 1:N
-                         ▼
-                   ADMIN_ROLES (RBAC)
-                         │
-                         │ N:1 (nullable)
-                         ▼
-                    PLANTS (Admin Scope)
-
-PLANTS (Tenant Master) ──┐
-                         │ 1:N
-                         ▼
-                    ENROLLMENTS (User-Course)
-                         │
-                         │ N:1
-                         ▼
-                    COURSES (Global Catalog)
-
-PLANTS (Tenant Master) ──┐
-                         │ 1:N
-                         ▼
-                    PROGRESS (Learning Progress)
-                         │
-                         │ N:1
-                         ▼
-                    COURSES (Global Catalog)
-
-PLANTS (Tenant Master) ──┐
-                         │ 1:N
-                         ▼
-                ACTIVITY_EVENTS (Analytics)
-                         │
-                         │ N:1
-                         ▼
-                    COURSES (Global Catalog)
-
-PLANTS (Tenant Master) ──┐
-                         │ 1:N
-                         ▼
-               QUESTION_EVENTS (Assessment Analytics)
-                         │
-                         │ N:1
-                         ▼
-                    COURSES (Global Catalog)
-
-PROFILES (Users) ─────────┐
-                         │ 1:N
-                         ▼
-                    ENROLLMENTS (User-Course)
-                         │
-                         │ N:1
-                         ▼
-                    COURSES (Global Catalog)
-
-PROFILES (Users) ─────────┐
-                         │ 1:N
-                         ▼
-                    PROGRESS (Learning Progress)
-                         │
-                         │ N:1
-                         ▼
-                    COURSES (Global Catalog)
-
-PROFILES (Users) ─────────┐
-                         │ 1:N
-                         ▼
-                ACTIVITY_EVENTS (Analytics)
-                         │
-                         │ N:1
-                         ▼
-                    COURSES (Global Catalog)
-
-PROFILES (Users) ─────────┐
-                         │ 1:N
-                         ▼
-               QUESTION_EVENTS (Assessment Analytics)
-                         │
-                         │ N:1
-                         ▼
-                    COURSES (Global Catalog)
-
-PROFILES (Users) ─────────┐
-                         │ 1:N
-                         ▼
-                   ADMIN_ROLES (RBAC)
-```
+- **`admin_role`**: `['hr_admin', 'dev_admin', 'plant_manager']`
+- **`enrollment_status`**: `['enrolled', 'in_progress', 'completed']`
+- **`event_type`**: `['view_section', 'start_course', 'complete_course']`
+- **`user_status`**: `['active', 'suspended']`
 
-## Key Architectural Patterns
-
-### 1. **Multi-Tenant Architecture**
-- **Plant-based tenant isolation** with `plant_id` as primary tenant boundary
-- **Tenant-scoped tables:** profiles, enrollments, progress, activity_events, question_events
-- **Global tables:** plants (tenant master), courses (global catalog)
-- **Cross-tenant access:** Admin roles with plant-specific or organization-wide scope
-
-### 2. **Role-Based Access Control (RBAC)**
-- **Hierarchical roles:** HR Admin > Dev Admin > Plant Manager > Employee
-- **Plant-specific permissions:** Plant managers scoped to specific plants
-- **Organization-wide permissions:** HR/Dev admins have cross-tenant access
-- **Flexible role assignment:** Many-to-many relationship between users and roles
-
-### 3. **Learning Management System (LMS)**
-- **Course catalog:** Global course definitions with version control
-- **Enrollment management:** User-course enrollment with status tracking
-- **Progress tracking:** Detailed progress with section-level granularity
-- **Assessment analytics:** Question-level response tracking with attempt counting
-
-### 4. **Analytics and Reporting**
-- **Activity tracking:** Comprehensive user activity event logging
-- **Question analytics:** Detailed assessment response analysis
-- **Tenant isolation:** All analytics scoped to plant boundaries
-- **Flexible metadata:** JSONB fields for extensible event data
-
-### 5. **Data Integrity and Performance**
-- **Referential integrity:** Comprehensive foreign key constraints
-- **Unique constraints:** Prevent duplicate enrollments and progress records
-- **Performance optimization:** Strategic indexes for tenant and user queries
-- **Cascade deletes:** Automatic cleanup of user-related data
-
-This database schema provides a robust foundation for a multi-tenant learning management system with comprehensive analytics, role-based access control, and enterprise-grade data integrity.
-
----
-
-# Zod Schema & Validation Analysis
-
-**Date:** October 1, 2025  
-**Purpose:** Comprehensive analysis of Zod validation schemas, their coverage, and application patterns
-
-## Zod Schema Overview
-
-The SpecChem Safety Training Platform implements comprehensive **Zod validation** across the entire application stack. The validation system provides runtime type safety, input validation, and API contract enforcement with **100% database schema coverage**.
-
-### Schema Statistics
-- **Total Schema Files:** 3 main validation files
-- **Entity Coverage:** 8 core database entities + 4 enums
-- **Schema Variants:** 50+ individual schemas (base, create, update, filter, response)
-- **Type Exports:** 50+ TypeScript types generated from schemas
-- **Validation Patterns:** Input/Output distinction, CRUD operations, API responses
-
-## Schema File Structure
-
-### 1. **Primary Validation File** (`src/lib/validations.ts`)
-**Purpose:** Main validation schemas for application logic and API operations
-- **Size:** 459 lines
-- **Coverage:** All database entities with CRUD variants
-- **Features:** Form validation, API responses, analytics schemas
-
-### 2. **Database Contracts** (`src/lib/db-contracts.ts`)
-**Purpose:** Database-specific validation contracts with exact schema matching
-- **Size:** 410 lines  
-- **Coverage:** Complete database schema with composite relations
-- **Features:** Database operations, type-safe queries, validation helpers
-
-### 3. **Index Validation** (`src/lib/validations/index.ts`)
-**Purpose:** Simplified validation schemas for specific use cases
-- **Size:** 247 lines
-- **Coverage:** Core entities with focused validation patterns
-- **Features:** Query parameters, filters, composite schemas
-
-## Entities Covered by Zod Schemas
-
-### 1. **Core Database Entities**
-
-#### **Plants** (Tenant Master)
-```typescript
-// Base schema
-plantSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(1, 'Plant name is required'),
-  isActive: z.boolean().default(true),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-})
-
-// CRUD variants
-createPlantSchema, updatePlantSchema, plantFilterSchema
-```
+### Table Structure and Relationships
 
-#### **Profiles** (User Management)
-```typescript
-// Base schema
-profileSchema = z.object({
-  id: z.string().uuid(),
-  plantId: z.string().uuid(),
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  email: z.string().email('Valid email is required'),
-  jobTitle: z.string().nullable(),
-  status: userStatusSchema.default('active'),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-})
-
-// CRUD variants
-createProfileSchema, updateProfileSchema, userFiltersSchema
-```
+#### Plants Table (Root Tenant Entity)
 
-#### **Courses** (Learning Content)
-```typescript
-// Base schema
-courseSchema = z.object({
-  id: z.string().uuid(),
-  slug: z.string().min(1, 'Course slug is required'),
-  title: z.string().min(1, 'Course title is required'),
-  version: z.string().default('1.0'),
-  isPublished: z.boolean().default(false),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-})
-
-// CRUD variants
-createCourseSchema, updateCourseSchema, courseFilterSchema
-```
+- **Primary Key**: `id` (UUID, auto-generated)
+- **Fields**: `name` (unique), `is_active` (boolean, default true)
+- **Timestamps**: `created_at`, `updated_at`
+- **Constraints**: Unique constraint on `name`
 
-#### **Enrollments** (Course Enrollment)
-```typescript
-// Base schema
-enrollmentSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
-  status: enrollmentStatusSchema.default('enrolled'),
-  enrolledAt: z.string().datetime(),
-  completedAt: z.string().datetime().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-})
-
-// CRUD variants
-createEnrollmentSchema, updateEnrollmentSchema, enrollmentFiltersSchema
-```
+#### Profiles Table (User Management)
 
-#### **Progress** (Learning Progress)
-```typescript
-// Base schema
-progressSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
-  progressPercent: z.number().int().min(0).max(100).default(0),
-  currentSection: z.string().nullable(),
-  lastActiveAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-})
-
-// CRUD variants
-createProgressSchema, updateProgressSchema, progressFiltersSchema
-```
+- **Primary Key**: `id` (UUID, references Supabase auth.users)
+- **Tenant Link**: `plant_id` (FK to plants.id)
+- **Fields**: `first_name`, `last_name`, `email`, `job_title`
+- **Status**: `status` (user_status enum, default 'active')
+- **Timestamps**: `created_at`, `updated_at`
+- **Indexes**: Email index, plant_id index
 
-#### **Admin Roles** (RBAC)
-```typescript
-// Base schema
-adminRoleRecordSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  role: adminRoleSchema,
-  plantId: z.string().uuid().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-})
-
-// CRUD variants
-createAdminRoleSchema, updateAdminRoleSchema
-```
+#### Courses Table (Content Management)
 
-#### **Activity Events** (Analytics)
-```typescript
-// Base schema
-activityEventSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
-  eventType: eventTypeSchema,
-  meta: z.record(z.any()).nullable(),
-  occurredAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
-})
-
-// CRUD variants
-createActivityEventSchema
-```
+- **Primary Key**: `id` (UUID, auto-generated)
+- **Fields**: `slug` (unique), `title`, `version` (default '1.0')
+- **Publishing**: `is_published` (boolean, default false)
+- **Timestamps**: `created_at`, `updated_at`
+- **Constraints**: Unique constraint on `slug`
 
-#### **Question Events** (Assessment Analytics)
-```typescript
-// Base schema
-questionEventSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
-  sectionKey: z.string().min(1, 'Section key is required'),
-  questionKey: z.string().min(1, 'Question key is required'),
-  isCorrect: z.boolean(),
-  attemptIndex: z.number().int().min(1).default(1),
-  responseMeta: z.record(z.any()).nullable(),
-  answeredAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
-})
-
-// CRUD variants
-createQuestionEventSchema
-```
+#### Enrollments Table (User-Course Relationships)
 
-### 2. **Enum Schemas**
+- **Primary Key**: `id` (UUID, auto-generated)
+- **Foreign Keys**: `user_id` (profiles.id), `course_id` (courses.id), `plant_id` (plants.id)
+- **Status**: `status` (enrollment_status enum, default 'enrolled')
+- **Timestamps**: `enrolled_at`, `completed_at`, `created_at`, `updated_at`
+- **Constraints**: Unique constraint on (user_id, course_id)
+- **Indexes**: Plant-course composite, status index
 
-#### **Admin Role Enum**
-```typescript
-adminRoleSchema = z.enum(['hr_admin', 'dev_admin', 'plant_manager'])
-```
+#### Progress Table (Learning Tracking)
 
-#### **Enrollment Status Enum**
-```typescript
-enrollmentStatusSchema = z.enum(['enrolled', 'in_progress', 'completed'])
-```
+- **Primary Key**: `id` (UUID, auto-generated)
+- **Foreign Keys**: `user_id` (profiles.id), `course_id` (courses.id), `plant_id` (plants.id)
+- **Progress**: `progress_percent` (integer, default 0), `current_section` (text)
+- **Activity**: `last_active_at` (timestamp, default now)
+- **Timestamps**: `created_at`, `updated_at`
+- **Constraints**: Unique constraint on (user_id, course_id)
+- **Indexes**: Plant-course composite index
 
-#### **Event Type Enum**
-```typescript
-eventTypeSchema = z.enum(['view_section', 'start_course', 'complete_course'])
-```
+#### Admin Roles Table (Authorization)
 
-#### **User Status Enum**
-```typescript
-userStatusSchema = z.enum(['active', 'suspended'])
-```
+- **Primary Key**: `id` (UUID, auto-generated)
+- **Foreign Keys**: `user_id` (profiles.id), `plant_id` (plants.id, optional)
+- **Role**: `role` (admin_role enum)
+- **Timestamps**: `created_at`, `updated_at`
+- **Constraints**: Unique constraint on (user_id, role, plant_id)
+- **Indexes**: User ID index
 
-## Input/Output Distinctions
-
-### 1. **Create vs Read Schemas**
-
-#### **Create Schemas** (Input Validation)
-- **Purpose:** Validate data before database insertion
-- **Pattern:** Omit auto-generated fields (id, timestamps)
-- **Examples:**
-  ```typescript
-  createProfileSchema = z.object({
-    plantId: z.string().uuid(),
-    firstName: z.string().min(1, 'First name is required'),
-    lastName: z.string().min(1, 'Last name is required'),
-    email: z.string().email('Valid email is required'),
-    jobTitle: z.string().optional(),
-    status: userStatusSchema.default('active').optional(),
-  })
-  ```
-
-#### **Read Schemas** (Output Validation)
-- **Purpose:** Validate data from database queries
-- **Pattern:** Include all fields with proper types
-- **Examples:**
-  ```typescript
-  profileSchema = z.object({
-    id: z.string().uuid(),
-    plantId: z.string().uuid(),
-    firstName: z.string().min(1, 'First name is required'),
-    lastName: z.string().min(1, 'Last name is required'),
-    email: z.string().email('Valid email is required'),
-    jobTitle: z.string().nullable(),
-    status: userStatusSchema.default('active'),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
-  })
-  ```
-
-#### **Update Schemas** (Partial Input)
-- **Purpose:** Validate partial updates
-- **Pattern:** All fields optional except identifiers
-- **Examples:**
-  ```typescript
-  updateProfileSchema = z.object({
-    plantId: z.string().uuid().optional(),
-    firstName: z.string().min(1, 'First name is required').optional(),
-    lastName: z.string().min(1, 'Last name is required').optional(),
-    email: z.string().email('Valid email is required').optional(),
-    jobTitle: z.string().optional(),
-    status: userStatusSchema.optional(),
-  })
-  ```
-
-### 2. **API Response Schemas**
-
-#### **Standard API Response**
-```typescript
-apiResponseSchema = <T>(dataSchema: z.ZodType<T>) => z.object({
-  success: z.boolean(),
-  data: dataSchema.optional(),
-  error: z.string().optional(),
-})
-```
+#### Activity Events Table (Analytics)
 
-#### **Paginated Response**
-```typescript
-paginatedResponseSchema = <T>(itemSchema: T) => z.object({
-  success: z.boolean(),
-  data: z.object({
-    items: z.array(itemSchema),
-    total: z.number().int().min(0),
-    page: z.number().int().min(1),
-    limit: z.number().int().min(1),
-    totalPages: z.number().int().min(0),
-  }),
-  error: z.string().optional(),
-  message: z.string().optional(),
-})
-```
+- **Primary Key**: `id` (UUID, auto-generated)
+- **Foreign Keys**: `user_id` (profiles.id), `course_id` (courses.id), `plant_id` (plants.id)
+- **Event Data**: `event_type` (event_type enum), `meta` (jsonb)
+- **Timestamps**: `occurred_at`, `created_at`
+- **Indexes**: Occurred_at, plant-course-event composite, user-event composite
 
-### 3. **Query Parameter Schemas**
-
-#### **Pagination**
-```typescript
-paginationSchema = z.object({
-  page: z.coerce.number().min(1).default(1),
-  limit: z.coerce.number().min(1).max(100).default(50),
-})
-```
+#### Question Events Table (Assessment Tracking)
 
-#### **Filter Schemas**
-```typescript
-enrollmentFiltersSchema = z.object({
-  plantId: z.string().uuid().optional(),
-  courseId: z.string().uuid().optional(),
-  userId: z.string().uuid().optional(),
-  status: z.enum(['enrolled', 'in_progress', 'completed']).optional(),
-}).merge(paginationSchema)
-```
+- **Primary Key**: `id` (UUID, auto-generated)
+- **Foreign Keys**: `user_id` (profiles.id), `course_id` (courses.id), `plant_id` (plants.id)
+- **Question Data**: `section_key`, `question_key`, `is_correct` (boolean)
+- **Attempts**: `attempt_index` (integer, default 1), `response_meta` (jsonb)
+- **Timestamps**: `answered_at`, `created_at`
+- **Indexes**: Answered_at, plant-course-question composite, user-question composite
 
-## Zod Validations Applied in API Routes
-
-### 1. **API Route Validation Patterns**
-
-#### **Test Routes** (Validation Testing)
-**File:** `src/app/api/test/drizzle-zod/route.ts`
-```typescript
-// Plant validation testing
-const validatedPlants = plantsData.map(plant => {
-  try {
-    return plantSchema.parse({
-      id: plant.id,
-      name: plant.name,
-      location: 'Test Location',
-      isActive: plant.isActive,
-      createdAt: plant.createdAt.toISOString(),
-      updatedAt: plant.updatedAt.toISOString(),
-    });
-  } catch (zodError) {
-    console.warn('Zod validation failed for plant:', plant, zodError);
-    return null;
-  }
-}).filter(Boolean);
-```
+### Entity Relationship Diagram (ERD) Overview
 
-**File:** `src/app/api/test/comprehensive/route.ts`
-```typescript
-// Comprehensive validation testing
-const validPlant = plantSchema.parse(validPlantData);
-const validPagination = paginationSchema.parse({ page: 1, limit: 20 });
-const validFilters = enrollmentFiltersSchema.parse({
-  plantId: '123e4567-e89b-12d3-a456-426614174000',
-  status: 'enrolled',
-  page: 1,
-  limit: 20
-});
 ```
+PLANTS (Root Tenant)
+├── id (PK, UUID)
+├── name (UNIQUE)
+├── is_active (boolean)
+└── timestamps
 
-### 2. **API Utility Functions**
-
-#### **Response Validation** (`src/lib/api-utils.ts`)
-```typescript
-export function validateApiResponse<T>(
-  response: unknown,
-  schema: z.ZodType<T>
-): ApiResponse<T> {
-  const responseSchema = apiResponseSchema(schema);
-  
-  try {
-    return responseSchema.parse(response);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      throw new ApiError(
-        `Invalid API response: ${error.issues.map((e: any) => e.message).join(', ')}`,
-        500,
-        'VALIDATION_ERROR'
-      );
-    }
-    throw error;
-  }
-}
-```
+PROFILES (Users)
+├── id (PK, UUID, references auth.users)
+├── plant_id (FK → plants.id)
+├── first_name, last_name, email
+├── job_title, status
+└── timestamps
 
-### 3. **Database Operation Validation**
-
-#### **Database Contracts Usage**
-```typescript
-// Database-specific validation with exact schema matching
-export const DbProfileSchema = z.object({
-  id: z.string().uuid(),
-  plantId: z.string().uuid(),
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  email: z.string().email('Valid email is required'),
-  jobTitle: z.string().nullable(),
-  status: DbUserStatusSchema,
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-});
-```
+COURSES (Training Content)
+├── id (PK, UUID)
+├── slug (UNIQUE)
+├── title, version
+├── is_published
+└── timestamps
 
-## Zod Validations Applied in UI Components
-
-### 1. **Form Validation Patterns**
-
-#### **Signup Form** (`src/components/auth/SignupForm.tsx`)
-```typescript
-// Profile data validation with Zod
-try {
-  updateUserProfileSchema.parse({
-    firstName: formData.firstName,
-    lastName: formData.lastName,
-    jobTitle: formData.jobTitle || undefined
-  })
-} catch (err) {
-  console.error('Validation error:', err)
-  return 'Please check your profile information'
-}
-```
+ADMIN_ROLES (Authorization)
+├── id (PK, UUID)
+├── user_id (FK → profiles.id)
+├── role (enum: hr_admin, dev_admin, plant_manager)
+├── plant_id (FK → plants.id, optional)
+└── timestamps
 
-#### **Form Schema Definitions**
-```typescript
-// Frontend form validation schemas
-loginFormSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-profileUpdateFormSchema = z.object({
-  firstName: z.string().min(1, 'First name is required').max(50, 'First name is too long'),
-  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name is too long'),
-  jobTitle: z.string().max(100, 'Job title is too long').optional(),
-});
-
-adminCreateUserFormSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  firstName: z.string().min(1, 'First name is required').max(50, 'First name is too long'),
-  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name is too long'),
-  jobTitle: z.string().max(100, 'Job title is too long').optional(),
-  role: z.enum(['employee', 'plant_manager', 'hr_admin'], {
-    message: 'Please select a valid role'
-  }),
-  plantId: z.string().uuid('Please select a plant'),
-});
-```
+ENROLLMENTS (User-Course Relationships)
+├── id (PK, UUID)
+├── user_id (FK → profiles.id)
+├── course_id (FK → courses.id)
+├── plant_id (FK → plants.id)
+├── status (enum: enrolled, in_progress, completed)
+├── enrolled_at, completed_at
+└── timestamps
 
-### 2. **Training Module Integration**
-
-#### **Training Content Schemas**
-```typescript
-// Integration with existing training system
-trainingModuleSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  duration: z.string(),
-  difficulty: z.enum(['beginner', 'intermediate', 'advanced']),
-  sections: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    content: z.string(),
-    estimatedReadTime: z.string(),
-  })),
-  learningObjectives: z.array(z.string()),
-  resources: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    type: z.string(),
-    url: z.string(),
-    description: z.string(),
-  })),
-});
-
-userModuleProgressSchema = z.object({
-  moduleId: z.string(),
-  completedSections: z.array(z.string()),
-  bookmarks: z.array(z.string()),
-  notes: z.array(z.object({
-    id: z.string(),
-    sectionId: z.string(),
-    content: z.string(),
-    createdAt: z.string().datetime(),
-  })),
-  assessmentAttempts: z.array(z.object({
-    id: z.string(),
-    score: z.number(),
-    completedAt: z.string().datetime(),
-  })),
-  completionPercentage: z.number().min(0).max(100),
-  lastAccessed: z.string().datetime(),
-  timeSpent: z.number(),
-});
-```
+PROGRESS (Learning Tracking)
+├── id (PK, UUID)
+├── user_id (FK → profiles.id)
+├── course_id (FK → courses.id)
+├── plant_id (FK → plants.id)
+├── progress_percent, current_section
+├── last_active_at
+└── timestamps
 
-## Validation Patterns and Best Practices
-
-### 1. **Schema Organization Patterns**
-
-#### **Entity-Based Organization**
-- **Base Schemas:** Complete entity definitions
-- **CRUD Variants:** Create, Read, Update, Delete operations
-- **Filter Schemas:** Query parameter validation
-- **Response Schemas:** API response formatting
-
-#### **Naming Conventions**
-- **Base:** `entitySchema` (e.g., `profileSchema`)
-- **Create:** `createEntitySchema` (e.g., `createProfileSchema`)
-- **Update:** `updateEntitySchema` (e.g., `updateProfileSchema`)
-- **Database:** `DbEntitySchema` (e.g., `DbProfileSchema`)
-- **Filters:** `entityFiltersSchema` (e.g., `enrollmentFiltersSchema`)
-
-### 2. **Type Safety Patterns**
-
-#### **Type Generation**
-```typescript
-// Automatic TypeScript type generation
-export type UserProfile = z.infer<typeof userProfileSchema>;
-export type CreateProfile = z.infer<typeof createProfileSchema>;
-export type UpdateProfile = z.infer<typeof updateProfileSchema>;
-export type EnrollmentFilters = z.infer<typeof enrollmentFiltersSchema>;
-```
+ACTIVITY_EVENTS (User Activity)
+├── id (PK, UUID)
+├── user_id (FK → profiles.id)
+├── course_id (FK → courses.id)
+├── plant_id (FK → plants.id)
+├── event_type (enum: view_section, start_course, complete_course)
+├── meta (jsonb)
+├── occurred_at
+└── created_at
 
-#### **Generic Response Types**
-```typescript
-// Generic API response types
-export type ApiResponse<T> = z.infer<ReturnType<typeof apiResponseSchema<T>>>;
-export type PaginatedResponse<T> = z.infer<ReturnType<typeof paginatedResponseSchema<T>>>;
+QUESTION_EVENTS (Assessment Data)
+├── id (PK, UUID)
+├── user_id (FK → profiles.id)
+├── course_id (FK → courses.id)
+├── plant_id (FK → plants.id)
+├── section_key, question_key
+├── is_correct, attempt_index
+├── response_meta (jsonb)
+├── answered_at
+└── created_at
 ```
 
-### 3. **Validation Helper Functions**
-
-#### **Database Validation Helpers**
-```typescript
-// Utility validation functions
-export const validateDbUUID = (value: string): boolean => {
-  return z.string().uuid().safeParse(value).success;
-};
-
-export const validateDbEmail = (value: string): boolean => {
-  return z.string().email().safeParse(value).success;
-};
-
-export const validateDbProgressPercent = (value: number): boolean => {
-  return z.number().int().min(0).max(100).safeParse(value).success;
-};
-```
+### Key Relationships and Constraints
 
-## Key Features and Benefits
-
-### 1. **Comprehensive Coverage**
-- **100% Database Schema Coverage:** Every table, column, and enum validated
-- **Multi-Layer Validation:** Database, API, and UI validation
-- **Type Safety:** Complete TypeScript integration
-- **Runtime Safety:** Zod catches invalid data at runtime
-
-### 2. **Input/Output Distinction**
-- **Create Schemas:** Validate input before database insertion
-- **Read Schemas:** Validate output from database queries
-- **Update Schemas:** Validate partial updates
-- **Response Schemas:** Standardize API responses
-
-### 3. **API Contract Enforcement**
-- **Request Validation:** All API inputs validated
-- **Response Validation:** All API outputs validated
-- **Error Handling:** Standardized validation error responses
-- **Type Generation:** Automatic TypeScript types
-
-### 4. **Form Integration**
-- **Frontend Validation:** Client-side form validation
-- **Backend Validation:** Server-side input validation
-- **Error Messages:** User-friendly validation messages
-- **Real-time Validation:** Immediate feedback on form errors
-
-### 5. **Multi-Tenant Support**
-- **Tenant Validation:** Plant-based data validation
-- **Role-Based Validation:** Admin role validation
-- **Cross-Tenant Prevention:** Validation prevents data leakage
-- **Tenant-Specific Filters:** Plant-scoped query validation
-
-This comprehensive Zod validation system provides enterprise-grade type safety and runtime validation suitable for a multi-tenant learning management system with strict compliance requirements.
-
----
-
-# Testing Coverage Analysis
-
-**Date:** October 1, 2025  
-**Purpose:** Comprehensive analysis of testing coverage, test types, and areas requiring additional testing
-
-## Testing Overview
-
-The SpecChem Safety Training Platform has **limited formal testing infrastructure** but includes several custom testing utilities and validation scripts. The testing approach focuses primarily on **integration testing** and **validation testing** rather than comprehensive unit or end-to-end testing.
-
-### Testing Infrastructure Status
-- **Testing Frameworks:** No formal testing frameworks (Jest, Vitest, Cypress, Playwright)
-- **Test Files:** Custom Node.js scripts and API endpoints for validation
-- **Coverage:** Focused on database integration and schema validation
-- **Automation:** Manual testing scripts with npm run commands
-
-## Areas Covered by Tests
-
-### 1. **Database Integration Testing** ✅ WELL COVERED
-
-#### **Drizzle ORM Testing**
-**Files:** `scripts/test-drizzle-zod.js`, `scripts/test-integrations.js`
-- **Database Connection:** Tests Supabase PostgreSQL connectivity
-- **Schema Validation:** Validates all 8 database tables and relationships
-- **Query Execution:** Tests basic CRUD operations and complex joins
-- **Type Safety:** Validates TypeScript type inference from Drizzle schemas
-
-**Test Coverage:**
-```javascript
-// Database connection testing
-const plantsResult = await db.select().from(plants).limit(5);
-console.log(`Found ${plantsResult.length} plants in database`);
-
-// Complex query testing
-const profilesWithPlants = await db
-  .select({
-    profileId: profiles.id,
-    email: profiles.email,
-    plantName: plants.name,
-  })
-  .from(profiles)
-  .innerJoin(plants, eq(profiles.plantId, plants.id))
-  .limit(3);
-```
+#### One-to-Many Relationships
 
-#### **Zod Schema Validation Testing**
-**Files:** `scripts/test-drizzle-zod.js`, `src/app/api/test/comprehensive/route.ts`
-- **Schema Parsing:** Tests all 50+ Zod schemas with valid/invalid data
-- **Type Inference:** Validates TypeScript type generation from schemas
-- **API Response Validation:** Tests API response format validation
-- **Form Validation:** Tests frontend form validation schemas
-
-**Test Coverage:**
-```javascript
-// Plant schema validation
-const validPlant = {
-  id: '123e4567-e89b-12d3-a456-426614174000',
-  name: 'Test Plant',
-  isActive: true,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
-const validatedPlant = plantSchema.parse(validPlant);
-
-// Invalid data rejection testing
-try {
-  plantSchema.parse({ id: 'invalid-uuid', name: '' });
-} catch {
-  console.log('✅ Invalid data correctly rejected');
-}
-```
+- **Plants → Profiles**: One plant has many users
+- **Plants → Enrollments**: One plant has many enrollments
+- **Plants → Progress**: One plant has many progress records
+- **Plants → Activity Events**: One plant has many activity events
+- **Plants → Question Events**: One plant has many question events
+- **Plants → Admin Roles**: One plant can have many admin role assignments
 
-### 2. **API Endpoint Testing** ✅ PARTIALLY COVERED
-
-#### **Comprehensive API Test Suite**
-**File:** `src/app/api/test/comprehensive/route.ts`
-- **Database Connection:** Tests Drizzle ORM connectivity
-- **Schema Validation:** Tests Zod schema parsing and validation
-- **Complex Queries:** Tests JOIN operations and complex database queries
-- **API Response Format:** Validates standardized API response structure
-
-**Test Endpoints:**
-- `GET /api/test/comprehensive` - Full integration test suite
-- `GET /api/test/drizzle-zod` - Database and validation testing
-- `GET /api/auth/test` - Authentication system verification
-
-#### **Integration Dashboard Testing**
-**File:** `src/components/IntegrationDashboard.tsx`
-- **Real-time Status:** Live testing of all system components
-- **API Hook Testing:** Tests useProgress, useCourseProgress, useUserProfile hooks
-- **Error Detection:** Identifies authentication and API connectivity issues
-- **Visual Feedback:** Provides real-time system health monitoring
-
-### 3. **Row-Level Security (RLS) Testing** ✅ BASIC COVERAGE
-
-#### **RLS Policy Testing**
-**File:** `supabase/test-rls.sql`
-- **Policy Verification:** Tests RLS policy creation and enablement
-- **Helper Functions:** Validates RLS helper function existence
-- **Data Isolation:** Tests tenant isolation with sample data
-- **Cleanup Procedures:** Includes proper test data cleanup
-
-**Test Coverage:**
-```sql
--- Test RLS enablement
-SELECT schemaname, tablename, rowsecurity as rls_enabled
-FROM pg_tables 
-WHERE schemaname = 'public' 
-  AND tablename IN ('plants', 'profiles', 'enrollments', 'progress');
-
--- Test policy creation
-SELECT schemaname, tablename, policyname, cmd as policy_type
-FROM pg_policies 
-WHERE schemaname = 'public';
-```
+- **Profiles → Enrollments**: One user can have many enrollments
+- **Profiles → Progress**: One user can have many progress records
+- **Profiles → Activity Events**: One user can have many activity events
+- **Profiles → Question Events**: One user can have many question events
+- **Profiles → Admin Roles**: One user can have many admin roles
 
-### 4. **Authentication Flow Testing** ⚠️ LIMITED COVERAGE
-
-#### **Auth API Testing**
-**Files:** `src/app/api/auth/test/route.ts`, `SUPABASE_AUTH_COMPLETION_GUIDE.md`
-- **Auth Endpoint Verification:** Tests auth callback and confirmation routes
-- **Session Management:** Basic session validation testing
-- **Error Handling:** Tests auth error scenarios
-
-**Planned Testing (from documentation):**
-```javascript
-// Authentication flow testing (planned)
-async function testAuthFlow() {
-  // Test 1: Sign up
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: testEmail,
-    password: 'TestPassword123!',
-  });
-  
-  // Test 2: Sign in
-  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-    email: testEmail,
-    password: 'TestPassword123!',
-  });
-}
-```
+- **Courses → Enrollments**: One course can have many enrollments
+- **Courses → Progress**: One course can have many progress records
+- **Courses → Activity Events**: One course can have many activity events
+- **Courses → Question Events**: One course can have many question events
 
-## Areas NOT Tested
-
-### 1. **Unit Testing** ❌ NO COVERAGE
-
-#### **React Component Testing**
-- **Component Rendering:** No tests for React component rendering
-- **User Interactions:** No tests for button clicks, form submissions, navigation
-- **State Management:** No tests for React state updates and context providers
-- **Props Validation:** No tests for component prop handling
-
-#### **Utility Function Testing**
-- **Database Operations:** No unit tests for individual database operation functions
-- **Validation Helpers:** No unit tests for Zod validation helper functions
-- **API Utilities:** No unit tests for API utility functions (`api-utils.ts`)
-- **Auth Helpers:** No unit tests for authentication helper functions
-
-#### **Business Logic Testing**
-- **Progress Calculation:** No tests for progress percentage calculations
-- **Role-Based Access:** No unit tests for RBAC logic
-- **Tenant Filtering:** No unit tests for multi-tenant data filtering
-- **Analytics Processing:** No tests for event processing and analytics
-
-### 2. **Integration Testing** ⚠️ PARTIAL COVERAGE
-
-#### **API Route Integration**
-- **End-to-End API Testing:** No comprehensive API route testing
-- **Authentication Integration:** No tests for protected route access
-- **Database Transaction Testing:** No tests for complex database transactions
-- **Error Handling Integration:** No tests for API error scenarios
-
-#### **Frontend-Backend Integration**
-- **Form Submission:** No tests for form data submission to APIs
-- **Real-time Updates:** No tests for progress tracking and real-time updates
-- **File Upload/Download:** No tests for document handling
-- **Multi-language Support:** No tests for Spanish/English content switching
-
-### 3. **End-to-End Testing** ❌ NO COVERAGE
-
-#### **User Journey Testing**
-- **Complete Training Flow:** No tests for full course completion journey
-- **Admin Workflow:** No tests for admin user management workflows
-- **Multi-tenant Scenarios:** No tests for cross-plant data access
-- **Authentication Flows:** No tests for complete login/logout/signup flows
-
-#### **Browser Testing**
-- **Cross-browser Compatibility:** No tests for different browser support
-- **Mobile Responsiveness:** No tests for mobile device compatibility
-- **Performance Testing:** No tests for page load times and performance
-- **Accessibility Testing:** No tests for WCAG compliance
-
-### 4. **Security Testing** ⚠️ LIMITED COVERAGE
-
-#### **Authentication Security**
-- **Password Security:** No tests for password strength validation
-- **Session Security:** No tests for session timeout and security
-- **CSRF Protection:** No tests for cross-site request forgery protection
-- **SQL Injection:** No tests for SQL injection prevention
-
-#### **Authorization Testing**
-- **Role Escalation:** No tests for unauthorized role access attempts
-- **Tenant Isolation:** No comprehensive tests for cross-tenant data access prevention
-- **API Security:** No tests for API endpoint security and rate limiting
-- **Data Validation:** No tests for malicious input handling
-
-## Test Types Analysis
-
-### 1. **Custom Integration Tests** ✅ IMPLEMENTED
-- **Purpose:** Database and schema validation
-- **Tools:** Custom Node.js scripts
-- **Coverage:** Database connectivity, Zod validation, schema compatibility
-- **Execution:** Manual via npm scripts (`npm run test:integrations`)
-
-### 2. **API Validation Tests** ✅ IMPLEMENTED
-- **Purpose:** API endpoint functionality verification
-- **Tools:** Next.js API routes with test endpoints
-- **Coverage:** Database queries, schema validation, complex operations
-- **Execution:** HTTP requests to test endpoints
-
-### 3. **Database Tests** ✅ IMPLEMENTED
-- **Purpose:** RLS policy and database structure validation
-- **Tools:** SQL scripts and database queries
-- **Coverage:** Policy creation, data isolation, helper functions
-- **Execution:** Direct SQL execution in Supabase
-
-### 4. **Unit Tests** ❌ NOT IMPLEMENTED
-- **Framework:** None (Jest, Vitest, etc.)
-- **Coverage:** Individual functions and components
-- **Status:** No unit testing infrastructure
-
-### 5. **End-to-End Tests** ❌ NOT IMPLEMENTED
-- **Framework:** None (Cypress, Playwright, etc.)
-- **Coverage:** Complete user workflows
-- **Status:** No E2E testing infrastructure
-
-### 6. **Component Tests** ❌ NOT IMPLEMENTED
-- **Framework:** None (React Testing Library, etc.)
-- **Coverage:** React component behavior
-- **Status:** No component testing infrastructure
-
-## Testing Gaps and Recommendations
-
-### 1. **Critical Testing Gaps**
-
-#### **Authentication & Authorization**
-- **Missing:** Complete authentication flow testing
-- **Risk:** Security vulnerabilities, unauthorized access
-- **Recommendation:** Implement comprehensive auth testing with Jest/Vitest
-
-#### **Multi-Tenant Security**
-- **Missing:** Cross-tenant data access prevention testing
-- **Risk:** Data leakage between plants
-- **Recommendation:** Create tenant isolation test suite
-
-#### **API Security**
-- **Missing:** API endpoint security testing
-- **Risk:** Unauthorized API access, data manipulation
-- **Recommendation:** Implement API security testing with proper authentication
-
-### 2. **High Priority Testing Needs**
-
-#### **React Component Testing**
-- **Priority:** High
-- **Framework:** React Testing Library + Jest/Vitest
-- **Coverage:** All UI components, forms, navigation
-- **Benefits:** Catch UI bugs, ensure component reliability
-
-#### **End-to-End Testing**
-- **Priority:** High
-- **Framework:** Playwright or Cypress
-- **Coverage:** Complete user journeys, admin workflows
-- **Benefits:** Ensure system works as intended for users
-
-#### **Performance Testing**
-- **Priority:** Medium
-- **Tools:** Lighthouse, WebPageTest
-- **Coverage:** Page load times, API response times
-- **Benefits:** Ensure good user experience
-
-### 3. **Testing Infrastructure Recommendations**
-
-#### **Unit Testing Setup**
-```bash
-# Install testing framework
-npm install -D jest @testing-library/react @testing-library/jest-dom
-npm install -D vitest @vitest/ui
-
-# Create test configuration
-# jest.config.js or vitest.config.ts
-```
+#### Unique Constraints
 
-#### **E2E Testing Setup**
-```bash
-# Install E2E testing framework
-npm install -D playwright
-# or
-npm install -D cypress
-```
+- **Enrollments**: (user_id, course_id) - Users can only be enrolled once per course
+- **Progress**: (user_id, course_id) - Users can only have one progress record per course
+- **Admin Roles**: (user_id, role, plant_id) - Users can only have one role per plant
+- **Plants**: (name) - Plant names must be unique
+- **Courses**: (slug) - Course slugs must be unique
 
-#### **Testing Scripts**
-```json
-{
-  "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:e2e": "playwright test",
-    "test:coverage": "jest --coverage"
-  }
-}
-```
+#### Foreign Key Constraints
 
-## Testing Maturity Assessment
-
-### **Current State: Level 2 (Basic Integration Testing)**
-- ✅ **Database Integration:** Well tested
-- ✅ **Schema Validation:** Comprehensive coverage
-- ✅ **API Endpoints:** Basic testing implemented
-- ⚠️ **Security Testing:** Limited coverage
-- ❌ **Unit Testing:** Not implemented
-- ❌ **E2E Testing:** Not implemented
-
-### **Target State: Level 4 (Comprehensive Testing)**
-- ✅ **Unit Testing:** All components and utilities
-- ✅ **Integration Testing:** Complete API and database testing
-- ✅ **E2E Testing:** Full user journey testing
-- ✅ **Security Testing:** Comprehensive security validation
-- ✅ **Performance Testing:** Load and performance testing
-- ✅ **Automated Testing:** CI/CD pipeline integration
-
-## Testing Strategy Recommendations
-
-### **Phase 1: Foundation (Immediate)**
-1. **Set up Jest/Vitest** for unit testing
-2. **Implement React Testing Library** for component testing
-3. **Create unit tests** for critical utility functions
-4. **Add component tests** for forms and navigation
-
-### **Phase 2: Integration (Short-term)**
-1. **Expand API testing** with comprehensive test suites
-2. **Implement authentication testing** with proper mocking
-3. **Add database transaction testing** for complex operations
-4. **Create tenant isolation testing** for multi-tenancy
-
-### **Phase 3: E2E (Medium-term)**
-1. **Set up Playwright/Cypress** for end-to-end testing
-2. **Create user journey tests** for complete workflows
-3. **Implement admin workflow testing** for management functions
-4. **Add cross-browser testing** for compatibility
-
-### **Phase 4: Advanced (Long-term)**
-1. **Implement performance testing** with load testing tools
-2. **Add security testing** with penetration testing tools
-3. **Create accessibility testing** for WCAG compliance
-4. **Set up CI/CD testing** with automated test execution
-
-The current testing approach provides solid foundation for database and schema validation but lacks comprehensive coverage for user-facing functionality, security, and complete system workflows. Implementing a full testing strategy would significantly improve system reliability and maintainability.
-
----
-
-# Documentation Analysis
-
-**Date:** October 1, 2025  
-**Purpose:** Comprehensive analysis of existing documentation, comments, and README files
-
-## Documentation Overview
-
-The SpecChem Safety Training Platform repository contains **extensive documentation** across multiple categories, ranging from technical implementation guides to business requirements and design specifications. The documentation demonstrates a mature, well-thought-out project with comprehensive coverage of most aspects.
-
-### Documentation Statistics
-- **Total Documentation Files:** 15+ markdown files
-- **Documentation Categories:** 6 main categories
-- **Coverage Areas:** Technical, business, design, implementation, testing
-- **Documentation Quality:** High - comprehensive and well-structured
-- **Maintenance Status:** Mixed - some files current, others outdated
-
-## Documentation Categories
-
-### 1. **Technical Implementation Documentation** ✅ COMPREHENSIVE
-
-#### **Database Schema Documentation**
-**File:** `docs/DB_SCHEMA.md` (365+ lines)
-- **Purpose:** Complete database schema reference
-- **Coverage:** 8 tables, 64 columns, 4 enums, 15 foreign keys, 12 indexes
-- **Quality:** Excellent - comprehensive with examples and relationships
-- **Status:** Current and well-maintained
-
-**Content Includes:**
-- Complete table definitions with column types and constraints
-- Enum definitions and usage examples
-- Foreign key relationships and cascading rules
-- Index definitions for performance optimization
-- RLS policy documentation
-- Database statistics and performance considerations
-
-#### **Authentication System Documentation**
-**File:** `docs/supabase-auth-guide.md` (870+ lines)
-- **Purpose:** Comprehensive Supabase authentication guide
-- **Coverage:** JWT tokens, RLS policies, session management, Next.js integration
-- **Quality:** Excellent - detailed technical explanations with examples
-- **Status:** Current and comprehensive
-
-**Content Includes:**
-- Supabase Auth architecture overview
-- JWT token structure and validation
-- Row-Level Security implementation
-- Authentication methods and flows
-- Next.js integration patterns
-- Security considerations and best practices
-
-#### **Schema Completion Summary**
-**File:** `docs/SCHEMA_COMPLETION_SUMMARY.md` (57 lines)
-- **Purpose:** Implementation status tracking
-- **Coverage:** Database schema completion, technical implementation status
-- **Quality:** Good - concise status summary
-- **Status:** Current implementation status
-
-### 2. **Project Status and Phase Documentation** ⚠️ MIXED STATUS
-
-#### **Phase Completion Documents**
-**Files:** `PHASE_1_COMPLETE.md`, `ZOD_CONTRACTS_COMPLETE.md`, `SUPABASE_AUTH_COMPLETION_GUIDE.md`
-- **Purpose:** Track implementation phases and completion status
-- **Coverage:** Authentication, database, validation, API integration
-- **Quality:** Good - clear status tracking
-- **Status:** Some current, some outdated
-
-**Phase 1 Complete** (`PHASE_1_COMPLETE.md`):
-- ✅ Auth API routes implementation
-- ✅ Error handling and middleware updates
-- ✅ Testing results and verification
-- **Status:** Current and accurate
-
-**Zod Contracts Complete** (`ZOD_CONTRACTS_COMPLETE.md`):
-- ✅ Comprehensive validation schema implementation
-- ✅ Type safety and API contract enforcement
-- ✅ Database operation validation
-- **Status:** Current implementation status
-
-**Supabase Auth Completion Guide** (`SUPABASE_AUTH_COMPLETION_GUIDE.md`):
-- ✅ Authentication system implementation
-- ✅ RLS policies and security setup
-- ✅ Testing and validation procedures
-- **Status:** Current implementation guide
-
-### 3. **Business Requirements and Design Documentation** ✅ COMPREHENSIVE
-
-#### **SpecChem Team Handbook**
-**File:** `docs/specchem_handbook.md` (1,780+ lines)
-- **Purpose:** Complete company handbook and policies
-- **Coverage:** Company information, policies, procedures, compliance
-- **Quality:** Excellent - comprehensive business documentation
-- **Status:** Current company information
-
-**Content Includes:**
-- Company overview and contact information
-- Employee policies and procedures
-- Safety protocols and compliance requirements
-- Training requirements and certifications
-- Administrative procedures and forms
-
-#### **Design Language Documentation**
-**File:** `docs/notes/prompts/specchem_design_language.md` (150+ lines)
-- **Purpose:** Design system and visual language specification
-- **Coverage:** Brand colors, typography, layout, component design
-- **Quality:** Excellent - comprehensive design system
-- **Status:** Current design guidelines
-
-**Content Includes:**
-- Industrial Knowledge Minimalism design philosophy
-- Design tokens (colors, typography, spacing, motion)
-- Layout system and component specifications
-- Brand consistency guidelines
-- Accessibility and responsive design principles
-
-### 4. **Feature Planning and Requirements** ✅ COMPREHENSIVE
-
-#### **Smart Job Role Navigator**
-**File:** `docs/prompts/smart_job_role_navigator.md` (200+ lines)
-- **Purpose:** Feature specification for role-based training system
-- **Coverage:** Business context, technical requirements, implementation plan
-- **Quality:** Excellent - detailed feature specification
-- **Status:** Current feature requirements
-
-**Content Includes:**
-- Business context and HR pain points
-- Technical foundation and current stack
-- Core features and implementation details
-- User experience and interface design
-- Integration requirements and API specifications
-
-#### **Phase 2 Dynamic Content**
-**File:** `docs/prompts/phase2_dynamic_content.md` (270+ lines)
-- **Purpose:** Implementation plan for dynamic content system
-- **Coverage:** Training modules, interactive components, progress tracking
-- **Quality:** Excellent - detailed implementation plan
-- **Status:** Current feature planning
-
-**Content Includes:**
-- Training module content system
-- Interactive module components
-- Progress tracking and analytics
-- Assessment and certification system
-- Mobile optimization and accessibility
-
-#### **Ideas and Concepts**
-**File:** `docs/notes/ideas.md` (84 lines)
-- **Purpose:** Feature ideas and concept exploration
-- **Coverage:** HR-focused features, compliance tools, knowledge management
-- **Quality:** Good - creative feature concepts
-- **Status:** Current brainstorming and planning
-
-**Content Includes:**
-- Smart Job Role & Training Navigator concept
-- Workforce Certification & Compliance Tracker
-- AI-Powered Internal Knowledge Assistant
-- Skill Inventory & Talent Mapping Tool
-- Instant Role-Based Policy Generator
-
-### 5. **Domain and Architecture Documentation** ✅ COMPREHENSIVE
-
-#### **Schema Narrative**
-**File:** `docs/notes/schema-narrative.md` (120+ lines)
-- **Purpose:** Domain model and architecture overview
-- **Coverage:** Actors, permissions, tenancy, core entities, happy paths
-- **Quality:** Excellent - clear domain understanding
-- **Status:** Current architectural foundation
-
-**Content Includes:**
-- Domain model in plain language
-- Actor definitions and permission matrix
-- Multi-tenant architecture explanation
-- Core entities and their relationships
-- User journey and happy path definitions
-- Technical implementation notes
-
-### 6. **Training Content Documentation** ✅ COMPREHENSIVE
-
-#### **Training Modules**
-**Files:** `src/data/modules/sales-representative-complete.ts`, `src/features/lms/data/mock.ts`
-- **Purpose:** Training content and module definitions
-- **Coverage:** Sales training, safety protocols, compliance training
-- **Quality:** Excellent - detailed training content
-- **Status:** Current training materials
-
-**Content Includes:**
-- Customer safety protocols
-- Sales compliance training
-- Documentation and recordkeeping requirements
-- Ethical practices and standards
-- Product knowledge and specifications
-
-## Documentation Quality Assessment
-
-### **Strengths** ✅
-
-#### **Comprehensive Coverage**
-- **Technical Documentation:** Complete database schema, authentication, and API documentation
-- **Business Documentation:** Full company handbook and policy documentation
-- **Design Documentation:** Complete design system and visual language
-- **Feature Documentation:** Detailed implementation plans and requirements
-
-#### **High Quality Writing**
-- **Clear Structure:** Well-organized with consistent formatting
-- **Detailed Explanations:** Comprehensive coverage with examples
-- **Technical Accuracy:** Accurate technical specifications and implementation details
-- **Business Context:** Clear business requirements and user needs
-
-#### **Current and Relevant**
-- **Implementation Status:** Accurate tracking of completed phases
-- **Technical Specifications:** Current with actual implementation
-- **Business Requirements:** Reflects current company needs and policies
-
-### **Areas for Improvement** ⚠️
-
-#### **Documentation Maintenance**
-- **Scattered Status:** Some files current, others outdated
-- **Version Control:** No clear versioning system for documentation
-- **Update Tracking:** No systematic process for keeping docs current
-
-#### **Missing Documentation**
-- **API Documentation:** No comprehensive API endpoint documentation
-- **Deployment Guide:** No deployment and production setup guide
-- **Troubleshooting:** No troubleshooting or FAQ documentation
-- **Contributing Guide:** No contribution guidelines for developers
-
-## Outdated or Unnecessary Files
-
-### **Files Requiring Review** ⚠️
-
-#### **Potentially Outdated Files**
-Based on the git status and file analysis, several documentation files appear to be outdated or temporary:
-
-1. **Phase Completion Files** - Some may be outdated:
-   - `PHASE_1_COMPLETE.md` - May be outdated if phases have progressed
-   - `ZOD_CONTRACTS_COMPLETE.md` - May need updating with current implementation
-   - `SUPABASE_AUTH_COMPLETION_GUIDE.md` - May need updating with current status
-
-2. **Implementation Status Files** - May be outdated:
-   - `docs/SCHEMA_COMPLETION_SUMMARY.md` - May need updating with current status
-   - Various phase completion summaries
-
-#### **Temporary Files** (from git status)
-These files appear to be temporary and should be reviewed for removal:
-- `DATABASE_STATUS_REPORT.md` (deleted)
-- `DEPLOYMENT_COMPLETE.md` (deleted)
-- `DEPLOYMENT_STRATEGY.md` (deleted)
-- `DRIZZLE_ZOD_VERIFICATION.md` (deleted)
-- `PRODUCTION_DEPLOYMENT_CHECKLIST.md` (deleted)
-- `PRODUCTION_UPDATE.md` (deleted)
-- `SUPABASE_AUTH_SETUP_GUIDE.md` (deleted)
-- `TESTING_INSTRUCTIONS.md` (deleted)
-- `VERCEL_DEPLOYMENT_GUIDE.md` (deleted)
-- `VERCEL_ENV_SETUP.md` (deleted)
-
-### **Files to Keep** ✅
-
-#### **Core Documentation** (Current and Valuable)
-- `README.md` - Main project documentation
-- `docs/DB_SCHEMA.md` - Database schema reference
-- `docs/supabase-auth-guide.md` - Authentication guide
-- `docs/specchem_handbook.md` - Company handbook
-- `docs/notes/prompts/specchem_design_language.md` - Design system
-- `docs/prompts/smart_job_role_navigator.md` - Feature specification
-- `docs/prompts/phase2_dynamic_content.md` - Implementation plan
-- `docs/notes/schema-narrative.md` - Domain model
-- `docs/notes/ideas.md` - Feature concepts
-- `docs/scans/10-1-25-baseline.md` - Current baseline analysis
-
-## Recommendations
-
-### **Immediate Actions** 🔧
-
-#### **Clean Up Temporary Files**
-1. **Remove Deleted Files:** Clean up git status by removing references to deleted files
-2. **Archive Outdated Phases:** Move completed phase documentation to archive folder
-3. **Update Status Files:** Update implementation status documentation
-
-#### **Consolidate Documentation**
-1. **Create Documentation Index:** Main index linking to all current documentation
-2. **Standardize Format:** Ensure consistent formatting across all documentation
-3. **Add Timestamps:** Add last updated timestamps to all documentation files
-
-### **Medium-term Improvements** 📈
-
-#### **Missing Documentation**
-1. **API Documentation:** Create comprehensive API endpoint documentation
-2. **Deployment Guide:** Create production deployment and setup guide
-3. **Contributing Guide:** Create developer contribution guidelines
-4. **Troubleshooting Guide:** Create FAQ and troubleshooting documentation
-
-#### **Documentation Maintenance**
-1. **Version Control:** Implement documentation versioning system
-2. **Update Process:** Create systematic process for keeping docs current
-3. **Review Schedule:** Establish regular documentation review schedule
-
-### **Long-term Enhancements** 🚀
-
-#### **Documentation Automation**
-1. **Auto-generated Docs:** Automate API documentation generation
-2. **Status Tracking:** Automate implementation status tracking
-3. **Change Logs:** Automate change log generation
-
-#### **Documentation Portal**
-1. **Centralized Access:** Create documentation portal for easy access
-2. **Search Functionality:** Add search capabilities across all documentation
-3. **Interactive Examples:** Add interactive code examples and demos
-
-## Documentation Maturity Assessment
-
-### **Current State: Level 4 (Comprehensive Documentation)**
-- ✅ **Technical Documentation:** Complete and current
-- ✅ **Business Documentation:** Comprehensive and accurate
-- ✅ **Design Documentation:** Complete design system
-- ✅ **Feature Documentation:** Detailed implementation plans
-- ⚠️ **Maintenance:** Mixed status, some outdated files
-- ⚠️ **API Documentation:** Missing comprehensive API docs
-
-### **Target State: Level 5 (Enterprise Documentation)**
-- ✅ **Complete Coverage:** All aspects documented
-- ✅ **Automated Updates:** Documentation stays current automatically
-- ✅ **Interactive Examples:** Live code examples and demos
-- ✅ **Search and Navigation:** Easy discovery and access
-- ✅ **Version Control:** Proper versioning and change tracking
-- ✅ **Quality Assurance:** Automated documentation quality checks
-
-The repository demonstrates excellent documentation practices with comprehensive coverage of technical, business, and design aspects. The main areas for improvement are maintenance, consolidation of outdated files, and addition of missing API documentation.
-
----
-
-# Complexity, Duplication, and Drift Analysis
-
-**Date:** October 1, 2025  
-**Purpose:** Identify areas of complexity, duplication, and potential drift requiring review
-
-## Areas Requiring Review
-
-### 1. **Validation Schema Duplication** ✅ RESOLVED
-**STATUS:** Schema duplication has been completely resolved
-**SOLUTION:** Consolidated all schemas into `src/lib/schemas.ts` as single source of truth
-
-**Previously Identified Issues (RESOLVED):**
-- ✅ **Triple Schema Definition:** Consolidated into single file
-- ✅ **Inconsistent Patterns:** Standardized naming conventions
-- ✅ **Type Mismatches:** Fixed `z.date()` vs `z.string().datetime()` inconsistencies
-- ✅ **Backup File Drift:** Removed outdated backup files
-
-**Files Removed:**
-- ✅ `src/lib/validations.ts` (459 lines)
-- ✅ `src/lib/db-contracts.ts` (410 lines)
-- ✅ `src/lib/validations/index.ts` (247 lines)
-- ✅ `src/lib/validations.ts.backup` (387 lines)
-
-**Impact:** Eliminated 1,503 lines of duplicate code, improved type safety
-
-### 2. **Progress Context Duplication** ✅ RESOLVED
-**STATUS:** Progress context duplication has been completely resolved
-**SOLUTION:** Removed duplicate `NewProgressContext.tsx` file, kept `ProgressContext.tsx` as single source of truth
-
-**Previously Identified Issues (RESOLVED):**
-- ✅ **Identical Implementation:** Removed duplicate 277-line implementation
-- ✅ **Same Interface:** Eliminated conflicting interface definitions
-- ✅ **Unclear Purpose:** Clarified by removing unused duplicate
-- ✅ **Import Conflicts:** Prevented by removing duplicate file
-
-**Resolution Actions:**
-- ✅ **Verified Usage:** Confirmed `ProgressContext.tsx` is actively used in 3 files
-- ✅ **Confirmed No Usage:** Verified `NewProgressContext.tsx` had zero imports/usage
-- ✅ **Safely Removed:** Deleted `src/contexts/NewProgressContext.tsx`
-- ✅ **Verified No Breakage:** Successfully built project to confirm no functionality broken
-
-**Impact:** Eliminated 277 lines of duplicate code, reduced maintenance overhead, prevented potential runtime conflicts
-
-### 3. **API Route Authentication Patterns** ✅ RESOLVED
-**STATUS:** Authentication patterns have been completely standardized across all API routes
-**SOLUTION:** Created centralized authentication utility with consistent patterns and error handling
-
-**Previously Identified Issues (RESOLVED):**
-- ✅ **Inconsistent Auth Checks:** All routes now use standardized authentication patterns
-- ✅ **Repeated Auth Logic:** Consolidated into reusable authentication wrappers
-- ✅ **Mixed Patterns:** Standardized to use appropriate wrapper functions
-- ✅ **Error Handling Variations:** Consistent error response formats across all routes
-
-**STANDARDIZED AUTHENTICATION PATTERNS:**
-
-**New Standardized Pattern (All Routes):**
-```typescript
-// Admin routes with role checking
-export async function GET() {
-  return withAdminAuth(async (profile, adminRoles) => {
-    // Route logic here
-    return data;
-  }, 'hr_admin'); // Role requirement
-}
-
-// User routes
-export async function GET() {
-  return withUserAuth(async (profile) => {
-    // Route logic here
-    return data;
-  });
-}
-
-// RLS context routes
-export async function GET() {
-  return withContextAuth(async (userContext) => {
-    // Route logic here
-    return data;
-  });
-}
-```
+- **Cascade Deletes**: User deletion cascades to enrollments, progress, activity events, question events, admin roles
+- **Course Deletion**: Course deletion cascades to enrollments, progress, activity events, question events
+- **Plant References**: Plant references are protected (no cascade) to prevent accidental data loss
+
+### Database Indexes and Performance
+
+#### Composite Indexes
+
+- **activity_events_plant_course_event_idx**: (plant_id, course_id, event_type)
+- **enrollments_plant_course_idx**: (plant_id, course_id)
+- **progress_plant_course_idx**: (plant_id, course_id)
+- **question_events_plant_course_question_idx**: (plant_id, course_id, question_key)
+
+#### Single Column Indexes
+
+- **activity_events_occurred_at_idx**: (occurred_at)
+- **activity_events_user_event_idx**: (user_id, event_type)
+- **enrollments_status_idx**: (status)
+- **profiles_email_idx**: (email)
+- **profiles_plant_id_idx**: (plant_id)
+- **question_events_answered_at_idx**: (answered_at)
+- **question_events_user_question_idx**: (user_id, question_key)
+- **admin_roles_user_id_idx**: (user_id)
+
+### Migration Structure
+
+#### Initial Migration (0000_productive_black_queen.sql)
+
+- **Enum Creation**: All custom enums defined first
+- **Table Creation**: Tables created in dependency order
+- **Constraint Addition**: Foreign key constraints added after table creation
+- **Index Creation**: Performance indexes created last
+- **Naming Convention**: Consistent naming with descriptive constraint names
+
+#### Migration Metadata
 
-**STANDARDIZED ERROR RESPONSE FORMATS:**
-```typescript
-// All routes now use consistent error format
-{
-  success: false,
-  error: "Descriptive error message",
-  message?: "Additional context"
-}
-
-// All routes now use consistent success format
-{
-  success: true,
-  data: responseData,
-  message?: "Optional success message"
-}
+- **Journal Tracking**: `_journal.json` tracks migration history
+- **Snapshot Storage**: `0000_snapshot.json` contains schema snapshot
+- **Version Control**: Migration files tracked in git for team collaboration
+
+This database schema provides a robust foundation for the multi-tenant LMS with comprehensive tracking, analytics, and tenant isolation capabilities.
+
+## Zod Schema Analysis
+
+### Schema Coverage and Entities
+
+#### Core Entity Schemas (`src/lib/schemas.ts`)
+
+The repository contains a comprehensive set of Zod schemas covering all database entities:
+
+**Base Entity Schemas:**
+
+- **`plantSchema`** - Manufacturing facility entities
+- **`profileSchema`** - User profiles with plant association
+- **`courseSchema`** - Training courses with versioning
+- **`enrollmentSchema`** - User-course enrollment relationships
+- **`progressSchema`** - Learning progress tracking
+- **`adminRoleRecordSchema`** - Role assignments
+- **`activityEventSchema`** - User activity tracking
+- **`questionEventSchema`** - Assessment response tracking
+
+**Enum Schemas:**
+
+- **`adminRoleSchema`**: `['hr_admin', 'dev_admin', 'plant_manager']`
+- **`enrollmentStatusSchema`**: `['enrolled', 'in_progress', 'completed']`
+- **`eventTypeSchema`**: `['view_section', 'start_course', 'complete_course']`
+- **`userStatusSchema`**: `['active', 'suspended']`
+
+#### Input/Output Schema Distinctions
+
+**Create Schemas (Input):**
+
+- **`createPlantSchema`** - Plant creation with required name
+- **`createProfileSchema`** - User profile creation with plant assignment
+- **`createCourseSchema`** - Course creation with slug and title
+- **`createEnrollmentSchema`** - Enrollment creation with user/course/plant
+- **`createProgressSchema`** - Progress record creation
+- **`createAdminRoleSchema`** - Admin role assignment
+- **`createActivityEventSchema`** - Activity event logging
+- **`createQuestionEventSchema`** - Question response logging
+
+**Update Schemas (Input):**
+
+- **`updatePlantSchema`** - Plant updates (all fields optional)
+- **`updateProfileSchema`** - Profile updates with optional fields
+- **`updateCourseSchema`** - Course updates with optional fields
+- **`updateEnrollmentSchema`** - Enrollment status updates
+- **`updateProgressSchema`** - Progress updates
+- **`updateAdminRoleSchema`** - Role updates
+
+**Read Schemas (Output):**
+
+- **Base schemas** - Full entity schemas with all fields
+- **Composite schemas** - Extended schemas with relations:
+  - `profileWithPlantSchema` - Profile with plant information
+  - `enrollmentWithRelationsSchema` - Enrollment with user, course, plant
+  - `progressWithRelationsSchema` - Progress with related entities
+  - `activityEventWithRelationsSchema` - Activity events with relations
+  - `questionEventWithRelationsSchema` - Question events with relations
+
+#### Specialized Schema Categories
+
+**Filter Schemas:**
+
+- **`paginationSchema`** - Standard pagination parameters
+- **`plantFilterSchema`** - Plant filtering with active status
+- **`courseFilterSchema`** - Course filtering with published status and search
+- **`enrollmentFiltersSchema`** - Enrollment filtering by plant, course, user, status
+- **`progressFiltersSchema`** - Progress filtering with range constraints
+- **`userFiltersSchema`** - User filtering by plant, status, role, search
+
+**Form Validation Schemas:**
+
+- **`loginFormSchema`** - Authentication form validation
+- **`profileUpdateFormSchema`** - Profile update form with length constraints
+- **`adminCreateUserFormSchema`** - Admin user creation form
+
+**Analytics Schemas:**
+
+- **`analyticsOverviewSchema`** - Dashboard overview statistics
+- **`coursePerformanceSchema`** - Course performance metrics
+- **`plantPerformanceSchema`** - Plant performance metrics
+- **`dashboardStatsSchema`** - Dashboard statistics
+- **`enrollmentStatsSchema`** - Enrollment statistics
+- **`courseStatisticsSchema`** - Course statistics
+
+**API Response Schemas:**
+
+- **`apiResponseSchema<T>`** - Generic API response wrapper
+- **`paginatedResponseSchema<T>`** - Paginated response wrapper
+
+### Zod Validation Usage in API Routes
+
+#### Standardized Validation Middleware (`src/app/api/shared/middleware/validation-middleware.ts`)
+
+- **`ValidationMiddleware.validateQuery()`** - Query parameter validation
+- **`ValidationMiddleware.validateBody()`** - Request body validation
+- **`ValidationMiddleware.validateParams()`** - Path parameter validation
+- **`ValidationMiddleware.validateParamsAndBody()`** - Combined validation
+- **`ValidationMiddleware.validateAll()`** - Complete request validation
+
+#### Route Template Integration (`src/app/api/shared/templates/`)
+
+- **`CrudRouteTemplate`** - Standardized CRUD operations with schema validation
+- **`ListRouteTemplate`** - List operations with pagination validation
+- **`AnalyticsRouteTemplate`** - Analytics routes with filter validation
+
+#### Common Schema Usage (`src/app/api/shared/utils/validation-utils.ts`)
+
+- **`CommonSchemas.pagination`** - Standard pagination validation
+- **`CommonSchemas.userFilters`** - User filtering validation
+- **`CommonSchemas.courseFilters`** - Course filtering validation
+- **`CommonSchemas.enrollmentFilters`** - Enrollment filtering validation
+- **`CommonSchemas.analyticsFilters`** - Analytics filtering validation
+
+#### API Route Examples
+
+- **`/api/admin/users/route.ts`** - Uses `updateProfileSchema.parse()` for validation
+- **`/api/admin/enrollments/route.ts`** - Uses `updateEnrollmentSchema.parse()` for validation
+- **`/api/admin/courses/route.ts`** - Uses `createCourseSchema.parse()` for validation
+
+### Zod Validation Usage in UI Components
+
+#### Form Validation (`src/components/admin/shared/hooks/useAdminForm.ts`)
+
+- **`useAdminForm<T>`** - Generic form hook with Zod validation
+- **Field-level validation** - Individual field validation using `schema.pick()`
+- **Form-level validation** - Complete form validation using `schema.parse()`
+- **Error handling** - Zod error extraction and display
+
+#### Component-Level Validation (`src/components/admin/shared/utils/validation-utils.ts`)
+
+- **`ValidationUtils.emailSchema`** - Email validation with custom error messages
+- **`ValidationUtils.passwordSchema`** - Password validation with complexity requirements
+- **`ValidationUtils.phoneSchema`** - Phone number format validation
+- **`ValidationUtils.nameSchema`** - Name validation with length constraints
+- **Static validation methods** - `validateEmail()`, `validatePassword()`, etc.
+
+#### Authentication Forms (`src/components/auth/SignupForm.tsx`)
+
+- **`updateUserProfileSchema.parse()`** - Profile data validation during signup
+- **Manual validation** - Additional form-specific validation logic
+- **Error handling** - Zod error integration with form state
+
+#### Configuration Validation (`src/lib/config.ts`)
+
+- **`envSchema`** - Environment variable validation with comprehensive error handling
+- **Type coercion** - Automatic type conversion for environment variables
+- **Default values** - Schema-defined defaults for optional variables
+- **Error mapping** - Custom error messages for validation failures
+
+### Schema Architecture Patterns
+
+#### Single Source of Truth
+
+- **Centralized schemas** - All schemas defined in `src/lib/schemas.ts`
+- **Database alignment** - Schemas match database schema exactly
+- **Type generation** - TypeScript types generated from Zod schemas
+- **Consistency** - No duplicate schema definitions
+
+#### Input/Output Separation
+
+- **Create schemas** - Required fields for entity creation
+- **Update schemas** - Optional fields for entity updates
+- **Read schemas** - Complete entity schemas with all fields
+- **Composite schemas** - Extended schemas with related entities
+
+#### Validation Layering
+
+- **API Level** - Request validation using middleware
+- **Component Level** - Form validation using hooks
+- **Field Level** - Individual field validation
+- **Configuration Level** - Environment variable validation
+
+#### Error Handling
+
+- **Custom error messages** - User-friendly validation messages
+- **Error extraction** - Zod error parsing and display
+- **Graceful degradation** - Fallback validation for edge cases
+- **Type safety** - Compile-time type checking
+
+### Schema Coverage Analysis
+
+#### Complete Entity Coverage
+
+- **All database tables** have corresponding Zod schemas
+- **All enum types** have matching Zod enum schemas
+- **All relationships** are represented in composite schemas
+- **All constraints** are enforced through validation rules
+
+#### Comprehensive Validation Rules
+
+- **Required fields** - Properly marked with `.min(1)` or required validation
+- **Optional fields** - Correctly marked as optional
+- **Type constraints** - UUID validation, email validation, date validation
+- **Range constraints** - Progress percentages, attempt counts
+- **Format validation** - Email format, phone format, URL format
+
+#### Multi-Tenant Awareness
+
+- **Plant ID validation** - All tenant-aware schemas include plant_id validation
+- **Tenant filtering** - Filter schemas support plant-based filtering
+- **Role validation** - Admin role schemas support plant-specific roles
+
+This comprehensive Zod schema system provides robust validation across all layers of the application, ensuring data integrity and type safety from API requests through UI components to database operations.
+
+## Testing Infrastructure Analysis
+
+### Test Coverage Overview
+
+The repository implements a comprehensive testing strategy with three distinct test types: **Unit Tests**, **Integration Tests**, and **End-to-End (E2E) Tests**. The testing infrastructure has been recently simplified and standardized to improve maintainability and consistency.
+
+### Test Infrastructure Architecture
+
+#### Testing Framework Configuration
+
+- **Unit Testing:** Vitest with jsdom environment for React component testing
+- **E2E Testing:** Playwright with multi-browser support (Chrome, Firefox, Safari)
+- **Coverage Thresholds:** 80% minimum coverage for branches, functions, lines, and statements
+- **Test Timeouts:** 10-second timeout for all test types
+- **Setup Files:** Centralized test setup in `src/__tests__/setup.ts`
+
+#### Test Organization Structure
+
 ```
+src/__tests__/           # Unit and integration tests
+├── app/                 # App-level tests
+├── components/          # Component tests
+│   ├── business/       # Business logic components
+│   └── ui/            # UI component tests
+├── contexts/           # React context tests
+├── integration/        # Integration tests
+├── lib/               # Library and utility tests
+│   ├── db/           # Database operation tests
+│   ├── schemas/      # Schema validation tests
+│   └── utils/        # Utility function tests
+├── templates/         # Test templates for consistency
+├── utils/            # Test utilities and helpers
+└── setup.ts          # Test environment setup
 
-**Files Updated:**
-- ✅ `src/lib/api-auth.ts` - New centralized authentication utility
-- ✅ `src/app/api/admin/courses/route.ts` - Updated to use `withAdminAuth()`
-- ✅ `src/app/api/admin/courses/[id]/route.ts` - Updated to use `withAdminAuth()`
-- ✅ `src/app/api/admin/users/route.ts` - Updated to use `withAdminAuth()`
-- ✅ `src/app/api/admin/analytics/route.ts` - Updated to use `withAdminAuth()`
-- ✅ `src/app/api/admin/reports/route.ts` - Updated to use `withAdminAuth()`
-- ✅ `src/app/api/admin/enrollments/route.ts` - Updated to use `withAdminAuth()`
-- ✅ `src/app/api/user/profile/route.ts` - Updated to use `withUserAuth()`
-- ✅ `src/app/api/progress/route.ts` - Updated to use `withContextAuth()`
-
-**Impact:** ✅ Security consistency achieved, maintenance overhead eliminated, developer experience improved
-
-### 4. **Database Operation Patterns** ⚠️ MEDIUM COMPLEXITY
-**Files:** `src/lib/db/operations.ts`, various API routes
-
-**Issues:**
-- **Mixed Query Patterns:** Some operations use Drizzle query builder, others use raw SQL
-- **Inconsistent Error Handling:** Different error handling patterns across operations
-- **Tenant Filtering Inconsistency:** Some operations explicitly filter by plant, others rely on RLS
-- **Type Safety Gaps:** Some operations return `any` types instead of proper schemas
-
-**Examples:**
-```typescript
-// Pattern 1: Drizzle query builder
-const profile = await db.query.profiles.findFirst({ where: eq(profiles.id, id) });
-
-// Pattern 2: Raw Supabase
-const { data: profile } = await supabase.from('profiles').select('*').eq('id', id);
+src/__e2e__/          # End-to-end tests
+├── admin/            # Admin functionality tests
+├── auth/             # Authentication flow tests
+├── courses/          # Course management tests
+├── navigation/       # Navigation flow tests
+├── templates/        # E2E test templates
+├── critical-flows.spec.ts    # Critical user journeys
+└── simplified-flows.spec.ts  # Simplified E2E tests
+
+src/__fixtures__/     # Test data and mock objects
+├── api/             # API mock data
+├── components/       # Component test fixtures
+├── database/        # Database test data
+└── test-data.ts     # Centralized test data
 ```
 
-**Impact:** Performance inconsistencies, type safety issues, maintenance overhead
+### Unit Test Coverage Analysis
 
-### 5. **Custom Hook Patterns** ⚠️ MEDIUM COMPLEXITY
-**Files:** `src/hooks/useApi.ts`, `src/hooks/useUsers.ts`, `src/hooks/useCourses.ts`
+#### Well-Tested Areas
 
-**Issues:**
-- **Inconsistent Data Fetching:** Some hooks use `useApi` utilities, others use direct fetch
-- **Mixed Error Handling:** Different error handling patterns across hooks
-- **Caching Inconsistency:** Some hooks implement caching, others don't
-- **Type Safety Variations:** Some hooks have proper TypeScript types, others use `any`
+**1. Database Operations (`src/lib/db/operations.test.ts`)**
 
-**Examples:**
-```typescript
-// Pattern 1: With caching and retry logic
-const result = await withRetry(() => apiGet('/api/progress', courseProgressSchema.array()));
+- **Coverage:** Complete CRUD operations for all entities
+- **Tested Operations:**
+  - Profile management (create, read, update, delete)
+  - Enrollment operations with conflict handling
+  - Progress tracking with validation
+  - Analytics operations (plant stats, course stats, detailed analytics)
+  - Error handling for database failures and validation errors
+- **Mock Strategy:** Comprehensive mocking of Drizzle ORM operations
+- **Test Count:** 25+ test cases covering success and failure scenarios
 
-// Pattern 2: Direct fetch
-const response = await fetch(`/api/admin/users?${params}`);
-const result: UserResponse = await response.json();
-```
+**2. Schema Validation (`src/lib/schemas/schemas.test.ts`)**
 
-**Impact:** Performance inconsistencies, maintenance overhead, developer confusion
+- **Coverage:** All Zod schemas and validation functions
+- **Tested Schemas:**
+  - Entity schemas (plants, profiles, courses, enrollments, progress)
+  - Input/output schema distinctions (create, update, read)
+  - Filter schemas (pagination, user filters, course filters)
+  - Form validation schemas (login, signup, profile updates)
+  - Analytics schemas (dashboard stats, performance metrics)
+- **Test Count:** 50+ test cases covering valid/invalid data scenarios
 
-### 6. **Configuration File Duplication** ⚠️ LOW COMPLEXITY
-**Files:** `vercel.json`, `vercel.json.backup`, `next.config.js`, `next.config.ts`
+**3. Utility Functions (`src/lib/utils/utils.test.ts`)**
 
-**Issues:**
-- **Duplicate Config Files:** Both `.js` and `.ts` versions of Next.js config
-- **Backup Files:** `vercel.json.backup` suggests configuration drift
-- **Environment Setup:** Multiple ways to configure environment variables
+- **Coverage:** Complete API utility functions
+- **Tested Functions:**
+  - API request/response handling with error management
+  - Retry logic with exponential backoff
+  - Caching mechanisms (basic and enhanced)
+  - Request deduplication
+  - Debouncing and query string building
+- **Test Count:** 30+ test cases covering edge cases and error scenarios
 
-**Impact:** Configuration confusion, potential deployment issues
+**4. UI Components (`src/components/ui/ui-components.test.tsx`)**
 
-### 7. **TypeScript Type Definitions** ⚠️ MEDIUM COMPLEXITY
-**Files:** `src/types/`, various component files
+- **Coverage:** Core UI components (Button, Card, Input)
+- **Tested Features:**
+  - Component rendering with different variants and sizes
+  - Event handling (click, focus, blur, change)
+  - Accessibility attributes and ARIA labels
+  - Ref forwarding and custom className support
+  - Disabled states and form integration
+- **Test Count:** 25+ test cases covering component behavior
 
-**Issues:**
-- **Scattered Type Definitions:** Types defined in multiple locations
-- **Generic Type Overuse:** Heavy use of `any`, `unknown`, `Record<string, any>`
-- **Interface Duplication:** Similar interfaces defined in multiple files
-- **Missing Type Exports:** Some types not properly exported from modules
+**5. Configuration Management (`src/lib/__tests__/config.test.ts`)**
 
-**Examples:**
-```typescript
-// Heavy use of generic types
-meta: z.record(z.any()).nullable(),
-responseMeta: z.record(z.string(), z.any()).nullable(),
-```
+- **Coverage:** Environment variable validation and configuration helpers
+- **Tested Features:**
+  - Required environment variable validation
+  - URL format validation
+  - Environment-specific configuration (development, production, test)
+  - Database and Supabase configuration helpers
+- **Test Count:** 15+ test cases covering configuration scenarios
+
+**6. Database Connection (`src/lib/db/__tests__/connection.test.ts`)**
+
+- **Coverage:** Database connection management and health checks
+- **Tested Features:**
+  - Connection pool management
+  - Health check functionality
+  - Pool statistics and connection cleanup
+  - Error handling for connection failures
+- **Test Count:** 8+ test cases covering connection scenarios
+
+**7. API Route Standardization (`src/app/api/__tests__/route-standardization.test.ts`)**
+
+- **Coverage:** Standardized API route patterns and utilities
+- **Tested Features:**
+  - Route utilities (query parameter extraction, pagination)
+  - Response utilities (success, error, paginated responses)
+  - Validation utilities (pagination, ID validation, filters)
+  - CRUD route templates and error middleware
+- **Test Count:** 20+ test cases covering route patterns
+
+**8. Hook Migration (`src/hooks/__tests__/migration-helper.test.ts`)**
+
+- **Coverage:** Hook migration utilities and validation
+- **Tested Features:**
+  - Migration guide generation
+  - Hook usage analysis and validation
+  - Migration report generation
+  - Legacy hook detection
+- **Test Count:** 10+ test cases covering migration scenarios
+
+**9. Type Validation (`src/types/__tests__/type-validation.test.ts`)**
+
+- **Coverage:** Type consolidation and validation
+- **Tested Features:**
+  - Database type exports and relationships
+  - API type definitions
+  - Domain-specific types (LMS, training, assessments)
+  - UI component types and utility types
+- **Test Count:** 50+ test cases covering type definitions
+
+### Integration Test Coverage Analysis
+
+#### Database Integration Tests (`src/__tests__/integration/database-integration.test.ts`)
+
+- **Coverage:** Real database operations with test data
+- **Tested Features:**
+  - Database connection and basic queries
+  - Entity creation, retrieval, and validation
+  - Complex queries (joins, aggregates, conditional queries)
+  - Data integrity and referential constraints
+  - Performance tests (query execution time, pagination)
+  - Error handling (invalid UUIDs, null values, empty results)
+- **Test Strategy:** Uses real database with test data setup/cleanup
+- **Test Count:** 20+ test cases covering database integration
+
+### End-to-End Test Coverage Analysis
+
+#### Critical Flows (`src/__e2e__/critical-flows.spec.ts`)
+
+- **Coverage:** Complete user journeys and critical business processes
+- **Tested Flows:**
+  - **Authentication Flow:** Login, signup, password reset with error handling
+  - **Course Management:** Course enrollment, progress tracking, completion
+  - **Admin Functions:** User management, course management, analytics viewing
+  - **Navigation Flow:** Role-based navigation, plant switching, responsive design
+  - **Accessibility Tests:** Keyboard navigation, ARIA labels, screen reader compatibility
+  - **Cross-Browser Compatibility:** Chrome, Firefox, Safari testing
+- **Test Count:** 25+ test cases covering critical user journeys
+
+#### Simplified Flows (`src/__e2e__/simplified-flows.spec.ts`)
+
+- **Coverage:** Streamlined E2E tests using standardized templates
+- **Tested Flows:**
+  - User authentication (login, signup, error handling)
+  - Course enrollment and progress tracking
+  - Admin user management and course creation
+  - Complete user journey from signup to course completion
+- **Test Strategy:** Uses template-based approach for consistency
+- **Test Count:** 10+ test cases covering simplified flows
+
+### Areas with Limited or No Test Coverage
+
+#### 1. Business Logic Components
+
+- **Missing Coverage:** Most business-specific components lack unit tests
+- **Affected Areas:**
+  - `src/components/business/` directory (no test files found)
+  - Training module components
+  - Assessment components
+  - Course management components
+- **Risk Level:** High - Core business functionality untested
+
+#### 2. React Contexts
+
+- **Missing Coverage:** Context providers lack comprehensive testing
+- **Affected Areas:**
+  - `src/contexts/AuthContext.tsx` - Authentication state management
+  - `src/contexts/ProgressContext.tsx` - Progress tracking context
+- **Risk Level:** Medium - State management untested
+
+#### 3. Custom Hooks
+
+- **Missing Coverage:** Most custom hooks lack unit tests
+- **Affected Areas:**
+  - `src/hooks/useApi.ts` - API integration hooks
+  - `src/hooks/useStandardizedApi.ts` - Standardized API hooks
+  - `src/hooks/useStandardizedProgress.ts` - Progress tracking hooks
+- **Risk Level:** High - Hook logic untested
+
+#### 4. API Routes
+
+- **Missing Coverage:** Individual API route implementations lack tests
+- **Affected Areas:**
+  - `src/app/api/admin/` routes - Admin functionality
+  - `src/app/api/auth/` routes - Authentication endpoints
+  - Individual route handlers and business logic
+- **Risk Level:** High - API endpoints untested
+
+#### 5. Middleware
+
+- **Missing Coverage:** Custom middleware lacks comprehensive testing
+- **Affected Areas:**
+  - `src/lib/middleware/` - Authentication and authorization middleware
+  - `middleware.ts` - Main application middleware
+- **Risk Level:** Medium - Security middleware untested
+
+#### 6. Authentication System
+
+- **Missing Coverage:** Core authentication logic lacks unit tests
+- **Affected Areas:**
+  - `src/lib/auth/` - Authentication service and middleware
+  - `src/lib/rls.ts` - Row-level security implementation
+- **Risk Level:** High - Security-critical code untested
+
+#### 7. Training Content System
+
+- **Missing Coverage:** Training module logic lacks tests
+- **Affected Areas:**
+  - `src/features/lms/` - LMS analytics and features
+  - `src/data/modules/` - Training module definitions
+- **Risk Level:** Medium - Business logic untested
+
+### Test Infrastructure Strengths
+
+#### 1. Comprehensive Test Templates
+
+- **Unit Test Templates:** Standardized patterns for component and hook testing
+- **Integration Test Templates:** Consistent database testing patterns
+- **E2E Test Templates:** Streamlined end-to-end testing approach
+- **Benefit:** Ensures consistency and reduces test maintenance overhead
+
+#### 2. Centralized Test Utilities
+
+- **Test Data Management:** Centralized test fixtures and data generators
+- **Mock Helpers:** Consistent API mocking and database mocking
+- **Environment Management:** Simplified test environment setup/cleanup
+- **Benefit:** Reduces test complexity and improves reliability
+
+#### 3. Multi-Layer Testing Strategy
+
+- **Unit Tests:** Individual function and component testing
+- **Integration Tests:** Database and service integration testing
+- **E2E Tests:** Complete user journey testing
+- **Benefit:** Comprehensive coverage from unit to system level
+
+#### 4. Modern Testing Tools
+
+- **Vitest:** Fast unit testing with excellent TypeScript support
+- **Playwright:** Reliable E2E testing with multi-browser support
+- **Testing Library:** Accessible component testing patterns
+- **Benefit:** Modern, maintainable testing infrastructure
+
+### Test Infrastructure Weaknesses
+
+#### 1. Incomplete Coverage
+
+- **Business Components:** Core business logic lacks unit tests
+- **Custom Hooks:** Hook logic untested despite heavy usage
+- **API Routes:** Individual route implementations untested
+- **Impact:** High risk of bugs in core functionality
+
+#### 2. Authentication Testing Gaps
+
+- **Security Logic:** Authentication and authorization logic untested
+- **RLS Policies:** Row-level security implementation untested
+- **Impact:** Security vulnerabilities may go undetected
+
+#### 3. Context Testing Gaps
+
+- **State Management:** React contexts lack comprehensive testing
+- **Impact:** State management bugs may affect user experience
+
+#### 4. Integration Test Limitations
+
+- **Service Integration:** Limited testing of external service integrations
+- **Impact:** Integration failures may not be caught early
+
+### Recommendations for Test Coverage Improvement
+
+#### 1. High Priority - Critical Business Logic
+
+- **Add unit tests for business components** in `src/components/business/`
+- **Test custom hooks** in `src/hooks/` directory
+- **Test API route handlers** in `src/app/api/` directory
+- **Test authentication system** in `src/lib/auth/` directory
+
+#### 2. Medium Priority - State Management
+
+- **Add context tests** for `AuthContext` and `ProgressContext`
+- **Test middleware** in `src/lib/middleware/` directory
+- **Test RLS implementation** in `src/lib/rls.ts`
+
+#### 3. Low Priority - Additional Coverage
+
+- **Add service integration tests** for external APIs
+- **Test training content system** in `src/features/lms/`
+- **Add performance tests** for critical operations
+
+### Test Quality Metrics
+
+#### Current Test Statistics
+
+- **Total Test Files:** 15+ test files across unit, integration, and E2E
+- **Unit Tests:** 200+ individual test cases
+- **Integration Tests:** 20+ database integration tests
+- **E2E Tests:** 35+ end-to-end test cases
+- **Coverage Areas:** Database operations, schemas, utilities, UI components, configuration
+- **Coverage Gaps:** Business logic, hooks, API routes, authentication, contexts
+
+#### Test Infrastructure Maturity
+
+- **Setup Quality:** Excellent - centralized setup and utilities
+- **Template Quality:** Excellent - standardized test patterns
+- **Mock Strategy:** Good - comprehensive mocking for tested areas
+- **Coverage Completeness:** Moderate - good foundation but significant gaps
+- **Maintainability:** Excellent - simplified infrastructure with consistent patterns
+
+The testing infrastructure demonstrates strong architectural decisions and modern tooling, but requires significant expansion of test coverage to ensure comprehensive validation of the application's core business logic and security-critical components.
+
+## Documentation Analysis
+
+### Existing Documentation Overview
+
+The repository contains extensive documentation organized into a well-structured system with clear categorization and maintenance processes. The documentation demonstrates enterprise-grade organization with comprehensive coverage of technical, business, and implementation aspects.
+
+### Documentation Structure and Organization
+
+#### Core Documentation Files
+
+- **README.md** - Main project overview with quick start guide, architecture summary, and feature highlights
+- **docs/README.md** - Comprehensive documentation index with navigation and maintenance information
+- **docs/SETUP.md** - Complete development environment setup guide
+- **docs/DEPLOYMENT.md** - Production deployment instructions with security checklist
+- **docs/API.md** - API endpoints documentation with authentication and error handling
+- **docs/ARCHITECTURE.md** - System architecture overview with technology stack and security features
+
+#### Implementation Documentation
+
+- **API Route Standardization Implementation Summary** - Complete documentation of API standardization project
+- **Authentication Pattern Consolidation Implementation Summary** - Unified authentication system implementation
+- **Component State Management Refactoring Implementation Summary** - State management improvements
+- **Database Operations Refactoring Implementation Summary** - Database layer improvements
+- **Configuration Management Standardization Implementation Summary** - Configuration system standardization
+- **Environment Deployment Implementation Summary** - Deployment process improvements
+- **Hook Pattern Migration Implementation Summary** - Hook system migration
+- **Testing Infrastructure Implementation Summary** - Testing system improvements
+- **Type Consolidation Implementation Summary** - Type system consolidation
+
+#### Business Documentation
+
+- **SpecChem Team Handbook** - Comprehensive company handbook with policies, procedures, and organizational information
+- **Design Language Guide** - Detailed design system with tokens, typography, colors, and component specifications
+- **Feature Ideas** - Business feature specifications and requirements
+- **Smart Job Role Navigator** - Role-based navigation system design
+- **Phase 2 Dynamic Content** - Content management system specifications
+
+#### Technical References
+
+- **Database Schema Documentation** - Complete schema reference with tables, relationships, and constraints
+- **Supabase Authentication Guide** - Comprehensive authentication system documentation
+- **Schema Completion Summary** - Database schema implementation status
+- **Schema Narrative** - Database design rationale and decisions
+
+#### Process Documentation
+
+- **Documentation Standards** - Documentation formatting and maintenance standards
+- **Documentation Strategy** - Documentation organization and maintenance strategy
+- **Maintenance Schedule** - Documentation review and update schedule
+- **Configuration Guide** - Environment configuration instructions
+- **Environment Setup** - Development environment configuration
+
+### What Documentation Explains Well
+
+#### 1. Technical Architecture
+
+- **Complete System Overview**: Architecture documentation provides comprehensive coverage of the technology stack, security features, and deployment process
+- **Database Design**: Detailed schema documentation with relationships, constraints, and performance considerations
+- **Authentication System**: Extensive documentation of Supabase auth integration, JWT handling, and RLS policies
+- **API Design**: Standardized API patterns with consistent error handling and response formatting
+
+#### 2. Implementation Processes
+
+- **Standardization Efforts**: Detailed documentation of major refactoring projects including API routes, authentication, and database operations
+- **Migration Guides**: Step-by-step migration instructions for deprecated systems
+- **Testing Strategy**: Comprehensive testing infrastructure documentation with coverage analysis
+- **Configuration Management**: Environment setup and configuration validation processes
+
+#### 3. Business Context
+
+- **Company Information**: Complete SpecChem handbook with organizational policies and procedures
+- **Design System**: Detailed design language with tokens, typography, and component specifications
+- **Feature Requirements**: Business feature specifications and implementation plans
+- **Role Definitions**: Comprehensive role-based access control documentation
+
+#### 4. Development Workflow
+
+- **Setup Instructions**: Complete development environment setup with prerequisites and verification steps
+- **Deployment Process**: Production deployment guide with security checklists and monitoring
+- **Code Standards**: Documentation standards and maintenance processes
+- **Quality Assurance**: Testing strategies and code quality metrics
+
+### What Documentation Leaves Out or Lacks
+
+#### 1. User Experience Documentation
+
+- **User Interface Guidelines**: Limited documentation of UI/UX patterns and component usage
+- **User Journey Documentation**: No comprehensive user flow documentation for different roles
+- **Accessibility Guidelines**: Missing accessibility standards and implementation guidelines
+- **Mobile/Responsive Design**: Limited documentation of responsive design patterns
+
+#### 2. Operational Documentation
+
+- **Monitoring and Alerting**: Limited documentation of production monitoring and alerting systems
+- **Performance Optimization**: Missing performance tuning and optimization guidelines
+- **Disaster Recovery**: No disaster recovery procedures or backup strategies documented
+- **Incident Response**: Missing incident response procedures and escalation paths
+
+#### 3. Integration Documentation
+
+- **External Service Integration**: Limited documentation of third-party service integrations
+- **API Integration Examples**: Missing practical examples of API usage and integration patterns
+- **Webhook Documentation**: No documentation of webhook endpoints and event handling
+- **Data Import/Export**: Missing documentation of data migration and import/export procedures
+
+#### 4. Advanced Features
+
+- **Analytics Implementation**: Limited documentation of analytics system implementation and usage
+- **Reporting System**: Missing documentation of reporting features and customization options
+- **Notification System**: No documentation of notification and communication systems
+- **Audit Logging**: Limited documentation of audit trail implementation and usage
+
+#### 5. Security Documentation
+
+- **Security Policies**: Missing comprehensive security policy documentation
+- **Penetration Testing**: No documentation of security testing procedures
+- **Compliance Documentation**: Limited documentation of regulatory compliance requirements
+- **Data Privacy**: Missing data privacy and GDPR compliance documentation
+
+#### 6. Maintenance and Operations
+
+- **Database Maintenance**: Limited documentation of database maintenance procedures
+- **Log Management**: Missing log management and analysis procedures
+- **Performance Monitoring**: Limited documentation of performance monitoring and optimization
+- **Capacity Planning**: No documentation of capacity planning and scaling procedures
+
+### Code Comments and Inline Documentation
+
+#### Well-Documented Areas
+
+- **API Routes**: Comprehensive JSDoc comments with parameter descriptions and return types
+- **Database Operations**: Detailed comments explaining complex queries and business logic
+- **Authentication System**: Extensive inline documentation of security-critical code
+- **Utility Functions**: Well-documented utility functions with usage examples
+- **Configuration Management**: Detailed comments explaining configuration options and validation
+
+#### Areas Lacking Comments
+
+- **Business Logic Components**: Limited inline documentation of complex business rules
+- **UI Components**: Missing component documentation and usage examples
+- **Custom Hooks**: Limited documentation of hook behavior and dependencies
+- **Middleware Functions**: Missing documentation of middleware behavior and side effects
+
+### Documentation Quality Assessment
+
+#### Strengths
+
+- **Comprehensive Coverage**: Documentation covers all major system components and processes
+- **Well-Organized**: Clear categorization and navigation structure
+- **Maintenance Process**: Established documentation maintenance and review processes
+- **Implementation Focus**: Detailed documentation of implementation projects and migrations
+- **Business Context**: Strong integration of business requirements and technical implementation
+
+#### Areas for Improvement
+
+- **User-Focused Documentation**: Need more user experience and interface documentation
+- **Operational Procedures**: Missing operational and maintenance procedures
+- **Integration Examples**: Need more practical examples and integration patterns
+- **Security Documentation**: Require more comprehensive security and compliance documentation
+- **Performance Guidelines**: Missing performance optimization and monitoring documentation
+
+### Recommendations for Documentation Enhancement
+
+#### High Priority
+
+1. **User Experience Documentation**: Create comprehensive UI/UX guidelines and user journey documentation
+2. **Operational Procedures**: Document monitoring, alerting, and incident response procedures
+3. **Security Documentation**: Develop comprehensive security policies and compliance documentation
+4. **Integration Examples**: Add practical examples of API usage and third-party integrations
+
+#### Medium Priority
+
+1. **Performance Documentation**: Document performance monitoring and optimization procedures
+2. **Accessibility Guidelines**: Create accessibility standards and implementation guidelines
+3. **Mobile Documentation**: Document responsive design patterns and mobile-specific considerations
+4. **Analytics Documentation**: Document analytics implementation and reporting features
+
+#### Low Priority
+
+1. **Advanced Features**: Document advanced features like notifications and audit logging
+2. **Disaster Recovery**: Create disaster recovery and backup procedures
+3. **Capacity Planning**: Document capacity planning and scaling procedures
+4. **Code Examples**: Add more practical code examples and usage patterns
+
+The documentation system demonstrates enterprise-grade organization and comprehensive coverage of technical implementation, but would benefit from enhanced user experience documentation, operational procedures, and security documentation to provide complete coverage of all system aspects.
+
+## Complexity, Duplication, and Drift Analysis
+
+Based on comprehensive code analysis, the following areas demonstrate complexity, duplication, or potential drift that deserve review and refactoring:
+
+### 1. Authentication Pattern Duplication and Complexity
+
+**Problem:** Multiple authentication systems coexist with significant duplication and complexity.
+
+**Evidence:**
+
+- **Legacy vs. New Systems:** `src/lib/api-auth.ts` contains deprecated functions that wrap new authentication functions, creating unnecessary abstraction layers
+- **Multiple Middleware Classes:** Three different auth middleware implementations:
+  - `src/lib/auth/middleware/auth-middleware.ts` (new unified system)
+  - `src/lib/middleware/auth.ts` (Supabase-specific)
+  - `src/app/api/shared/middleware/auth-middleware.ts` (API route templates)
+- **Inconsistent Patterns:** Different authentication patterns across API routes:
+  - Legacy: `withAdminAuth()`, `withUserAuth()` in `src/lib/api-auth.ts`
+  - New: `AuthMiddleware.withAdminAuth()` in shared templates
+  - Direct: `authenticateAdmin()` calls in individual routes
+
+**Impact:** High maintenance overhead, inconsistent security patterns, potential security gaps, developer confusion
+
+**Recommendation:** Complete migration to unified authentication system and remove legacy wrappers.
+
+### 2. Custom Hook Pattern Fragmentation
+
+**Problem:** Multiple hook systems with overlapping functionality and inconsistent patterns.
+
+**Evidence:**
+
+- **Three Hook Systems:**
+  - Legacy: `src/hooks/useApi.ts` (deprecated with warnings)
+  - Standardized: `src/hooks/useStandardizedApi.ts` (new system)
+  - Domain-specific: `src/hooks/useStandardizedProgress.ts`, `src/hooks/useEnrollments.ts`, etc.
+- **Duplicated Functionality:** Progress hooks exist in both `useApi.ts` and `useStandardizedProgress.ts`
+- **Inconsistent Caching:** Different caching strategies across hook systems
+- **Migration State:** Components still using deprecated hooks (e.g., `IntegrationDashboard.tsx`)
+
+**Impact:** Bundle size bloat, inconsistent user experience, maintenance complexity, potential bugs from deprecated code
+
+**Recommendation:** Complete hook migration, remove deprecated hooks, standardize caching patterns.
+
+### 3. Database Operation Layer Complexity
+
+**Problem:** Over-engineered database layer with multiple abstraction levels and inconsistent patterns.
+
+**Evidence:**
+
+- **Multiple Operation Classes:** Separate classes for each entity (`UserOperations`, `EnrollmentOperations`, `CourseOperations`)
+- **Builder Pattern Overuse:** `QueryBuilder`, `FilterBuilder`, `PaginationBuilder` create unnecessary complexity
+- **Wrapper Proliferation:** `OperationWrapper`, `DatabaseErrorHandler` add layers without clear benefit
+- **Tenant Filtering Inconsistency:** Some operations use `withTenantFilter()`, others implement manual filtering
+- **Legacy Operations:** `src/lib/db/operations.ts` contains older patterns alongside new class-based operations
+
+**Impact:** High cognitive load, difficult debugging, inconsistent tenant security, maintenance overhead
+
+**Recommendation:** Simplify database layer, consolidate operation patterns, ensure consistent tenant filtering.
+
+### 4. API Route Template Over-Engineering
+
+**Problem:** Complex template system that may be over-engineered for the actual use cases.
+
+**Evidence:**
+
+- **Template Classes:** `CrudRouteTemplate`, `ListRouteTemplate`, `AnalyticsRouteTemplate` with extensive generic typing
+- **Middleware Layering:** Multiple middleware classes (`AuthMiddleware`, `ValidationMiddleware`, `ErrorMiddleware`) create complex call chains
+- **Limited Usage:** Templates appear to be used in only a few routes, suggesting over-engineering
+- **Inconsistent Adoption:** Some routes use templates, others implement patterns directly
+
+**Impact:** Unnecessary complexity, learning curve for developers, maintenance overhead
+
+**Recommendation:** Evaluate template usage, simplify or remove unused templates, standardize on simpler patterns.
+
+### 5. Configuration Management Redundancy
+
+**Problem:** Multiple configuration validation systems with overlapping concerns.
+
+**Evidence:**
+
+- **Dual Validation:** Both `src/lib/config.ts` and `src/lib/config-validation.ts` handle configuration validation
+- **Redundant Checks:** `ConfigValidationService` re-validates already validated configuration
+- **Complex Error Handling:** Multiple layers of error handling for configuration issues
+- **Environment Override Logic:** Complex temporary environment switching in validation service
+
+**Impact:** Code duplication, maintenance overhead, potential inconsistencies
+
+**Recommendation:** Consolidate configuration validation into single system, simplify error handling.
+
+### 6. Component State Management Inconsistency
+
+**Problem:** Inconsistent state management patterns across components.
+
+**Evidence:**
+
+- **Multiple Form Patterns:** Different form handling approaches:
+  - `useAdminForm` hook for admin forms
+  - Manual state management in `SignupForm`
+  - Different validation patterns across components
+- **Inconsistent Error Handling:** Different error state management patterns
+- **Mixed Hook Usage:** Components using both legacy and new hook systems
+
+**Impact:** Inconsistent user experience, maintenance complexity, potential bugs
+
+**Recommendation:** Standardize form patterns, consolidate error handling, complete hook migration.
+
+### 7. Type System Fragmentation
+
+**Problem:** Multiple type definition locations with potential inconsistencies.
+
+**Evidence:**
+
+- **Scattered Types:** Types defined in multiple locations:
+  - `src/types/` directory
+  - Inline types in component files
+  - Generated types from schemas
+- **Import Confusion:** Multiple import paths for similar types
+- **Schema-Type Misalignment:** Potential drift between Zod schemas and TypeScript types
+
+**Impact:** Type safety issues, import confusion, maintenance overhead
+
+**Recommendation:** Consolidate type definitions, ensure schema-type alignment, standardize imports.
+
+### 8. Testing Infrastructure Complexity
+
+**Problem:** Over-engineered testing infrastructure with multiple overlapping systems.
+
+**Evidence:**
+
+- **Multiple Test Templates:** Various test templates for different scenarios
+- **Complex Setup:** Extensive test setup and utilities
+- **Migration Testing:** Tests for migration systems that may not be needed long-term
+- **Incomplete Coverage:** Despite complex infrastructure, significant gaps in test coverage
+
+**Impact:** High maintenance overhead, complex test writing, incomplete coverage
+
+**Recommendation:** Simplify testing infrastructure, focus on essential patterns, improve coverage.
+
+### 9. Middleware Orchestration Complexity
+
+**Problem:** Complex middleware orchestration with multiple layers and potential race conditions.
+
+**Evidence:**
+
+- **Multiple Middleware Files:** `auth.ts`, `authorization.ts`, `config.ts` in middleware directory
+- **Complex Orchestration:** Main `middleware.ts` coordinates multiple middleware systems
+- **Header Injection:** Complex header injection patterns for user context
+- **Potential Race Conditions:** Multiple async operations in middleware chain
+
+**Impact:** Debugging difficulty, potential performance issues, maintenance complexity
+
+**Recommendation:** Simplify middleware chain, reduce layers, improve debugging.
+
+### 10. Documentation Maintenance Overhead
+
+**Problem:** Extensive documentation system that may be difficult to maintain.
+
+**Evidence:**
+
+- **Implementation Summaries:** Multiple implementation summary documents that may become outdated
+- **Migration Guides:** Extensive migration documentation for systems in transition
+- **Maintenance Scripts:** Automated documentation maintenance scripts suggesting high maintenance overhead
+- **Documentation Drift:** Risk of documentation becoming outdated as code evolves
+
+**Impact:** Maintenance overhead, potential documentation drift, developer confusion
+
+**Recommendation:** Focus documentation on essential information, automate where possible, regular review cycles.
+
+## Priority Recommendations
+
+### High Priority (Address Immediately)
+
+1. **Complete Authentication Migration** - Remove legacy auth wrappers and consolidate patterns
+2. **Finish Hook Migration** - Remove deprecated hooks and standardize patterns
+3. **Simplify Database Layer** - Reduce abstraction levels and ensure consistent tenant filtering
+
+### Medium Priority (Address Soon)
+
+4. **Consolidate Configuration Validation** - Merge validation systems
+5. **Standardize Component Patterns** - Unify form handling and state management
+6. **Simplify API Route Templates** - Evaluate necessity and simplify or remove
+
+### Low Priority (Address When Time Permits)
+
+7. **Consolidate Type Definitions** - Organize and align type systems
+8. **Simplify Testing Infrastructure** - Focus on essential patterns
+9. **Streamline Middleware** - Reduce complexity and improve debugging
+10. **Optimize Documentation** - Focus on essential information and reduce maintenance overhead
 
-**Impact:** Type safety issues, maintenance overhead, developer confusion
-
-### 8. **Documentation File Management** ⚠️ LOW COMPLEXITY
-**Files:** Multiple `.md` files in root and `docs/`
-
-**Issues:**
-- **Outdated Status Files:** Several phase completion files may be outdated
-- **Scattered Documentation:** Documentation spread across multiple locations
-- **Temporary Files:** Several temporary documentation files in git status
-- **Version Control:** No clear versioning system for documentation
-
-**Impact:** Developer confusion, maintenance overhead
-
-### 9. **Testing Infrastructure Gaps** ⚠️ HIGH COMPLEXITY
-**Files:** `scripts/`, `src/app/api/test/`
-
-**Issues:**
-- **No Formal Testing Framework:** No Jest, Vitest, or similar testing framework
-- **Custom Test Scripts:** Ad-hoc testing scripts instead of proper test suites
-- **Limited Coverage:** Only integration testing, no unit or E2E tests
-- **Manual Testing:** Most testing requires manual execution
-
-**Impact:** Quality assurance gaps, maintenance overhead, potential bugs
-
-### 10. **Environment and Deployment Configuration** ⚠️ MEDIUM COMPLEXITY
-**Files:** `drizzle.config.ts`, `middleware.ts`, environment files
-
-**Issues:**
-- **Environment Variable Management:** Multiple ways to handle environment variables
-- **Database Connection Patterns:** Different connection patterns across files
-- **Middleware Complexity:** Complex middleware with multiple responsibilities
-- **Deployment Configuration:** Multiple deployment configuration approaches
-
-**Impact:** Deployment issues, environment inconsistencies, maintenance overhead
-
-## Recommendations for Immediate Action
-
-### **High Priority (Address First)**
-1. **Consolidate Validation Schemas:** Choose one schema definition approach and remove duplicates
-2. **Resolve Progress Context Duplication:** Determine which context to keep and remove the other
-3. **Standardize API Authentication:** Create consistent auth patterns across all API routes
-4. **Implement Proper Testing:** Set up Jest/Vitest for unit testing and Playwright for E2E testing
-
-### **Medium Priority (Address Soon)**
-5. **Standardize Database Operations:** Choose consistent query patterns and error handling
-6. **Consolidate Custom Hooks:** Standardize data fetching patterns across all hooks
-7. **Improve Type Safety:** Replace generic types with proper TypeScript definitions
-8. **Clean Up Configuration Files:** Remove duplicate and backup configuration files
-
-### **Low Priority (Address Later)**
-9. **Organize Documentation:** Consolidate and version control documentation
-10. **Simplify Environment Setup:** Standardize environment variable management
-
-## Clear Action Checklist
-
-### **🔴 CRITICAL DUPLICATES TO RESOLVE**
-
-#### **Validation Schema Duplication** ✅ COMPLETED
-- [x] **DECIDE:** Chose `src/lib/schemas.ts` as single source of truth
-- [x] **REMOVE:** Deleted `src/lib/validations.ts.backup` (outdated)
-- [x] **STANDARDIZE:** Fixed type mismatches (`z.date()` vs `z.string().datetime()`)
-- [x] **CONSOLIDATE:** Merged all schemas into single source of truth
-- [x] **UPDATE:** Updated all imports to use consolidated schemas
-
-#### **Progress Context Duplication** ✅ COMPLETED
-- [x] **DECIDE:** Chose `src/contexts/ProgressContext.tsx` as single source of truth
-- [x] **REMOVE:** Deleted `src/contexts/NewProgressContext.tsx` (unused duplicate)
-- [x] **UPDATE:** No imports needed updating (duplicate was unused)
-- [x] **VERIFY:** Successfully built project to confirm no runtime conflicts
-
-#### **API Authentication Inconsistency** ✅ COMPLETED
-- [x] **STANDARDIZE:** Created centralized authentication utility (`src/lib/api-auth.ts`)
-- [x] **UPDATE:** Converted all admin routes to use consistent pattern:
-  - [x] `src/app/api/admin/courses/route.ts`
-  - [x] `src/app/api/admin/courses/[id]/route.ts`  
-  - [x] `src/app/api/admin/users/route.ts`
-  - [x] `src/app/api/admin/analytics/route.ts`
-  - [x] `src/app/api/admin/reports/route.ts`
-  - [x] `src/app/api/admin/enrollments/route.ts`
-- [x] **STANDARDIZE:** Created consistent error response format
-- [x] **TEST:** Verified all auth patterns work correctly (build successful)
-
-### **🟡 MEDIUM PRIORITY FIXES**
-
-#### **Database Operation Patterns**
-- [ ] **STANDARDIZE:** Choose Drizzle query builder over raw Supabase calls
-- [ ] **UPDATE:** Convert all operations in `src/lib/db/operations.ts`
-- [ ] **CONSISTENT:** Apply same error handling pattern across all operations
-- [ ] **TENANT:** Ensure all operations properly handle tenant filtering
-
-#### **Custom Hook Patterns**
-- [ ] **STANDARDIZE:** Use `useApi` utilities consistently across all hooks
-- [ ] **UPDATE:** Convert `src/hooks/useUsers.ts` and `src/hooks/useCourses.ts`
-- [ ] **CACHING:** Implement consistent caching strategy
-- [ ] **ERRORS:** Standardize error handling patterns
-
-#### **TypeScript Type Safety**
-- [ ] **REPLACE:** Remove all `any` and `unknown` types (50+ instances found)
-- [ ] **DEFINE:** Create proper interfaces for all data structures
-- [ ] **EXPORT:** Ensure all types are properly exported from modules
-- [ ] **VALIDATE:** Use Zod schemas for runtime type validation
-
-### **🟢 LOW PRIORITY CLEANUP**
-
-#### **Configuration Files**
-- [ ] **REMOVE:** Delete `vercel.json.backup`
-- [ ] **DECIDE:** Choose between `next.config.js` vs `next.config.ts`
-- [ ] **STANDARDIZE:** Use consistent environment variable patterns
-
-#### **Documentation Management**
-- [ ] **REVIEW:** Check if phase completion files are still current
-- [ ] **CONSOLIDATE:** Organize documentation in logical structure
-- [ ] **VERSION:** Add timestamps to all documentation files
-- [ ] **CLEANUP:** Remove temporary documentation files from git
-
-### **🧪 TESTING INFRASTRUCTURE**
-
-#### **Unit Testing Setup**
-- [ ] **INSTALL:** Add Jest or Vitest testing framework
-- [ ] **CONFIG:** Set up testing configuration files
-- [ ] **TESTS:** Create unit tests for:
-  - [ ] Database operations (`src/lib/db/operations.ts`)
-  - [ ] Validation schemas (`src/lib/validations.ts`)
-  - [ ] Auth helpers (`src/lib/auth.ts`)
-  - [ ] API utilities (`src/lib/api-utils.ts`)
-
-#### **Integration Testing**
-- [ ] **EXPAND:** Enhance existing integration tests in `scripts/`
-- [ ] **AUTOMATE:** Convert manual tests to automated test suites
-- [ ] **COVERAGE:** Add tests for API routes and database operations
-
-#### **End-to-End Testing**
-- [ ] **INSTALL:** Add Playwright or Cypress for E2E testing
-- [ ] **SCENARIOS:** Create tests for:
-  - [ ] Complete authentication flow
-  - [ ] Course enrollment and progress tracking
-  - [ ] Admin user management workflows
-  - [ ] Multi-tenant data isolation
-
-## Complexity Metrics
-
-- **Files with Duplication:** 4+ files with significant code duplication (down from 8+)
-- **Validation Schema Files:** 1 consolidated file (down from 4 duplicate files)
-- **Context Providers:** 1 context implementation (down from 2 nearly identical)
-- **API Route Patterns:** 1 standardized authentication pattern (down from 3+ different patterns)
-- **Type Safety Issues:** 50+ instances of `any` or generic types
-- **Testing Coverage:** 0% unit test coverage, limited integration testing
-
-**Duplication Resolution Impact:**
-- ✅ **Schema Duplication:** Eliminated 1,503 lines of duplicate schema code
-- ✅ **Progress Context:** Eliminated 277 lines of duplicate context code
-- ✅ **API Authentication:** Eliminated 500+ lines of duplicate authentication code
-- ✅ **Total Reduction:** 2,280+ lines of duplicate code eliminated
-- ✅ **File Consolidation:** Reduced duplicate files from 8 to 1
-- ✅ **Improved Maintainability:** Single source of truth for schemas, contexts, and authentication
-- ✅ **Enhanced Type Safety:** Standardized validation patterns across application
-- ✅ **Security Consistency:** Standardized authentication patterns across all API routes
-
-This analysis reveals a codebase with good architectural foundations. Major areas of duplication and inconsistency have been successfully addressed, significantly improving maintainability and reducing technical debt. The authentication system has been standardized, schema duplication eliminated, and context providers consolidated, resulting in a more maintainable and secure codebase.
+These areas represent significant opportunities for reducing complexity, eliminating duplication, and preventing architectural drift while maintaining the system's robust functionality.

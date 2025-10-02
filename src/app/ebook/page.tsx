@@ -1,24 +1,24 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { 
-  BookOpen, 
-  CheckCircle, 
-  AlertTriangle, 
-  Package, 
-  Shield, 
-  FileText,
-  ArrowRight,
-  ArrowLeft,
-  Menu,
-  X,
-  Globe
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  CheckCircle,
+  FileText,
+  Globe,
+  Menu,
+  Package,
+  Shield,
+  X
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface QuizQuestion {
   id: string;
@@ -1834,9 +1834,9 @@ export default function EbookPage() {
             <div className="max-w-4xl mx-auto">
               {sections[currentSection]?.content}
               
-              {sections[currentSection]?.quiz && (
-                <QuizComponent quiz={sections[currentSection].quiz!} />
-              )}
+              {sections[currentSection]?.quiz ? (
+                <QuizComponent quiz={sections[currentSection]?.quiz!} />
+              ) : null}
 
               {/* Navigation */}
               <div className="flex flex-col sm:flex-row justify-between items-center mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-200 gap-4 sm:gap-0">

@@ -1,5 +1,6 @@
 export interface CacheStrategy {
   // Different TTLs for different data types
+  default: number;          // 2 minutes - general default
   userData: number;        // 5 minutes - relatively stable
   courseData: number;       // 3 minutes - moderate changes
   enrollmentData: number;   // 2 minutes - frequent updates
@@ -8,6 +9,7 @@ export interface CacheStrategy {
 }
 
 export const CACHE_STRATEGY: CacheStrategy = {
+  default: 2 * 60 * 1000,       // 2 minutes
   userData: 5 * 60 * 1000,      // 5 minutes
   courseData: 3 * 60 * 1000,    // 3 minutes
   enrollmentData: 2 * 60 * 1000, // 2 minutes

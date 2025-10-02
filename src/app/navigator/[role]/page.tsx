@@ -32,7 +32,7 @@ import {
 import Link from 'next/link'
 import Image from 'next/image'
 import { getRoleById, getTrainingPathByRole, getModuleById } from '@/data/roles'
-import { SpecChemRole, TrainingPath, TrainingModule } from '@/types/navigator'
+import { SpecChemRole, TrainingPath, TrainingModule } from '@/types/domain'
 
 // Icon mapping for dynamic icon rendering
 const IconMap = {
@@ -73,8 +73,8 @@ export default function RolePage() {
         setTrainingPath(pathData)
         // Get module details for the training path
         const moduleDetails = pathData.modules
-          .sort((a, b) => a.order - b.order)
-          .map(pathModule => getModuleById(pathModule.moduleId))
+          .sort((a: any, b: any) => a.order - b.order)
+          .map((pathModule: any) => getModuleById(pathModule.moduleId))
           .filter(Boolean) as TrainingModule[]
         setModules(moduleDetails)
       }
@@ -210,7 +210,8 @@ export default function RolePage() {
                 <div className="space-y-4">
                   {modules.map((module, index) => {
                     const status = getModuleStatus(module.id)
-                    const isLocked = index > 0 && getModuleStatus(modules[index - 1].id) !== 'completed'
+                    const previousModule = index > 0 ? modules[index - 1] : null
+                    const isLocked = previousModule && getModuleStatus(previousModule.id) !== 'completed'
                     
                     return (
                       <div key={module.id} className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all ${

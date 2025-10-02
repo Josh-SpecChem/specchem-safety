@@ -1,6 +1,6 @@
-import { TrainingModuleContent } from '@/types/training'
+import { TrainingModule } from '@/types/domain'
 
-export const SALES_REPRESENTATIVE_MODULES: TrainingModuleContent[] = [
+export const SALES_REPRESENTATIVE_MODULES: TrainingModule[] = [
   {
     id: 'sales-product-knowledge',
     title: 'SpecChem Product Portfolio',
@@ -8,12 +8,17 @@ export const SALES_REPRESENTATIVE_MODULES: TrainingModuleContent[] = [
     duration: '2 hours',
     difficulty: 'intermediate',
     category: 'product',
+    prerequisites: [],
+    assessmentRequired: true,
+    certificationEligible: true,
+    lastUpdated: '2024-12-19',
     content: {
       sections: [
         {
           id: 'intro-overview',
           title: 'Introduction to SpecChem Products',
           estimatedReadTime: '15 minutes',
+        order: 1,
           content: `
             <div class="space-y-6">
               <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl text-white">
@@ -62,6 +67,7 @@ export const SALES_REPRESENTATIVE_MODULES: TrainingModuleContent[] = [
           id: 'core-product-lines',
           title: 'Core Product Lines & Applications',
           estimatedReadTime: '30 minutes',
+        order: 2,
           content: `
             <div class="space-y-6">
               <h2 class="text-2xl font-bold text-gray-900 mb-6">SpecChem Product Categories</h2>
@@ -149,6 +155,7 @@ export const SALES_REPRESENTATIVE_MODULES: TrainingModuleContent[] = [
           id: 'competitive-advantages',
           title: 'Competitive Advantages & Value Propositions',
           estimatedReadTime: '25 minutes',
+        order: 3,
           content: `
             <div class="space-y-6">
               <h2 class="text-2xl font-bold text-gray-900 mb-6">Why Customers Choose SpecChem</h2>
@@ -391,16 +398,6 @@ export const SALES_REPRESENTATIVE_MODULES: TrainingModuleContent[] = [
         showFeedback: true,
         certificateGeneration: true
       }
-    },
-    prerequisites: [],
-    learningObjectives: [
-      'Identify and describe all major SpecChem product categories and their applications',
-      'Explain the competitive advantages that differentiate SpecChem from competitors',
-      'Match appropriate products to specific customer needs and project requirements',
-      'Articulate value propositions for different product lines',
-      'Use technical specifications and performance data in customer consultations'
-    ],
-    certificationEligible: true,
-    lastUpdated: '2025-08-27'
+    }
   }
 ]

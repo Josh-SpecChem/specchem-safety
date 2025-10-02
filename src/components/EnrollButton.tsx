@@ -2,10 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { trackLmsEvent } from '@/features/lms/analytics/client';
-
-interface EnrollButtonProps {
-  moduleSlug: string;
-}
+import type { EnrollButtonProps } from '@/types';
 
 export function EnrollButton({ moduleSlug }: EnrollButtonProps) {
   const handleEnroll = () => {

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useDashboardStats } from '@/hooks/useAnalytics'
 import { useUsers } from '@/hooks/useUsers'
+import type { DashboardStats, UserWithDetails } from '@/types/database'
 
 // Mock recent activities - could be replaced with real API data
 const mockRecentActivities = [
@@ -93,8 +94,8 @@ function getActivityIcon(type: string) {
 }
 
 export function AdminDashboardContent() {
-  const { stats, loading: statsLoading, error: statsError } = useDashboardStats()
-  const { users, loading: usersLoading } = useUsers({ limit: 5 })
+  const { data: stats, loading: statsLoading, error: statsError } = useDashboardStats()
+  const { data: users, loading: usersLoading } = useUsers({ page: 1, limit: 5 })
 
   return (
     <>
@@ -113,7 +114,7 @@ export function AdminDashboardContent() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Total Users</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? '...' : statsError ? 'Error' : stats.totalUsers}
+                  {statsLoading ? '...' : statsError ? 'Error' : (stats as DashboardStats)?.totalUsers || 0}
                 </p>
               </div>
             </div>
@@ -133,7 +134,7 @@ export function AdminDashboardContent() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Active Enrollments</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? '...' : statsError ? 'Error' : stats.activeEnrollments}
+                  {statsLoading ? '...' : statsError ? 'Error' : (stats as DashboardStats)?.activeEnrollments || 0}
                 </p>
               </div>
             </div>
@@ -153,7 +154,7 @@ export function AdminDashboardContent() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Completion Rate</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? '...' : statsError ? 'Error' : `${stats.completionRate}%`}
+                  {statsLoading ? '...' : statsError ? 'Error' : `${(stats as DashboardStats)?.completionRate || 0}%`}
                 </p>
               </div>
             </div>
@@ -173,7 +174,7 @@ export function AdminDashboardContent() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Overdue Training</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? '...' : statsError ? 'Error' : stats.overdueTraining}
+                  {statsLoading ? '...' : statsError ? 'Error' : (stats as DashboardStats)?.overdueTraining || 0}
                 </p>
               </div>
             </div>
@@ -220,8 +221,8 @@ export function AdminDashboardContent() {
             <div className="space-y-4">
               {usersLoading ? (
                 <div className="text-center text-gray-500">Loading users...</div>
-              ) : users.length > 0 ? (
-                users.slice(0, 5).map((user) => (
+              ) : users && users.length > 0 ? (
+                (users as UserWithDetails[]).slice(0, 5).map((user) => (
                   <div key={user.id} className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                       <span className="text-sm font-medium text-gray-600">
@@ -238,7 +239,7 @@ export function AdminDashboardContent() {
                     </div>
                     <div className="flex flex-col items-end">
                       <Badge variant="outline" className="mb-1">
-                        {user.role}
+                        Employee
                       </Badge>
                       <div className="text-xs text-gray-400">
                         {user.plant.name}

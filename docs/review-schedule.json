@@ -1,0 +1,17 @@
+{
+  "lastReview": "2025-10-01T21:54:24.632Z",
+  "nextReview": "2025-10-31T21:54:24.632Z",
+  "reviewFrequency": {
+    "essential": "monthly",
+    "process": "quarterly",
+    "business": "semi-annual",
+    "historical": "annual"
+  },
+  "reviewHistory": [
+    {
+      "date": "2025-10-01T21:54:24.632Z",
+      "outdatedDocs": 0,
+      "recommendations": 3
+    }
+  ]
+}

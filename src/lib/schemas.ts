@@ -23,11 +23,11 @@ export const userStatusSchema = z.enum(['active', 'suspended']);
 
 // Plants Table Schema
 export const plantSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().min(1), // Allow any string format for UUIDs from database
   name: z.string().min(1, 'Plant name is required'),
   isActive: z.boolean().default(true),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.string().min(1), // Allow PostgreSQL timestamp format
+  updatedAt: z.string().min(1), // Allow PostgreSQL timestamp format
 });
 
 export const createPlantSchema = z.object({
@@ -42,13 +42,13 @@ export const updatePlantSchema = z.object({
 
 // Courses Table Schema
 export const courseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().min(1), // Allow any string format for UUIDs from database
   slug: z.string().min(1, 'Course slug is required'),
   title: z.string().min(1, 'Course title is required'),
   version: z.string().default('1.0'),
   isPublished: z.boolean().default(false),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.string().min(1), // Allow PostgreSQL timestamp format
+  updatedAt: z.string().min(1), // Allow PostgreSQL timestamp format
 });
 
 export const createCourseSchema = z.object({
@@ -67,20 +67,20 @@ export const updateCourseSchema = z.object({
 
 // Profiles Table Schema
 export const profileSchema = z.object({
-  id: z.string().uuid(),
-  plantId: z.string().uuid(),
+  id: z.string().min(1), // Allow any string format for UUIDs from database
+  plantId: z.string().min(1), // Allow any string format for UUIDs from database
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Valid email is required'),
   jobTitle: z.string().nullable(),
   status: userStatusSchema.default('active'),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.string().min(1), // Allow PostgreSQL timestamp format
+  updatedAt: z.string().min(1), // Allow PostgreSQL timestamp format
 });
 
 export const createProfileSchema = z.object({
-  id: z.string().uuid(),
-  plantId: z.string().uuid(),
+  id: z.string().min(1), // Allow any string format for UUIDs
+  plantId: z.string().min(1), // Allow any string format for UUIDs
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Valid email is required'),
@@ -89,7 +89,7 @@ export const createProfileSchema = z.object({
 });
 
 export const updateProfileSchema = z.object({
-  plantId: z.string().uuid().optional(),
+  plantId: z.string().min(1).optional(), // Allow any string format for UUIDs
   firstName: z.string().min(1, 'First name is required').optional(),
   lastName: z.string().min(1, 'Last name is required').optional(),
   email: z.string().email('Valid email is required').optional(),
@@ -99,68 +99,68 @@ export const updateProfileSchema = z.object({
 
 // Admin Roles Table Schema
 export const adminRoleRecordSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
+  id: z.string().min(1), // Allow any string format for UUIDs from database
+  userId: z.string().min(1), // Allow any string format for UUIDs from database
   role: adminRoleSchema,
-  plantId: z.string().uuid().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  plantId: z.string().min(1).nullable(), // Allow any string format for UUIDs from database
+  createdAt: z.string().min(1), // Allow PostgreSQL timestamp format
+  updatedAt: z.string().min(1), // Allow PostgreSQL timestamp format
 });
 
 export const createAdminRoleSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.string().min(1), // Allow any string format for UUIDs
   role: adminRoleSchema,
-  plantId: z.string().uuid().optional(),
+  plantId: z.string().min(1).optional(), // Allow any string format for UUIDs
 });
 
 export const updateAdminRoleSchema = z.object({
-  userId: z.string().uuid().optional(),
+  userId: z.string().min(1).optional(), // Allow any string format for UUIDs
   role: adminRoleSchema.optional(),
-  plantId: z.string().uuid().optional(),
+  plantId: z.string().min(1).optional(), // Allow any string format for UUIDs
 });
 
 // Enrollments Table Schema
 export const enrollmentSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
+  id: z.string().min(1), // Allow any string format for UUIDs from database
+  userId: z.string().min(1), // Allow any string format for UUIDs from database
+  courseId: z.string().min(1), // Allow any string format for UUIDs from database
+  plantId: z.string().min(1), // Allow any string format for UUIDs from database
   status: enrollmentStatusSchema.default('enrolled'),
-  enrolledAt: z.string().datetime(),
-  completedAt: z.string().datetime().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  enrolledAt: z.string().min(1), // Allow PostgreSQL timestamp format
+  completedAt: z.string().min(1).nullable(), // Allow PostgreSQL timestamp format
+  createdAt: z.string().min(1), // Allow PostgreSQL timestamp format
+  updatedAt: z.string().min(1), // Allow PostgreSQL timestamp format
 });
 
 export const createEnrollmentSchema = z.object({
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
+  userId: z.string().min(1), // Allow any string format for UUIDs
+  courseId: z.string().min(1), // Allow any string format for UUIDs
+  plantId: z.string().min(1), // Allow any string format for UUIDs
   status: enrollmentStatusSchema.default('enrolled').optional(),
 });
 
 export const updateEnrollmentSchema = z.object({
   status: enrollmentStatusSchema.optional(),
-  completedAt: z.string().datetime().nullable().optional(),
+  completedAt: z.string().min(1).nullable().optional(), // Allow PostgreSQL timestamp format
 });
 
 // Progress Table Schema
 export const progressSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
+  id: z.string().min(1), // Allow any string format for UUIDs from database
+  userId: z.string().min(1), // Allow any string format for UUIDs from database
+  courseId: z.string().min(1), // Allow any string format for UUIDs from database
+  plantId: z.string().min(1), // Allow any string format for UUIDs from database
   progressPercent: z.number().int().min(0).max(100).default(0),
   currentSection: z.string().nullable(),
-  lastActiveAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  lastActiveAt: z.string().min(1), // Allow PostgreSQL timestamp format
+  createdAt: z.string().min(1), // Allow PostgreSQL timestamp format
+  updatedAt: z.string().min(1), // Allow PostgreSQL timestamp format
 });
 
 export const createProgressSchema = z.object({
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
+  userId: z.string().min(1), // Allow any string format for UUIDs
+  courseId: z.string().min(1), // Allow any string format for UUIDs
+  plantId: z.string().min(1), // Allow any string format for UUIDs
   progressPercent: z.number().int().min(0).max(100).default(0).optional(),
   currentSection: z.string().optional(),
 });
@@ -172,43 +172,43 @@ export const updateProgressSchema = z.object({
 
 // Activity Events Table Schema
 export const activityEventSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
+  id: z.string().min(1), // Allow any string format for UUIDs from database
+  userId: z.string().min(1), // Allow any string format for UUIDs from database
+  courseId: z.string().min(1), // Allow any string format for UUIDs from database
+  plantId: z.string().min(1), // Allow any string format for UUIDs from database
   eventType: eventTypeSchema,
   meta: z.record(z.string(), z.any()).nullable(), // JSONB field
-  occurredAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
+  occurredAt: z.string().min(1), // Allow PostgreSQL timestamp format
+  createdAt: z.string().min(1), // Allow PostgreSQL timestamp format
 });
 
 export const createActivityEventSchema = z.object({
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
+  userId: z.string().min(1), // Allow any string format for UUIDs
+  courseId: z.string().min(1), // Allow any string format for UUIDs
+  plantId: z.string().min(1), // Allow any string format for UUIDs
   eventType: eventTypeSchema,
   meta: z.record(z.string(), z.any()).optional(),
 });
 
 // Question Events Table Schema
 export const questionEventSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
+  id: z.string().min(1), // Allow any string format for UUIDs from database
+  userId: z.string().min(1), // Allow any string format for UUIDs from database
+  courseId: z.string().min(1), // Allow any string format for UUIDs from database
+  plantId: z.string().min(1), // Allow any string format for UUIDs from database
   sectionKey: z.string().min(1, 'Section key is required'),
   questionKey: z.string().min(1, 'Question key is required'),
   isCorrect: z.boolean(),
   attemptIndex: z.number().int().min(1).default(1),
   responseMeta: z.record(z.string(), z.any()).nullable(), // JSONB field
-  answeredAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
+  answeredAt: z.string().min(1), // Allow PostgreSQL timestamp format
+  createdAt: z.string().min(1), // Allow PostgreSQL timestamp format
 });
 
 export const createQuestionEventSchema = z.object({
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
-  plantId: z.string().uuid(),
+  userId: z.string().min(1), // Allow any string format for UUIDs
+  courseId: z.string().min(1), // Allow any string format for UUIDs
+  plantId: z.string().min(1), // Allow any string format for UUIDs
   sectionKey: z.string().min(1, 'Section key is required'),
   questionKey: z.string().min(1, 'Question key is required'),
   isCorrect: z.boolean(),

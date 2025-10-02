@@ -4,6 +4,7 @@
  */
 
 import type React from 'react';
+import type { AssessmentQuestion, AssessmentResult } from './domain';
 
 // ========================================
 // COMPONENT PROP TYPES
@@ -296,4 +297,156 @@ export interface FormState<T> {
   errors: FormFieldError[];
   isSubmitting: boolean;
   isValid: boolean;
+}
+
+// ========================================
+// COMPONENT-SPECIFIC TYPES (consolidated from scattered interfaces)
+// ========================================
+
+export interface RegistrationData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+  jobTitle?: string;
+}
+
+export interface ModuleViewerProps {
+  moduleData: {
+    id: string;
+    title: string;
+    description: string;
+    duration: string;
+    difficulty: 'beginner' | 'intermediate' | 'advanced';
+    sections: Array<{
+      id: string;
+      title: string;
+      content: string;
+      estimatedReadTime: string;
+    }>;
+    learningObjectives: string[];
+    resources: Array<{
+      id: string;
+      title: string;
+      type: string;
+      url: string;
+      description: string;
+    }>;
+  };
+  userProgress: {
+    currentSection: string;
+    sectionsCompleted: string[];
+    bookmarks: string[];
+    timeSpent: number;
+    status: 'not-started' | 'in-progress' | 'completed';
+  };
+  onProgressUpdate: (progress: Record<string, unknown>) => void;
+}
+
+export interface EnhancedModuleViewerProps {
+  courseRoute: string; // e.g., '/ebook' or '/ebook-spanish'
+  moduleData: {
+    id: string;
+    title: string;
+    description: string;
+    duration: string;
+    difficulty: 'beginner' | 'intermediate' | 'advanced';
+    sections: Array<{
+      id: string;
+      title: string;
+      content: string;
+      estimatedReadTime: string;
+      questions?: Array<{
+        id: string;
+        question: string;
+        options: string[];
+        correctAnswer: number;
+        explanation?: string;
+      }>;
+    }>;
+    learningObjectives: string[];
+    resources: Array<{
+      id: string;
+      title: string;
+      type: string;
+      url: string;
+      description: string;
+    }>;
+  };
+  onModuleComplete?: () => void;
+}
+
+export interface AssessmentProps {
+  moduleId: string;
+  assessment: {
+    id: string;
+    title: string;
+    questions: AssessmentQuestion[];
+    passingScore: number;
+    maxAttempts: number;
+    timeLimit?: number;
+    showFeedback?: boolean;
+    certificateGeneration?: boolean;
+  };
+  onComplete: (result: AssessmentResult) => void;
+}
+
+export interface EnrollButtonProps {
+  moduleSlug: string;
+}
+
+export interface ProtectedRouteProps {
+  children: React.ReactNode;
+  requireAdmin?: boolean;
+  fallbackPath?: string;
+}
+
+// ========================================
+// ADMIN UI TYPES
+// ========================================
+
+export interface AdminTableColumn<T> {
+  key: keyof T;
+  title: string;
+  sortable?: boolean;
+  render?: (value: T[keyof T], row: T) => React.ReactNode;
+  width?: string;
+  align?: 'left' | 'center' | 'right';
+}
+
+export interface AdminFormField {
+  key: string;
+  label: string;
+  type: 'text' | 'email' | 'password' | 'select' | 'textarea' | 'checkbox' | 'date' | 'number';
+  required?: boolean;
+  options?: { value: string; label: string }[];
+  placeholder?: string;
+  validation?: Record<string, unknown>;
+}
+
+export interface AdminFormData {
+  [key: string]: unknown;
+}
+
+export interface AdminBulkAction {
+  id: string;
+  label: string;
+  action: (selectedItems: string[]) => Promise<void>;
+  variant?: 'default' | 'destructive' | 'outline';
+  icon?: React.ReactNode;
+}
+
+// ========================================
+// INTEGRATION TYPES
+// ========================================
+
+export interface IntegrationStatus {
+  id?: string;
+  name: string;
+  status: 'connected' | 'disconnected' | 'error' | 'pending' | 'loading' | 'success' | 'warning';
+  description?: string;
+  details?: string[];
+  lastSync?: string;
+  error?: string;
 }

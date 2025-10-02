@@ -22,37 +22,7 @@ import {
   Award
 } from 'lucide-react'
 
-interface ModuleViewerProps {
-  moduleData: {
-    id: string
-    title: string
-    description: string
-    duration: string
-    difficulty: 'beginner' | 'intermediate' | 'advanced'
-    sections: Array<{
-      id: string
-      title: string
-      content: string
-      estimatedReadTime: string
-    }>
-    learningObjectives: string[]
-    resources: Array<{
-      id: string
-      title: string
-      type: string
-      url: string
-      description: string
-    }>
-  }
-  userProgress: {
-    currentSection: string
-    sectionsCompleted: string[]
-    bookmarks: string[]
-    timeSpent: number
-    status: 'not-started' | 'in-progress' | 'completed'
-  }
-  onProgressUpdate: (progress: Record<string, unknown>) => void
-}
+import type { ModuleViewerProps } from '@/types'
 
 export default function ModuleViewer({ moduleData, userProgress, onProgressUpdate }: ModuleViewerProps) {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
@@ -93,10 +63,13 @@ export default function ModuleViewer({ moduleData, userProgress, onProgressUpdat
   }, [])
 
   const handleSectionComplete = () => {
+    if (!currentSection) return
+    
+    const nextSection = moduleData.sections[currentSectionIndex + 1]
     const newProgress = {
       ...userProgress,
       sectionsCompleted: [...userProgress.sectionsCompleted, currentSection.id],
-      currentSection: isLastSection ? currentSection.id : moduleData.sections[currentSectionIndex + 1].id,
+      currentSection: isLastSection ? currentSection.id : nextSection?.id || currentSection.id,
       timeSpent: userProgress.timeSpent + Math.floor((Date.now() - sessionStartTime) / 1000)
     }
 
@@ -114,6 +87,8 @@ export default function ModuleViewer({ moduleData, userProgress, onProgressUpdat
   }
 
   const handleBookmarkToggle = () => {
+    if (!currentSection) return
+    
     const newBookmarks = isBookmarked 
       ? userProgress.bookmarks.filter(id => id !== currentSection.id)
       : [...userProgress.bookmarks, currentSection.id]
@@ -126,10 +101,13 @@ export default function ModuleViewer({ moduleData, userProgress, onProgressUpdat
   }
 
   const navigateToSection = (index: number) => {
+    const targetSection = moduleData.sections[index]
+    if (!targetSection) return
+    
     setCurrentSectionIndex(index)
     onProgressUpdate({
       ...userProgress,
-      currentSection: moduleData.sections[index].id
+      currentSection: targetSection.id
     })
   }
 

@@ -24,7 +24,7 @@ import {
 import Link from 'next/link'
 import Image from 'next/image'
 import { SPECCHEM_ROLES, getRoleById } from '@/data/roles'
-import { SpecChemRole } from '@/types/navigator'
+import { SpecChemRole } from '@/types/domain'
 
 // Icon mapping for dynamic icon rendering
 const IconMap = {
@@ -45,7 +45,7 @@ export default function NavigatorPage() {
   const filteredRoles = SPECCHEM_ROLES.filter(role => {
     const matchesSearch = role.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          role.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         role.keyResponsibilities.some(resp => resp.toLowerCase().includes(searchQuery.toLowerCase()))
+                          role.keyResponsibilities.some((resp: any) => resp.toLowerCase().includes(searchQuery.toLowerCase()))
     
     const matchesCategory = selectedCategory === 'all' || role.trainingPriorities === selectedCategory
     
@@ -216,7 +216,7 @@ export default function NavigatorPage() {
                   <div className="text-sm">
                     <span className="text-gray-500 mb-2 block">Key Responsibilities:</span>
                     <ul className="text-gray-700 space-y-1">
-                      {role.keyResponsibilities.slice(0, 2).map((responsibility, index) => (
+                      {role.keyResponsibilities.slice(0, 2).map((responsibility: any, index: number) => (
                         <li key={index} className="flex items-start gap-2">
                           <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
                           <span className="text-xs">{responsibility}</span>

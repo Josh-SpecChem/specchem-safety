@@ -11,7 +11,7 @@ const {
   plantSchema, 
   paginationSchema,
   enrollmentFiltersSchema 
-} = require('../src/lib/validations.js');
+} = require('../src/lib/schemas.js');
 
 async function testDrizzleConnection() {
   console.log('🔌 Testing Drizzle Database Connection...');
@@ -43,7 +43,6 @@ async function testZodValidation() {
       validData: {
         id: '123e4567-e89b-12d3-a456-426614174000',
         name: 'Test Plant',
-        location: 'Test Location',
         isActive: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -51,7 +50,6 @@ async function testZodValidation() {
       invalidData: {
         id: 'invalid-uuid',
         name: '',
-        location: '',
         isActive: 'not-boolean',
       }
     },
@@ -134,10 +132,9 @@ async function testSchemaCompatibility() {
     const validatedPlant = plantSchema.parse({
       id: plant.id,
       name: plant.name,
-      location: 'Sample Location', // Note: location field doesn't exist in DB yet
       isActive: plant.isActive,
-      createdAt: plant.createdAt.toISOString(),
-      updatedAt: plant.updatedAt.toISOString(),
+      createdAt: plant.createdAt,
+      updatedAt: plant.updatedAt,
     });
     
     console.log('✅ Database data validates with Zod schema');

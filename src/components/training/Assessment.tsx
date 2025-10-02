@@ -1,31 +1,19 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { AssessmentQuestion, AssessmentResult } from '@/types/training'
-import { useProgress } from '@/contexts/ProgressContext'
+import { AssessmentQuestion, AssessmentResult, AssessmentProps } from '@/types'
+import { useCourseProgress, useQuestionEvents } from '@/hooks/useUnifiedProgress'
 import { Clock, CheckCircle, XCircle, AlertCircle, Trophy } from 'lucide-react'
-
-interface AssessmentProps {
-  moduleId: string
-  assessment: {
-    id: string
-    title: string
-    questions: AssessmentQuestion[]
-    passingScore: number
-    maxAttempts: number
-    timeLimit?: number
-    showFeedback?: boolean
-    certificateGeneration?: boolean
-  }
-  onComplete: (result: AssessmentResult) => void
-}
 
 export const Assessment: React.FC<AssessmentProps> = ({
   moduleId,
   assessment,
   onComplete
 }) => {
-  const { state, dispatch } = useProgress()
+  // Use unified hooks for progress tracking
+  const { progress, updateProgress } = useCourseProgress(`/${moduleId}`)
+  const { recordQuestion } = useQuestionEvents(`/${moduleId}`)
+  
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({})
   const [timeRemaining, setTimeRemaining] = useState((assessment.timeLimit || 45) * 60) // Convert to seconds, default 45 mins
@@ -34,14 +22,11 @@ export const Assessment: React.FC<AssessmentProps> = ({
   const [result, setResult] = useState<AssessmentResult | null>(null)
   const [currentAttempt, setCurrentAttempt] = useState(1)
 
-  const moduleProgress = state.moduleProgress[moduleId]
-  const previousAttempts = moduleProgress?.assessmentAttempts || []
-
+  // Assessment attempts are not tracked in the current progress schema
+  // Starting with attempt 1 for now
   useEffect(() => {
-    if (previousAttempts.length > 0) {
-      setCurrentAttempt(previousAttempts.length + 1)
-    }
-  }, [previousAttempts])
+    setCurrentAttempt(1)
+  }, [])
 
   useEffect(() => {
     let timer: NodeJS.Timeout
@@ -115,20 +100,31 @@ export const Assessment: React.FC<AssessmentProps> = ({
     }
   }
 
-  const handleSubmitAssessment = () => {
+  const handleSubmitAssessment = async () => {
     const assessmentResult = calculateScore()
     setResult(assessmentResult)
     setIsCompleted(true)
 
-    // Update progress in context
-    dispatch({
-      type: 'COMPLETE_ASSESSMENT',
-      payload: {
-        moduleId,
-        assessmentId: assessment.id,
-        result: assessmentResult
+    // Record question responses using unified hooks
+    for (const [questionId, answer] of Object.entries(selectedAnswers)) {
+      const question = assessment.questions.find(q => q.id === questionId)
+      if (question) {
+        await recordQuestion(
+          'assessment',
+          questionId,
+          answer === question.correctAnswer,
+          currentAttempt,
+          { timeSpent: ((assessment.timeLimit || 45) * 60) - timeRemaining }
+        )
       }
-    })
+    }
+
+    // Update progress using unified hooks
+    await updateProgress(
+      assessmentResult.passed ? 100 : Math.round((assessmentResult.correctAnswers / assessmentResult.totalQuestions) * 100),
+      'assessment',
+      assessmentResult.passed ? 'complete_course' : 'view_section'
+    )
 
     onComplete(assessmentResult)
   }
@@ -173,10 +169,8 @@ export const Assessment: React.FC<AssessmentProps> = ({
               <h3 className="font-semibold text-gray-900 mb-2">Your Progress</h3>
               <ul className="text-sm text-gray-700 space-y-1">
                 <li>• Attempt: {currentAttempt} of {assessment.maxAttempts}</li>
-                <li>• Previous attempts: {previousAttempts.length}</li>
-                {previousAttempts.length > 0 && (
-                  <li>• Best score: {Math.max(...previousAttempts.map((a: AssessmentResult) => a.score))}%</li>
-                )}
+                <li>• Time limit: {assessment.timeLimit || 45} minutes</li>
+                <li>• Passing score: {assessment.passingScore || 80}%</li>
               </ul>
             </div>
           </div>
@@ -279,6 +273,17 @@ export const Assessment: React.FC<AssessmentProps> = ({
   }
 
   const currentQuestion = assessment.questions[currentQuestionIndex]
+  
+  if (!currentQuestion) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg border border-gray-200">
+        <div className="text-center text-red-600">
+          <p>Error: Question not found</p>
+        </div>
+      </div>
+    )
+  }
+  
   const isAnswered = selectedAnswers[currentQuestion.id]
 
   return (
@@ -368,14 +373,14 @@ export const Assessment: React.FC<AssessmentProps> = ({
         </button>
 
         <div className="flex gap-2">
-          {assessment.questions.map((_, index) => (
+          {assessment.questions.map((question, index) => (
             <button
               key={index}
               onClick={() => setCurrentQuestionIndex(index)}
               className={`w-8 h-8 rounded-full text-sm font-medium ${
                 index === currentQuestionIndex
                   ? 'bg-federal-blue text-white'
-                  : selectedAnswers[assessment.questions[index].id]
+                  : selectedAnswers[question.id]
                     ? 'bg-green-500 text-white'
                     : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
               }`}

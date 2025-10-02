@@ -4,6 +4,7 @@
  */
 
 import type { PaginatedResult } from './database';
+import { NextRequest, NextResponse } from 'next/server';
 
 // ========================================
 // API RESPONSE TYPES
@@ -199,6 +200,177 @@ export interface UpdateEnrollmentData {
 }
 
 // ========================================
+// ADMIN API TYPES
+// ========================================
+
+export interface AdminFilterOptions {
+  search?: string;
+  role?: string;
+  status?: string;
+  department?: string;
+  plantId?: string;
+  courseId?: string;
+  isActive?: boolean;
+  limit?: number;
+  offset?: number;
+  dateRange?: {
+    start: Date;
+    end: Date;
+  };
+}
+
+export interface AdminError {
+  message: string;
+  code?: string;
+  field?: string;
+}
+
+export interface AdminApiResponse<T> {
+  data: T;
+  error?: AdminError;
+  loading: boolean;
+}
+
+// ========================================
+// ROUTE HANDLER TYPES
+// ========================================
+
+export interface StandardApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: {
+    message: string;
+    code?: string;
+    details?: Record<string, unknown>;
+  };
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  timestamp: string;
+}
+
+export interface RouteContext {
+  params: Record<string, string>;
+  searchParams: URLSearchParams;
+}
+
+export interface AuthContext {
+  profile: import('@/contracts').Profile;
+  adminRoles: string[];
+  userId: string;
+  plantId?: string;
+}
+
+export interface ValidationErrorDetails {
+  field: string;
+  message: string;
+  code: string;
+}
+
+export type RouteHandler<T = unknown> = (
+  request: NextRequest,
+  context: RouteContext,
+  ...args: unknown[]
+) => Promise<NextResponse<T>>;
+
+export type AuthRouteHandler<T = unknown> = (
+  request: NextRequest,
+  context: RouteContext,
+  authContext: AuthContext,
+  ...args: unknown[]
+) => Promise<NextResponse<T>>;
+
+// ========================================
+// CRUD OPERATION INTERFACES
+// ========================================
+
+export interface CrudOperations<T, CreateT, UpdateT> {
+  list: (params: Record<string, unknown>) => Promise<{ data: T[]; pagination?: import('@/contracts').PaginationParams }>;
+  get: (id: string) => Promise<T>;
+  create: (data: CreateT) => Promise<T>;
+  update: (id: string, data: UpdateT) => Promise<T>;
+  delete: (id: string) => Promise<void>;
+}
+
+export interface ListOperations<T> {
+  list: (params: Record<string, unknown>) => Promise<{ data: T[]; pagination?: import('@/contracts').PaginationParams }>;
+}
+
+export interface AnalyticsOperations<T> {
+  getAnalytics: (params: Record<string, unknown>) => Promise<T>;
+}
+
+// ========================================
+// MIDDLEWARE AND AUTHENTICATION TYPES
+// ========================================
+
+export interface SupabaseUser {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+  app_metadata?: Record<string, unknown>;
+}
+
+export interface SupabaseClient {
+  auth: {
+    getUser: () => Promise<{ data: { user: SupabaseUser | null } }>;
+    getSession: () => Promise<{ data: { session: unknown | null } }>;
+  };
+}
+
+export interface AdminRole {
+  id: string;
+  userId: string;
+  role: 'hr_admin' | 'dev_admin' | 'plant_manager';
+  plantId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserContext {
+  userId: string;
+  plantId: string;
+  accessiblePlants: string[];
+  roles: AdminRole[];
+}
+
+export interface DatabaseQuery {
+  where?: (column: string, value: unknown) => unknown;
+  select?: () => unknown;
+  from?: (table: string) => unknown;
+}
+
+// ========================================
+// VALIDATION SCHEMA TYPES
+// ========================================
+
+export interface ValidationSchema {
+  parse: (data: unknown) => unknown;
+  safeParse: (data: unknown) => { success: boolean; data?: unknown; error?: unknown };
+}
+
+export interface UnifiedApiOptions {
+  cacheKey?: string;
+  cacheTTL?: number;
+  enabled?: boolean;
+  retryCount?: number;
+  retryDelay?: number;
+  onSuccess?: (data: unknown) => void;
+  onError?: (error: Error) => void;
+}
+
+export interface UnifiedApiState<T> {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
+// ========================================
 // IMPORT TYPES FROM DATABASE
 // ========================================
 
@@ -206,4 +378,11 @@ import type {
   UserWithDetails,
   CourseWithStats,
   EnrollmentWithDetails,
+  AdminUser,
+  AdminCourse,
+  AdminEnrollment,
+  AdminStats,
 } from './database';
+
+// Import PaginationParams from contracts
+export type { PaginationParams } from '@/contracts';

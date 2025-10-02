@@ -322,7 +322,7 @@ export class EnhancedCache {
       this.cache.delete(key);
       return null;
     }
-    return item.data;
+    return item.data as T;
   }
   
   clear(pattern?: string): void {
@@ -434,3 +434,19 @@ export async function apiGetDeduplicated<T>(
     () => apiGet(url, schema)
   );
 }
+
+// ========================================
+// CACHE STRATEGY EXPORTS
+// ========================================
+
+/**
+ * Cache strategy configuration for different data types
+ */
+export const CACHE_STRATEGY = {
+  default: 5 * 60 * 1000, // 5 minutes
+  userData: 10 * 60 * 1000, // 10 minutes
+  courseData: 15 * 60 * 1000, // 15 minutes
+  progressData: 30 * 1000, // 30 seconds
+  analytics: 30 * 60 * 1000, // 30 minutes
+  static: 60 * 60 * 1000, // 1 hour
+} as const;

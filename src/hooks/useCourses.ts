@@ -22,17 +22,25 @@ export function useCourses(): UseCoursesReturn {
 }
 
 export function useCreateCourse(): UseCreateCourseReturn {
-  return useApiMutation(
+  const mutation = useApiMutation(
     '/api/admin/courses',
     courseWithStatsSchema,
     {
-      method: 'POST',
-      invalidateCache: CACHE_INVALIDATION.onCourseUpdate,
-      onSuccess: () => {
-        // Optional: Show success notification
-      },
+      retryCount: 3,
+      retryDelay: 1000,
     }
   );
+
+  return {
+    data: null, // Mutation doesn't return data immediately
+    loading: mutation.loading,
+    mutating: mutation.loading,
+    error: mutation.error,
+    mutate: async (data: CreateCourseData) => {
+      const result = await mutation.postData(data);
+      return !!result;
+    }
+  };
 }
 
 export function useUpdateCourse(courseId: string) {
@@ -40,8 +48,8 @@ export function useUpdateCourse(courseId: string) {
     `/api/admin/courses/${courseId}`,
     courseWithStatsSchema,
     {
-      method: 'PATCH',
-      invalidateCache: [...CACHE_INVALIDATION.onCourseUpdate, `course-${courseId}`],
+      retryCount: 3,
+      retryDelay: 1000,
     }
   );
 }
@@ -51,8 +59,8 @@ export function useToggleCourseStatus(courseId: string) {
     `/api/admin/courses/${courseId}`,
     courseWithStatsSchema,
     {
-      method: 'PATCH',
-      invalidateCache: CACHE_INVALIDATION.onCourseUpdate,
+      retryCount: 3,
+      retryDelay: 1000,
     }
   );
 }

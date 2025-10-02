@@ -1,9 +1,9 @@
-import { db } from './db';
-import { progress, enrollments, questionEvents, activityEvents } from './db/schema';
-import { eq, and, desc } from 'drizzle-orm';
-import { getCurrentUserContext } from './rls';
+import { activityEvents, enrollments, progress, questionEvents } from '@/contracts';
+import type { ActivityEventMeta, QuestionResponseMeta } from '@/types';
+import { and, desc, eq } from 'drizzle-orm';
 import { getCourseByRoute } from './courses';
-import type { QuestionResponseMeta, ActivityEventMeta } from '@/types';
+import { getDb } from './db/connection';
+import { getCurrentUserContext } from './rls';
 
 /**
  * Progress tracking utilities for SpecChem Safety Training
@@ -32,7 +32,7 @@ export async function getProgressByRoute(route: string): Promise<CourseProgress 
 
   try {
     // Get enrollment status
-    const enrollment = await db.query.enrollments.findFirst({
+    const enrollment = await getDb().query.enrollments.findFirst({
       where: and(
         eq(enrollments.userId, userContext.userId),
         eq(enrollments.courseId, courseInfo.id)
@@ -40,7 +40,7 @@ export async function getProgressByRoute(route: string): Promise<CourseProgress 
     });
 
     // Get progress data
-    const progressData = await db.query.progress.findFirst({
+    const progressData = await getDb().query.progress.findFirst({
       where: and(
         eq(progress.userId, userContext.userId),
         eq(progress.courseId, courseInfo.id)
@@ -56,7 +56,7 @@ export async function getProgressByRoute(route: string): Promise<CourseProgress 
       courseSlug: courseInfo.slug,
       progressPercent: progressData.progressPercent,
       currentSection: progressData.currentSection,
-      lastActiveAt: progressData.lastActiveAt,
+      lastActiveAt: new Date(progressData.lastActiveAt),
       enrollmentStatus: enrollment.status,
     };
   } catch (error) {
@@ -82,13 +82,13 @@ export async function updateProgressByRoute(
 
   try {
     // Update progress
-    await db
+    await getDb()
       .update(progress)
       .set({
         progressPercent: Math.max(progressPercent, 0), // Ensure non-negative
         currentSection: currentSection || null,
-        lastActiveAt: new Date(),
-        updatedAt: new Date(),
+        lastActiveAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       })
       .where(and(
         eq(progress.userId, userContext.userId),
@@ -99,12 +99,12 @@ export async function updateProgressByRoute(
     const newStatus = progressPercent >= 100 ? 'completed' : 
                      progressPercent > 0 ? 'in_progress' : 'enrolled';
     
-    await db
+    await getDb()
       .update(enrollments)
       .set({
         status: newStatus,
-        completedAt: progressPercent >= 100 ? new Date() : null,
-        updatedAt: new Date(),
+        completedAt: progressPercent >= 100 ? new Date().toISOString() : null,
+        updatedAt: new Date().toISOString(),
       })
       .where(and(
         eq(enrollments.userId, userContext.userId),
@@ -137,7 +137,7 @@ export async function recordQuestionEvent(
   }
 
   try {
-    await db.insert(questionEvents).values({
+    await getDb().insert(questionEvents).values({
       userId: userContext.userId,
       courseId: courseInfo.id,
       plantId: userContext.plantId,
@@ -146,7 +146,7 @@ export async function recordQuestionEvent(
       isCorrect,
       attemptIndex,
       responseMeta,
-      answeredAt: new Date(),
+      answeredAt: new Date().toISOString(),
     });
 
     return true;
@@ -172,13 +172,13 @@ export async function recordActivityEvent(
   }
 
   try {
-    await db.insert(activityEvents).values({
+    await getDb().insert(activityEvents).values({
       userId: userContext.userId,
       courseId: courseInfo.id,
       plantId: userContext.plantId,
       eventType,
       meta,
-      occurredAt: new Date(),
+      occurredAt: new Date().toISOString(),
     });
 
     return true;
@@ -199,7 +199,7 @@ export async function getAllUserProgress(): Promise<CourseProgress[]> {
   }
 
   try {
-    const userEnrollments = await db.query.enrollments.findMany({
+    const userEnrollments = await getDb().query.enrollments.findMany({
       where: eq(enrollments.userId, userContext.userId),
       with: {
         course: true,
@@ -207,8 +207,8 @@ export async function getAllUserProgress(): Promise<CourseProgress[]> {
       orderBy: [desc(enrollments.enrolledAt)],
     });
 
-    const progressPromises = userEnrollments.map(async (enrollment) => {
-      const progressData = await db.query.progress.findFirst({
+    const progressPromises = userEnrollments.map(async (enrollment: any) => {
+      const progressData = await getDb().query.progress.findFirst({
         where: and(
           eq(progress.userId, userContext.userId),
           eq(progress.courseId, enrollment.courseId)
@@ -220,7 +220,7 @@ export async function getAllUserProgress(): Promise<CourseProgress[]> {
         courseSlug: enrollment.course.slug,
         progressPercent: progressData?.progressPercent || 0,
         currentSection: progressData?.currentSection || null,
-        lastActiveAt: progressData?.lastActiveAt || enrollment.enrolledAt,
+        lastActiveAt: new Date(progressData?.lastActiveAt || enrollment.enrolledAt),
         enrollmentStatus: enrollment.status,
       };
     });
@@ -242,13 +242,13 @@ export async function initializeUserProgress(
 ): Promise<boolean> {
   try {
     // Create initial progress record
-    await db.insert(progress).values({
+    await getDb().insert(progress).values({
       userId,
       courseId,
       plantId,
       progressPercent: 0,
       currentSection: 'introduction',
-      lastActiveAt: new Date(),
+      lastActiveAt: new Date().toISOString(),
     });
 
     return true;

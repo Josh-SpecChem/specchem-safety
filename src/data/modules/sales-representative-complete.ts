@@ -1,19 +1,24 @@
-import { TrainingModuleContent } from '@/types/training'
+import { TrainingModule } from '@/types/domain'
 
 // Customer Safety Protocols Module
-const CUSTOMER_SAFETY_PROTOCOLS: TrainingModuleContent = {
+const CUSTOMER_SAFETY_PROTOCOLS: TrainingModule = {
   id: 'sales-customer-safety',
   title: 'Customer Safety Protocols',
   description: 'Essential safety protocols and procedures for interacting with customers at construction sites and industrial facilities.',
   duration: '1.5 hours',
   difficulty: 'intermediate',
   category: 'safety',
+  prerequisites: [],
+  assessmentRequired: true,
+  certificationEligible: true,
+  lastUpdated: '2024-12-19',
   content: {
     sections: [
       {
         id: 'site-entry-protocols',
         title: 'Construction Site Entry & Safety Requirements',
         estimatedReadTime: '20 minutes',
+        order: 1,
         content: `
           <div class="space-y-6">
             <div class="bg-red-50 border border-red-200 rounded-lg p-6">
@@ -103,6 +108,7 @@ const CUSTOMER_SAFETY_PROTOCOLS: TrainingModuleContent = {
         id: 'product-handling-safety',
         title: 'Safe Product Handling & Demonstration',
         estimatedReadTime: '25 minutes',
+        order: 2,
         content: `
           <div class="space-y-6">
             <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-xl text-white">
@@ -204,6 +210,7 @@ const CUSTOMER_SAFETY_PROTOCOLS: TrainingModuleContent = {
         id: 'emergency-procedures',
         title: 'Emergency Response & Communication',
         estimatedReadTime: '20 minutes',
+        order: 3,
         content: `
           <div class="space-y-6">
             <div class="bg-red-600 p-6 rounded-xl text-white">
@@ -409,33 +416,28 @@ const CUSTOMER_SAFETY_PROTOCOLS: TrainingModuleContent = {
       showFeedback: true,
       certificateGeneration: true
     }
-  },
-  prerequisites: ['sales-product-knowledge'],
-  learningObjectives: [
-    'Identify and implement proper site entry safety protocols',
-    'Demonstrate safe chemical handling and product demonstration procedures',
-    'Execute emergency response procedures according to company protocols',
-    'Use appropriate PPE for different construction site environments',
-    'Communicate safety requirements effectively with customers and site personnel'
-  ],
-  certificationEligible: true,
-  lastUpdated: '2025-08-27'
+  }
 }
 
 // Sales Compliance Training Module  
-const SALES_COMPLIANCE_TRAINING: TrainingModuleContent = {
+const SALES_COMPLIANCE_TRAINING: TrainingModule = {
   id: 'sales-compliance-documentation',
   title: 'Sales Compliance & Documentation',
   description: 'Comprehensive training on regulatory compliance, documentation requirements, and ethical sales practices in the construction chemicals industry.',
   duration: '1 hour',
   difficulty: 'intermediate',
   category: 'compliance',
+  prerequisites: [],
+  assessmentRequired: true,
+  certificationEligible: true,
+  lastUpdated: '2024-12-19',
   content: {
     sections: [
       {
         id: 'regulatory-framework',
         title: 'Regulatory Compliance Framework',
         estimatedReadTime: '20 minutes',
+        order: 1,
         content: `
           <div class="space-y-6">
             <div class="bg-gradient-to-r from-federal-blue to-yale-blue p-6 rounded-xl text-white">
@@ -527,6 +529,7 @@ const SALES_COMPLIANCE_TRAINING: TrainingModuleContent = {
         id: 'documentation-requirements',
         title: 'Sales Documentation & Record Keeping',
         estimatedReadTime: '25 minutes',
+        order: 2,
         content: `
           <div class="space-y-6">
             <div class="bg-white border border-gray-200 rounded-lg">
@@ -633,6 +636,7 @@ const SALES_COMPLIANCE_TRAINING: TrainingModuleContent = {
         id: 'ethical-practices',
         title: 'Ethical Sales Practices & Anti-Corruption',
         estimatedReadTime: '15 minutes',
+        order: 3,
         content: `
           <div class="space-y-6">
             <div class="bg-gradient-to-r from-gray-800 to-gray-900 p-6 rounded-xl text-white">
@@ -825,20 +829,10 @@ const SALES_COMPLIANCE_TRAINING: TrainingModuleContent = {
       showFeedback: true,
       certificateGeneration: true
     }
-  },
-  prerequisites: ['sales-product-knowledge', 'sales-customer-safety'],
-  learningObjectives: [
-    'Identify key regulatory bodies and their requirements affecting SpecChem sales',
-    'Implement proper documentation procedures for all sales activities',
-    'Apply ethical sales practices in challenging situations',
-    'Understand gift policies and anti-corruption guidelines',
-    'Maintain compliance with record retention requirements'
-  ],
-  certificationEligible: true,
-  lastUpdated: '2025-08-27'
+  }
 }
 
-export const UPDATED_SALES_REPRESENTATIVE_MODULES: TrainingModuleContent[] = [
+export const UPDATED_SALES_REPRESENTATIVE_MODULES: TrainingModule[] = [
   // Keep the existing product knowledge module (from previous file)
   {
     id: 'sales-product-knowledge',
@@ -847,12 +841,17 @@ export const UPDATED_SALES_REPRESENTATIVE_MODULES: TrainingModuleContent[] = [
     duration: '2 hours',
     difficulty: 'intermediate',
     category: 'product',
+    prerequisites: [],
+    assessmentRequired: true,
+    certificationEligible: true,
+    lastUpdated: '2024-12-19',
     content: {
       sections: [
         {
           id: 'intro-overview',
           title: 'Introduction to SpecChem Products',
           estimatedReadTime: '15 minutes',
+        order: 4,
           content: `<div class="text-center p-6"><h2 class="text-2xl font-bold">Product Knowledge Module</h2><p>This module covers SpecChem's complete product portfolio...</p></div>`
         }
       ],
@@ -878,11 +877,7 @@ export const UPDATED_SALES_REPRESENTATIVE_MODULES: TrainingModuleContent[] = [
         showFeedback: true,
         certificateGeneration: true
       }
-    },
-    prerequisites: [],
-    learningObjectives: ['Product knowledge objectives'],
-    certificationEligible: true,
-    lastUpdated: '2025-08-27'
+    }
   },
   CUSTOMER_SAFETY_PROTOCOLS,
   SALES_COMPLIANCE_TRAINING

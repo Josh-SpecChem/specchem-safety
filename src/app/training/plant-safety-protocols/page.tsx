@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useProgress } from '@/contexts/ProgressContext'
+import { useCourseProgress } from '@/hooks/useUnifiedProgress'
+import type { CourseProgress } from '@/lib/schemas'
 import { PLANT_TECHNICIAN_MODULES } from '@/data/modules/plant-technician-complete'
 import { ChevronLeft, ChevronRight, BookOpen, Clock, Award, CheckCircle, Play } from 'lucide-react'
 import { Assessment } from '@/components/training/Assessment'
 
 const PlantSafetyProtocolsPage: React.FC = () => {
-  const { state: progressState, completeSection } = useProgress()
+  const { progress, updateProgress } = useCourseProgress('/plant-safety-protocols')
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [showAssessment, setShowAssessment] = useState(false)
   
@@ -26,20 +27,26 @@ const PlantSafetyProtocolsPage: React.FC = () => {
     )
   }
 
-  const moduleProgress = progressState.moduleProgress[module.id]
+  const moduleProgress = progress as CourseProgress | null
   const currentSection = moduleData.content.sections[currentSectionIndex]
   const totalSections = moduleData.content.sections.length
   
-  const isCurrentSectionCompleted = moduleProgress?.completedSections.includes(currentSection.id) || false
+  // Determine if current section is completed based on progress percentage
+  const sectionProgressThreshold = ((currentSectionIndex + 1) / totalSections) * 100
+  const isCurrentSectionCompleted = (moduleProgress?.progressPercent || 0) >= sectionProgressThreshold
 
-  const handleSectionComplete = () => {
-    if (!isCurrentSectionCompleted) {
-      completeSection(module.id, currentSection.id)
+  const handleSectionComplete = async () => {
+    if (!isCurrentSectionCompleted && currentSection) {
+      await updateProgress(
+        Math.round(((currentSectionIndex + 1) / totalSections) * 100),
+        currentSection.id,
+        'view_section'
+      )
     }
   }
 
-  const handleNext = () => {
-    handleSectionComplete()
+  const handleNext = async () => {
+    await handleSectionComplete()
     if (currentSectionIndex < totalSections - 1) {
       setCurrentSectionIndex(currentSectionIndex + 1)
     } else {
@@ -61,7 +68,7 @@ const PlantSafetyProtocolsPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
         <Assessment
           assessment={moduleData.content.assessment}
-          moduleId={module.id}
+          moduleId={moduleData.id}
           onComplete={() => {
             // Handle assessment completion - could redirect to completion page
             console.log('Assessment completed')
@@ -112,11 +119,11 @@ const PlantSafetyProtocolsPage: React.FC = () => {
         <div className="bg-white border-b border-gray-200 p-4">
           <div className="flex items-center justify-between mb-2">
             <h2 className="font-semibold text-gray-900">
-              Section {currentSectionIndex + 1} of {totalSections}: {currentSection.title}
+              Section {currentSectionIndex + 1} of {totalSections}: {currentSection?.title || 'Loading...'}
             </h2>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Clock className="w-4 h-4" />
-              <span>{currentSection.estimatedReadTime}</span>
+              <span>{currentSection?.estimatedReadTime || 'Loading...'}</span>
             </div>
           </div>
           
@@ -136,19 +143,19 @@ const PlantSafetyProtocolsPage: React.FC = () => {
         {/* Section Navigation */}
         <div className="bg-white border-b border-gray-200 p-4">
           <div className="flex gap-2 overflow-x-auto">
-            {moduleData.content.sections.map((section, index) => (
+            {moduleData.content.sections.map((section: any, index: number) => (
               <button
                 key={section.id}
                 onClick={() => setCurrentSectionIndex(index)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                   index === currentSectionIndex
                     ? 'bg-federal-blue text-white'
-                    : moduleProgress?.completedSections.includes(section.id)
+                    : (moduleProgress?.progressPercent || 0) >= (((index + 1) / totalSections) * 100)
                       ? 'bg-green-50 text-green-800 border border-green-200'
                       : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'
                 }`}
               >
-                {moduleProgress?.completedSections.includes(section.id) ? (
+                {(moduleProgress?.progressPercent || 0) >= (((index + 1) / totalSections) * 100) ? (
                   <CheckCircle className="w-4 h-4" />
                 ) : (
                   <span className="w-4 h-4 rounded-full bg-current opacity-20" />
@@ -171,10 +178,14 @@ const PlantSafetyProtocolsPage: React.FC = () => {
 
         {/* Section Content */}
         <div className="bg-white p-8">
-          <div 
-            className="prose prose-lg max-w-none"
-            dangerouslySetInnerHTML={{ __html: currentSection.content }}
-          />
+          {currentSection ? (
+            <div 
+              className="prose prose-lg max-w-none"
+              dangerouslySetInnerHTML={{ __html: currentSection.content }}
+            />
+          ) : (
+            <div className="text-center text-gray-500">Loading section content...</div>
+          )}
           
           {/* Section Completion */}
           <div className="mt-8 p-6 bg-gray-50 rounded-lg">

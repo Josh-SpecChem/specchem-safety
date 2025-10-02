@@ -1,61 +1,191 @@
 'use client'
 
-import { useState } from 'react'
+import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useEnrollments, useEnrollmentStats } from '@/hooks/useEnrollments'
-
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
-}
-
-function getStatusBadgeColor(status: string) {
-  switch (status) {
-    case 'completed':
-      return 'bg-green-100 text-green-800'
-    case 'in_progress':
-      return 'bg-blue-100 text-blue-800'
-    case 'enrolled':
-      return 'bg-gray-100 text-gray-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
-}
+import { 
+  useAdminFilters, 
+  useAdminPagination, 
+  AdminTable, 
+  AdminFilters, 
+  AdminPagination,
+  BadgeUtils,
+  FormatUtils
+} from './shared'
+import type { AdminEnrollment, EnrollmentStats } from '@/types/database'
+import type { AdminTableColumn } from '@/types/ui'
 
 export function EnrollmentManagementContent() {
-  const [filters, setFilters] = useState({
+  const { filters, updateFilter, clearFilters, hasActiveFilters, filterCount } = useAdminFilters({
     plantId: '',
     courseId: '',
     status: '',
     limit: 50,
     offset: 0
-  })
+  });
 
-  const { enrollments, loading, error, refetch } = useEnrollments(filters)
-  const { stats, loading: statsLoading } = useEnrollmentStats()
+  const { pagination, setPage, setLimit, updateTotal } = useAdminPagination({
+    initialPage: 1,
+    initialLimit: 50
+  });
 
-  const handleFilterChange = (key: string, value: string | number) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: value,
-      offset: 0 // Reset pagination when filters change
-    }))
-  }
+  const { data: enrollments, loading, error, refetch } = useEnrollments({ 
+    ...filters, 
+    page: pagination.page, 
+    limit: pagination.limit,
+    status: filters.status as "enrolled" | "in_progress" | "completed" | undefined,
+    dateRange: filters.dateRange ? {
+      startDate: filters.dateRange.start?.toISOString(),
+      endDate: filters.dateRange.end?.toISOString()
+    } : undefined
+  });
+  const { data: stats, loading: statsLoading } = useEnrollmentStats();
 
-  const resetFilters = () => {
-    setFilters({
-      plantId: '',
-      courseId: '',
-      status: '',
-      limit: 50,
-      offset: 0
-    })
-  }
+  // Update pagination total when enrollments data changes
+  React.useEffect(() => {
+    if (enrollments && Array.isArray(enrollments) && enrollments.length > 0) {
+      updateTotal(enrollments.length);
+    }
+  }, [enrollments, updateTotal]);
+
+  const columns: AdminTableColumn<AdminEnrollment>[] = [
+    {
+      key: 'userId',
+      title: 'User',
+      render: (value: any, enrollment: AdminEnrollment) => (
+        <div>
+          <div className="font-medium text-gray-900">
+            {enrollment.user ? FormatUtils.formatName(enrollment.user.firstName, enrollment.user.lastName) : 'N/A'}
+          </div>
+          <div className="text-sm text-gray-500">{enrollment.user?.email || 'N/A'}</div>
+        </div>
+      )
+    },
+    {
+      key: 'courseId',
+      title: 'Course',
+      render: (value: any, enrollment: AdminEnrollment) => (
+        <div>
+          <div className="font-medium text-gray-900">
+            {enrollment.course?.title || 'N/A'}
+          </div>
+          <div className="text-sm text-gray-500">
+            {enrollment.course?.difficulty || 'N/A'} • {FormatUtils.formatDuration(enrollment.course?.duration || 0)}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      title: 'Status',
+      render: (value: any, row: AdminEnrollment) => {
+        const status = value as string;
+        const config = BadgeUtils.getStatusBadgeConfig(status);
+        return (
+          <Badge className={config.className}>
+            {config.text}
+          </Badge>
+        );
+      }
+    },
+    {
+      key: 'progress',
+      title: 'Progress',
+      render: (value: any, row: AdminEnrollment) => {
+        const progress = value as number;
+        return (
+          <div className="text-sm text-gray-700">
+            {FormatUtils.formatProgress(progress)}
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+              <div 
+                className="bg-blue-600 h-2 rounded-full" 
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      key: 'enrolledAt',
+      title: 'Enrolled',
+      render: (value: any, row: AdminEnrollment) => {
+        const enrolledAt = value as string;
+        return (
+          <div className="text-sm text-gray-500">
+            {FormatUtils.formatDate(enrolledAt)}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'completedAt',
+      title: 'Completed',
+      render: (value: any, row: AdminEnrollment) => {
+        const completedAt = value as string;
+        return (
+          <div className="text-sm text-gray-500">
+            {completedAt ? FormatUtils.formatDate(completedAt) : 'Not completed'}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'id',
+      title: 'Actions',
+      render: (value: any, enrollment: AdminEnrollment) => (
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm">
+            View
+          </Button>
+          <Button variant="outline" size="sm">
+            Edit
+          </Button>
+          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+            Cancel
+          </Button>
+        </div>
+      )
+    }
+  ];
+
+  const filterFields = [
+    {
+      key: 'plantId',
+      label: 'Plant',
+      type: 'select' as const,
+      options: [
+        { value: 'columbus', label: 'Columbus, OH' },
+        { value: 'atlanta', label: 'Atlanta, GA' },
+        { value: 'denver', label: 'Denver, CO' },
+        { value: 'seattle', label: 'Seattle, WA' }
+      ]
+    },
+    {
+      key: 'courseId',
+      label: 'Course',
+      type: 'select' as const,
+      options: [
+        // These would typically come from an API call
+        { value: 'course1', label: 'Safety Training' },
+        { value: 'course2', label: 'Equipment Operation' },
+        { value: 'course3', label: 'Emergency Procedures' }
+      ]
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'select' as const,
+      options: [
+        { value: 'enrolled', label: 'Enrolled' },
+        { value: 'in_progress', label: 'In Progress' },
+        { value: 'completed', label: 'Completed' },
+        { value: 'cancelled', label: 'Cancelled' }
+      ]
+    }
+  ];
 
   if (error) {
     return (
@@ -71,13 +201,13 @@ export function EnrollmentManagementContent() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
-    <>
+    <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -91,7 +221,7 @@ export function EnrollmentManagementContent() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Total Enrollments</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? '...' : stats.total}
+                  {statsLoading ? '...' : (stats as EnrollmentStats)?.total || 0}
                 </p>
               </div>
             </div>
@@ -111,7 +241,7 @@ export function EnrollmentManagementContent() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Completed</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? '...' : stats.completed}
+                  {statsLoading ? '...' : (stats as EnrollmentStats)?.completed || 0}
                 </p>
               </div>
             </div>
@@ -131,7 +261,7 @@ export function EnrollmentManagementContent() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">In Progress</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? '...' : stats.inProgress}
+                  {statsLoading ? '...' : (stats as EnrollmentStats)?.inProgress || 0}
                 </p>
               </div>
             </div>
@@ -151,7 +281,7 @@ export function EnrollmentManagementContent() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Overdue</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? '...' : stats.overdue}
+                  {statsLoading ? '...' : (stats as EnrollmentStats)?.overdue || 0}
                 </p>
               </div>
             </div>
@@ -159,80 +289,15 @@ export function EnrollmentManagementContent() {
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Search & Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={filters.status}
-                onChange={(e) => handleFilterChange('status', e.target.value)}
-              >
-                <option value="">All Status</option>
-                <option value="enrolled">Enrolled</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Course
-              </label>
-              <select 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={filters.courseId}
-                onChange={(e) => handleFilterChange('courseId', e.target.value)}
-              >
-                <option value="">All Courses</option>
-                <option value="hazmat">Function-Specific HazMat Training</option>
-                <option value="hazmat-spanish">HazMat Training (Spanish)</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Plant
-              </label>
-              <select 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={filters.plantId}
-                onChange={(e) => handleFilterChange('plantId', e.target.value)}
-              >
-                <option value="">All Plants</option>
-                <option value="columbus">Columbus, OH</option>
-                <option value="atlanta">Atlanta, GA</option>
-                <option value="denver">Denver, CO</option>
-                <option value="seattle">Seattle, WA</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Limit
-              </label>
-              <select 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={filters.limit}
-                onChange={(e) => handleFilterChange('limit', parseInt(e.target.value))}
-              >
-                <option value="25">25 per page</option>
-                <option value="50">50 per page</option>
-                <option value="100">100 per page</option>
-              </select>
-            </div>
-            <div className="flex items-end">
-              <Button variant="outline" className="w-full" onClick={resetFilters}>
-                Reset Filters
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Search and Filters */}
+      <AdminFilters
+        fields={filterFields}
+        filters={filters as unknown as Record<string, unknown>}
+        onFilterChange={updateFilter as (key: string, value: unknown) => void}
+        onClearFilters={clearFilters}
+        hasActiveFilters={hasActiveFilters}
+        filterCount={filterCount}
+      />
 
       {/* Enrollments Table */}
       <Card>
@@ -241,7 +306,7 @@ export function EnrollmentManagementContent() {
             <div>
               <CardTitle>Enrollments</CardTitle>
               <CardDescription>
-                {loading ? 'Loading enrollments...' : `${enrollments.length} enrollments found`}
+                {loading ? 'Loading enrollments...' : `${Array.isArray(enrollments) ? enrollments.length : 0} enrollments found`}
               </CardDescription>
             </div>
             <Button>
@@ -253,112 +318,22 @@ export function EnrollmentManagementContent() {
           </div>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="mt-2 text-gray-600">Loading enrollments...</p>
-            </div>
-          ) : enrollments.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No enrollments found matching your criteria.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full table-auto">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">User</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Course</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Enrolled</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Completed</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {enrollments.map((enrollment) => (
-                    <tr key={enrollment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4">
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {enrollment.user.firstName} {enrollment.user.lastName}
-                          </div>
-                          <div className="text-sm text-gray-500">{enrollment.user.email}</div>
-                          <div className="text-sm text-gray-500">{enrollment.user.plant.name}</div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="font-medium text-gray-900 max-w-xs">
-                          {enrollment.course.name}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {enrollment.course.isActive ? 'Active' : 'Inactive'}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge className={getStatusBadgeColor(enrollment.status)}>
-                          {enrollment.status.replace('_', ' ').toUpperCase()}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-700">
-                        {formatDate(enrollment.enrolledAt)}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-700">
-                        {enrollment.completedAt ? formatDate(enrollment.completedAt) : 'Not completed'}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center space-x-2">
-                          <Button variant="outline" size="sm">
-                            View
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            Extend
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <AdminTable
+            data={enrollments as AdminEnrollment[] || []}
+            columns={columns}
+            isLoading={loading}
+            error={error}
+            emptyMessage="No enrollments found matching your criteria."
+          />
         </CardContent>
       </Card>
 
       {/* Pagination */}
-      <div className="mt-6 flex items-center justify-between">
-        <div className="text-sm text-gray-700">
-          Showing {Math.min(filters.offset + 1, enrollments.length)} to {Math.min(filters.offset + filters.limit, enrollments.length)} of {enrollments.length} results
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={filters.offset === 0}
-            onClick={() => handleFilterChange('offset', Math.max(0, filters.offset - filters.limit))}
-          >
-            Previous
-          </Button>
-          <Button variant="outline" size="sm" className="bg-blue-600 text-white">
-            {Math.floor(filters.offset / filters.limit) + 1}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={enrollments.length < filters.limit}
-            onClick={() => handleFilterChange('offset', filters.offset + filters.limit)}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
-    </>
-  )
+      <AdminPagination
+        pagination={pagination}
+        onPageChange={setPage}
+        onLimitChange={setLimit}
+      />
+    </div>
+  );
 }

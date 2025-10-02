@@ -1,27 +1,46 @@
-import { db } from '../db';
-import { profiles, plants, enrollments, progress, questionEvents, courses, adminRoles } from '../db/schema';
-import { eq, and, desc, asc, count, avg, sql, or, like } from 'drizzle-orm';
-import type { 
-  CreateProfile, 
-  UpdateProfile, 
-  EnrollmentFilters, 
-  ProgressFilters,
-  PaginationParams,
-  CreateEnrollment,
-  UpdateEnrollment,
-  CreateProgress,
-  UpdateProgress,
-  UserFilters
-} from '../schemas';
-import { DatabaseError, ValidationError, NotFoundError, ConflictError } from '../errors';
-import type { 
-  DatabaseResponse, 
-  PaginatedResult, 
-  ProfileWithDetails, 
-  EnrollmentWithDetails,
-  ProgressWithDetails,
-  UserContext
+import type {
+    CreateEnrollment,
+    CreateProfile,
+    CreateProgress,
+    EnrollmentFilter,
+    PaginatedResult,
+    PaginationParams,
+    Profile,
+    ProfileWithPlant,
+    ProgressFilter,
+    UpdateEnrollment,
+    UpdateProfile,
+    UpdateProgress,
+    UserFilter
+} from '@/contracts';
+import {
+    and,
+    asc,
+    count,
+    courses,
+    desc,
+    enrollments,
+    eq,
+    mapEnrollmentWithRelationsToDTO,
+    mapProfileToDTO,
+    mapProfileWithPlantToDTO,
+    mapProgressWithRelationsToDTO,
+    or,
+    plants,
+    profiles,
+    progress,
+    questionEvents,
+    sql
+} from '@/contracts';
+import { avg, like } from 'drizzle-orm';
+import type {
+    DatabaseResponse,
+    EnrollmentWithDetails,
+    ProfileWithDetails,
+    ProgressWithDetails
 } from '../../types/database';
+import { ConflictError, DatabaseError, NotFoundError } from '../errors';
+import { getDb } from './connection';
 
 // ========================================
 // STANDARDIZED DATABASE OPERATION WRAPPER
@@ -50,50 +69,48 @@ export async function withDatabaseOperation<T>(
 // ========================================
 export async function createProfile(data: CreateProfile): Promise<DatabaseResponse<Profile>> {
   return withDatabaseOperation(async () => {
-    const [profile] = await db.insert(profiles).values(data).returning();
-    return profile;
+    const [profile] = await getDb().insert(profiles).values(data).returning();
+    return mapProfileToDTO(profile!);
   });
 }
 
-export async function getProfile(id: string): Promise<DatabaseResponse<ProfileWithDetails | null>> {
+export async function getProfile(id: string): Promise<DatabaseResponse<ProfileWithPlant | null>> {
   return withDatabaseOperation(async () => {
-    const profile = await db.query.profiles.findFirst({
+    const profile = await getDb().query.profiles.findFirst({
       where: eq(profiles.id, id),
       with: {
         plant: true,
-        adminRoles: true,
-        enrollments: {
-          with: {
-            course: true,
-          },
-        },
       },
     });
-    return profile;
+    
+    if (!profile) {
+      return null;
+    }
+    
+    return mapProfileWithPlantToDTO(profile!);
   });
 }
 
-export async function getProfileByEmail(email: string): Promise<DatabaseResponse<ProfileWithDetails | null>> {
+export async function getProfileByEmail(email: string): Promise<DatabaseResponse<ProfileWithPlant | null>> {
   return withDatabaseOperation(async () => {
-    const profile = await db.query.profiles.findFirst({
+    const profile = await getDb().query.profiles.findFirst({
       where: eq(profiles.email, email),
       with: {
         plant: true,
-        adminRoles: true,
-        enrollments: {
-          with: {
-            course: true,
-          },
-        },
       },
     });
-    return profile;
+    
+    if (!profile) {
+      return null;
+    }
+    
+    return mapProfileWithPlantToDTO(profile!);
   });
 }
 
 export async function updateProfile(id: string, data: UpdateProfile): Promise<DatabaseResponse<Profile>> {
   return withDatabaseOperation(async () => {
-    const [profile] = await db
+    const [profile] = await getDb()
       .update(profiles)
       .set({ ...data, updatedAt: new Date().toISOString() })
       .where(eq(profiles.id, id))
@@ -109,14 +126,14 @@ export async function updateProfile(id: string, data: UpdateProfile): Promise<Da
 
 export async function deleteProfile(id: string): Promise<DatabaseResponse<void>> {
   return withDatabaseOperation(async () => {
-    const result = await db.delete(profiles).where(eq(profiles.id, id));
-    if (result.rowCount === 0) {
+    const result = await getDb().delete(profiles).where(eq(profiles.id, id));
+    if (result.count === 0) {
       throw new NotFoundError('Profile not found');
     }
   });
 }
 
-export async function getUsersWithDetails(filters: UserFilters): Promise<DatabaseResponse<PaginatedResult<ProfileWithDetails>>> {
+export async function getUsersWithDetails(filters: UserFilter): Promise<DatabaseResponse<PaginatedResult<ProfileWithDetails>>> {
   return withDatabaseOperation(async () => {
     const page = filters.page || 1;
     const limit = filters.limit || 20;
@@ -144,7 +161,7 @@ export async function getUsersWithDetails(filters: UserFilters): Promise<Databas
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const profilesData = await db.query.profiles.findMany({
+    const profilesData = await getDb().query.profiles.findMany({
       where: whereClause,
       with: {
         plant: true,
@@ -160,13 +177,14 @@ export async function getUsersWithDetails(filters: UserFilters): Promise<Databas
       orderBy: [asc(profiles.lastName), asc(profiles.firstName)],
     });
 
-    const [{ total }] = await db
+    const totalResult = await getDb()
       .select({ total: count() })
       .from(profiles)
       .where(whereClause);
+    const total = totalResult[0]?.total || 0;
 
     return {
-      data: profilesData as ProfileWithDetails[],
+      items: profilesData.map((profile: any) => mapProfileWithPlantToDTO(profile)),
       total,
       page,
       limit,
@@ -178,7 +196,7 @@ export async function getUsersWithDetails(filters: UserFilters): Promise<Databas
 export async function getProfilesByPlant(plantId: string, pagination: PaginationParams = { page: 1, limit: 20 }) {
   const offset = (pagination.page - 1) * pagination.limit;
   
-  const profilesData = await db.query.profiles.findMany({
+  const profilesData = await getDb().query.profiles.findMany({
     where: eq(profiles.plantId, plantId),
     with: {
       plant: true,
@@ -189,36 +207,37 @@ export async function getProfilesByPlant(plantId: string, pagination: Pagination
     orderBy: [asc(profiles.lastName), asc(profiles.firstName)],
   });
 
-  const [{ total }] = await db
+  const totalResult = await getDb()
     .select({ total: count() })
     .from(profiles)
     .where(eq(profiles.plantId, plantId));
+  const total = totalResult[0]?.total || 0;
 
-  return {
-    data: profilesData,
-    total,
-    page: pagination.page,
-    limit: pagination.limit,
-    totalPages: Math.ceil(total / pagination.limit),
-  };
+    return {
+      items: profilesData.map((profile: any) => mapProfileWithPlantToDTO(profile)),
+      total,
+      page: pagination.page,
+      limit: pagination.limit,
+      totalPages: Math.ceil(total / pagination.limit),
+    };
 }
 
 // Plant operations
 export async function getPlants() {
-  return await db.query.plants.findMany({
+  return await getDb().query.plants.findMany({
     orderBy: [asc(plants.name)],
   });
 }
 
 export async function getActivePlants() {
-  return await db.query.plants.findMany({
+  return await getDb().query.plants.findMany({
     where: eq(plants.isActive, true),
     orderBy: [asc(plants.name)],
   });
 }
 
 export async function getPlant(id: string) {
-  return await db.query.plants.findFirst({
+  return await getDb().query.plants.findFirst({
     where: eq(plants.id, id),
   });
 }
@@ -227,10 +246,10 @@ export async function getPlant(id: string) {
 // ENROLLMENT OPERATIONS
 // ========================================
 
-export async function createEnrollment(data: CreateEnrollment): Promise<DatabaseResponse<Enrollment>> {
+export async function createEnrollment(data: CreateEnrollment): Promise<DatabaseResponse<any>> {
   return withDatabaseOperation(async () => {
     // Check if enrollment already exists
-    const existing = await db.query.enrollments.findFirst({
+    const existing = await getDb().query.enrollments.findFirst({
       where: and(
         eq(enrollments.userId, data.userId),
         eq(enrollments.courseId, data.courseId)
@@ -241,14 +260,14 @@ export async function createEnrollment(data: CreateEnrollment): Promise<Database
       throw new ConflictError('User is already enrolled in this course');
     }
 
-    const [enrollment] = await db.insert(enrollments).values(data).returning();
+    const [enrollment] = await getDb().insert(enrollments).values(data).returning();
     return enrollment;
   });
 }
 
-export async function updateEnrollment(id: string, data: UpdateEnrollment): Promise<DatabaseResponse<Enrollment>> {
+export async function updateEnrollment(id: string, data: UpdateEnrollment): Promise<DatabaseResponse<any>> {
   return withDatabaseOperation(async () => {
-    const [enrollment] = await db
+    const [enrollment] = await getDb()
       .update(enrollments)
       .set({ ...data, updatedAt: new Date().toISOString() })
       .where(eq(enrollments.id, id))
@@ -264,14 +283,14 @@ export async function updateEnrollment(id: string, data: UpdateEnrollment): Prom
 
 export async function deleteEnrollment(id: string): Promise<DatabaseResponse<void>> {
   return withDatabaseOperation(async () => {
-    const result = await db.delete(enrollments).where(eq(enrollments.id, id));
-    if (result.rowCount === 0) {
+    const result = await getDb().delete(enrollments).where(eq(enrollments.id, id));
+    if (result.count === 0) {
       throw new NotFoundError('Enrollment not found');
     }
   });
 }
 
-export async function getEnrollmentsWithDetails(filters: EnrollmentFilters): Promise<DatabaseResponse<PaginatedResult<EnrollmentWithDetails>>> {
+export async function getEnrollmentsWithDetails(filters: EnrollmentFilter): Promise<DatabaseResponse<PaginatedResult<EnrollmentWithDetails>>> {
   return withDatabaseOperation(async () => {
     const page = filters.page || 1;
     const limit = filters.limit || 20;
@@ -297,7 +316,7 @@ export async function getEnrollmentsWithDetails(filters: EnrollmentFilters): Pro
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const enrollmentsData = await db.query.enrollments.findMany({
+    const enrollmentsData = await getDb().query.enrollments.findMany({
       where: whereClause,
       with: {
         profile: true,
@@ -309,13 +328,14 @@ export async function getEnrollmentsWithDetails(filters: EnrollmentFilters): Pro
       orderBy: [desc(enrollments.enrolledAt)],
     });
 
-    const [{ total }] = await db
+    const totalResult = await getDb()
       .select({ total: count() })
       .from(enrollments)
       .where(whereClause);
+    const total = totalResult[0]?.total || 0;
 
     return {
-      data: enrollmentsData as EnrollmentWithDetails[],
+      items: enrollmentsData.map((enrollment: any) => mapEnrollmentWithRelationsToDTO(enrollment)),
       total,
       page,
       limit,
@@ -324,7 +344,7 @@ export async function getEnrollmentsWithDetails(filters: EnrollmentFilters): Pro
   });
 }
 
-export async function getEnrollments(filter: EnrollmentFilters, pagination: PaginationParams = { page: 1, limit: 20 }) {
+export async function getEnrollments(filter: EnrollmentFilter, pagination: PaginationParams = { page: 1, limit: 20 }) {
   const offset = (pagination.page - 1) * pagination.limit;
   
   const conditions = [];
@@ -344,7 +364,7 @@ export async function getEnrollments(filter: EnrollmentFilters, pagination: Pagi
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  const enrollmentsData = await db.query.enrollments.findMany({
+  const enrollmentsData = await getDb().query.enrollments.findMany({
     where: whereClause,
     with: {
       profile: true,
@@ -356,13 +376,14 @@ export async function getEnrollments(filter: EnrollmentFilters, pagination: Pagi
     orderBy: [desc(enrollments.enrolledAt)],
   });
 
-  const [{ total }] = await db
+  const totalResult = await getDb()
     .select({ total: count() })
     .from(enrollments)
     .where(whereClause);
+  const total = totalResult[0]?.total || 0;
 
   return {
-    data: enrollmentsData,
+    items: enrollmentsData.map((enrollment: any) => mapEnrollmentWithRelationsToDTO(enrollment)),
     total,
     page: pagination.page,
     limit: pagination.limit,
@@ -371,7 +392,7 @@ export async function getEnrollments(filter: EnrollmentFilters, pagination: Pagi
 }
 
 export async function getUserEnrollments(userId: string) {
-  return await db.query.enrollments.findMany({
+  return await getDb().query.enrollments.findMany({
     where: eq(enrollments.userId, userId),
     with: {
       course: true,
@@ -385,10 +406,10 @@ export async function getUserEnrollments(userId: string) {
 // PROGRESS OPERATIONS
 // ========================================
 
-export async function createProgress(data: CreateProgress): Promise<DatabaseResponse<Progress>> {
+export async function createProgress(data: CreateProgress): Promise<DatabaseResponse<any>> {
   return withDatabaseOperation(async () => {
     // Check if progress already exists
-    const existing = await db.query.progress.findFirst({
+    const existing = await getDb().query.progress.findFirst({
       where: and(
         eq(progress.userId, data.userId),
         eq(progress.courseId, data.courseId)
@@ -399,14 +420,14 @@ export async function createProgress(data: CreateProgress): Promise<DatabaseResp
       throw new ConflictError('Progress record already exists for this user and course');
     }
 
-    const [progressRecord] = await db.insert(progress).values(data).returning();
+    const [progressRecord] = await getDb().insert(progress).values(data).returning();
     return progressRecord;
   });
 }
 
-export async function updateProgress(id: string, data: UpdateProgress): Promise<DatabaseResponse<Progress>> {
+export async function updateProgress(id: string, data: UpdateProgress): Promise<DatabaseResponse<any>> {
   return withDatabaseOperation(async () => {
-    const [progressRecord] = await db
+    const [progressRecord] = await getDb()
       .update(progress)
       .set({ ...data, updatedAt: new Date().toISOString() })
       .where(eq(progress.id, id))
@@ -422,14 +443,14 @@ export async function updateProgress(id: string, data: UpdateProgress): Promise<
 
 export async function deleteProgress(id: string): Promise<DatabaseResponse<void>> {
   return withDatabaseOperation(async () => {
-    const result = await db.delete(progress).where(eq(progress.id, id));
-    if (result.rowCount === 0) {
+    const result = await getDb().delete(progress).where(eq(progress.id, id));
+    if (result.count === 0) {
       throw new NotFoundError('Progress record not found');
     }
   });
 }
 
-export async function getProgressWithDetails(filter: ProgressFilters): Promise<DatabaseResponse<PaginatedResult<ProgressWithDetails>>> {
+export async function getProgressWithDetails(filter: ProgressFilter): Promise<DatabaseResponse<PaginatedResult<ProgressWithDetails>>> {
   return withDatabaseOperation(async () => {
     const page = filter.page || 1;
     const limit = filter.limit || 20;
@@ -459,7 +480,7 @@ export async function getProgressWithDetails(filter: ProgressFilters): Promise<D
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const progressData = await db.query.progress.findMany({
+    const progressData = await getDb().query.progress.findMany({
       where: whereClause,
       with: {
         profile: true,
@@ -471,13 +492,14 @@ export async function getProgressWithDetails(filter: ProgressFilters): Promise<D
       orderBy: [desc(progress.lastActiveAt)],
     });
 
-    const [{ total }] = await db
+    const totalResult = await getDb()
       .select({ total: count() })
       .from(progress)
       .where(whereClause);
+    const total = totalResult[0]?.total || 0;
 
     return {
-      data: progressData as ProgressWithDetails[],
+      items: progressData.map((prog: any) => mapProgressWithRelationsToDTO(prog)),
       total,
       page,
       limit,
@@ -486,7 +508,7 @@ export async function getProgressWithDetails(filter: ProgressFilters): Promise<D
   });
 }
 
-export async function getProgress(filter: ProgressFilters, pagination: PaginationParams = { page: 1, limit: 20 }) {
+export async function getProgress(filter: ProgressFilter, pagination: PaginationParams = { page: 1, limit: 20 }) {
   const offset = (pagination.page - 1) * pagination.limit;
   
   const conditions = [];
@@ -506,7 +528,7 @@ export async function getProgress(filter: ProgressFilters, pagination: Paginatio
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  const progressData = await db.query.progress.findMany({
+  const progressData = await getDb().query.progress.findMany({
     where: whereClause,
     with: {
       profile: true,
@@ -518,13 +540,14 @@ export async function getProgress(filter: ProgressFilters, pagination: Paginatio
     orderBy: [desc(progress.lastActiveAt)],
   });
 
-  const [{ total }] = await db
+  const totalResult = await getDb()
     .select({ total: count() })
     .from(progress)
     .where(whereClause);
+  const total = totalResult[0]?.total || 0;
 
   return {
-    data: progressData,
+    items: progressData.map((prog: any) => mapProgressWithRelationsToDTO(prog)),
     total,
     page: pagination.page,
     limit: pagination.limit,
@@ -541,7 +564,7 @@ export async function getUserProgress(userId: string, courseId?: string) {
 
   const whereClause = and(...conditions);
 
-  return await db.query.progress.findMany({
+  return await getDb().query.progress.findMany({
     where: whereClause,
     with: {
       course: true,
@@ -553,7 +576,7 @@ export async function getUserProgress(userId: string, courseId?: string) {
 
 // Analytics operations
 export async function getPlantStats(plantId: string) {
-  const [enrollmentStats] = await db
+  const enrollmentStatsResult = await getDb()
     .select({
       totalEnrollments: count(),
       completedEnrollments: count(sql`CASE WHEN ${enrollments.status} = 'completed' THEN 1 END`),
@@ -562,18 +585,21 @@ export async function getPlantStats(plantId: string) {
     .from(enrollments)
     .where(eq(enrollments.plantId, plantId));
 
-  const [progressStats] = await db
+  const progressStatsResult = await getDb()
     .select({
       averageProgress: avg(progress.progressPercent),
     })
     .from(progress)
     .where(eq(progress.plantId, plantId));
 
+  const enrollmentStats = enrollmentStatsResult[0];
+  const progressStats = progressStatsResult[0];
+
   return {
     ...enrollmentStats,
-    averageProgress: progressStats.averageProgress || 0,
-    completionRate: enrollmentStats.totalEnrollments > 0 
-      ? (enrollmentStats.completedEnrollments / enrollmentStats.totalEnrollments) * 100 
+    averageProgress: progressStats?.averageProgress || 0,
+    completionRate: (enrollmentStats?.totalEnrollments || 0) > 0 
+      ? ((enrollmentStats?.completedEnrollments || 0) / (enrollmentStats?.totalEnrollments || 1)) * 100 
       : 0,
   };
 }
@@ -590,7 +616,7 @@ export async function getCourseStats(courseId: string, plantId?: string) {
   const enrollmentWhere = and(...enrollmentConditions);
   const progressWhere = and(...progressConditions);
 
-  const [enrollmentStats] = await db
+  const enrollmentStatsResult = await getDb()
     .select({
       totalEnrollments: count(),
       completedEnrollments: count(sql`CASE WHEN ${enrollments.status} = 'completed' THEN 1 END`),
@@ -598,18 +624,21 @@ export async function getCourseStats(courseId: string, plantId?: string) {
     .from(enrollments)
     .where(enrollmentWhere);
 
-  const [progressStats] = await db
+  const progressStatsResult = await getDb()
     .select({
       averageProgress: avg(progress.progressPercent),
     })
     .from(progress)
     .where(progressWhere);
 
+  const enrollmentStats = enrollmentStatsResult[0];
+  const progressStats = progressStatsResult[0];
+
   return {
     ...enrollmentStats,
-    averageProgress: progressStats.averageProgress || 0,
-    completionRate: enrollmentStats.totalEnrollments > 0 
-      ? (enrollmentStats.completedEnrollments / enrollmentStats.totalEnrollments) * 100 
+    averageProgress: progressStats?.averageProgress || 0,
+    completionRate: (enrollmentStats?.totalEnrollments || 0) > 0 
+      ? ((enrollmentStats?.completedEnrollments || 0) / (enrollmentStats?.totalEnrollments || 1)) * 100 
       : 0,
   };
 }
@@ -622,19 +651,19 @@ export async function getDetailedAnalytics(): Promise<DatabaseResponse<any>> {
   return withDatabaseOperation(async () => {
     // Get overview statistics
     const [usersResult, enrollmentsResult, completedResult] = await Promise.all([
-      db.select({ count: count() }).from(profiles).where(eq(profiles.status, 'active')),
-      db.select({ count: count() }).from(enrollments),
-      db.select({ count: count() }).from(enrollments).where(eq(enrollments.status, 'completed'))
+      getDb().select({ count: count() }).from(profiles).where(eq(profiles.status, 'active')),
+      getDb().select({ count: count() }).from(enrollments),
+      getDb().select({ count: count() }).from(enrollments).where(eq(enrollments.status, 'completed'))
     ]);
 
-    const totalUsers = usersResult[0].count;
-    const activeUsers = usersResult[0].count;
-    const totalEnrollments = enrollmentsResult[0].count;
-    const completedCourses = completedResult[0].count;
+    const totalUsers = usersResult[0]?.count || 0;
+    const activeUsers = usersResult[0]?.count || 0;
+    const totalEnrollments = enrollmentsResult[0]?.count || 0;
+    const completedCourses = completedResult[0]?.count || 0;
     const overallCompletionRate = totalEnrollments > 0 ? (completedCourses / totalEnrollments) * 100 : 0;
 
     // Get course performance
-    const coursePerformanceData = await db
+    const coursePerformanceData = await getDb()
       .select({
         courseId: courses.id,
         courseName: courses.title,
@@ -647,7 +676,7 @@ export async function getDetailedAnalytics(): Promise<DatabaseResponse<any>> {
       .leftJoin(progress, eq(courses.id, progress.courseId))
       .groupBy(courses.id);
 
-    const coursePerformance = coursePerformanceData.map(course => ({
+    const coursePerformance = coursePerformanceData.map((course: any) => ({
       courseId: course.courseId,
       courseName: course.courseName,
       totalEnrollments: course.totalEnrollments,
@@ -658,7 +687,7 @@ export async function getDetailedAnalytics(): Promise<DatabaseResponse<any>> {
     }));
 
     // Get plant performance
-    const plantPerformanceData = await db
+    const plantPerformanceData = await getDb()
       .select({
         plantId: plants.id,
         plantName: plants.name,
@@ -671,7 +700,7 @@ export async function getDetailedAnalytics(): Promise<DatabaseResponse<any>> {
       .leftJoin(enrollments, eq(profiles.id, enrollments.userId))
       .groupBy(plants.id);
 
-    const plantPerformance = plantPerformanceData.map(plant => ({
+    const plantPerformance = plantPerformanceData.map((plant: any) => ({
       plantId: plant.plantId,
       plantName: plant.plantName,
       totalUsers: plant.totalUsers,
@@ -681,7 +710,7 @@ export async function getDetailedAnalytics(): Promise<DatabaseResponse<any>> {
     }));
 
     // Get question analytics
-    const questionData = await db
+    const questionData = await getDb()
       .select({
         courseId: questionEvents.courseId,
         sectionKey: questionEvents.sectionKey,
@@ -693,7 +722,7 @@ export async function getDetailedAnalytics(): Promise<DatabaseResponse<any>> {
       .from(questionEvents)
       .groupBy(questionEvents.courseId, questionEvents.sectionKey, questionEvents.questionKey);
 
-    const questionAnalytics = questionData.map(q => ({
+    const questionAnalytics = questionData.map((q: any) => ({
       courseId: q.courseId,
       courseName: '', // Would need join with courses
       sectionKey: q.sectionKey,
@@ -716,7 +745,7 @@ export async function getDetailedAnalytics(): Promise<DatabaseResponse<any>> {
       plantPerformance,
       questionAnalytics,
       userActivity: [], // Would need additional implementation
-      complianceTracking: plantPerformance.map(plant => ({
+      complianceTracking: plantPerformance.map((plant: any) => ({
         plantId: plant.plantId,
         plantName: plant.plantName,
         courseId: '',
@@ -744,7 +773,7 @@ export async function getQuestionStats(plantId: string, courseId?: string, quest
 
   const whereClause = and(...conditions);
 
-  const stats = await db
+  const stats = await getDb()
     .select({
       questionKey: questionEvents.questionKey,
       totalAttempts: count(),
@@ -756,8 +785,15 @@ export async function getQuestionStats(plantId: string, courseId?: string, quest
     .groupBy(questionEvents.questionKey)
     .orderBy(questionEvents.questionKey);
 
-  return stats.map(stat => ({
+  return stats.map((stat: any) => ({
     ...stat,
     successRate: stat.totalAttempts > 0 ? (stat.correctAttempts / stat.totalAttempts) * 100 : 0,
   }));
 }
+
+// ========================================
+// LEGACY COMPATIBILITY EXPORTS
+// ========================================
+
+// Export compatibility classes for backward compatibility
+export { EnrollmentOperationsCompat, UserOperationsCompat } from './migration-strategy';

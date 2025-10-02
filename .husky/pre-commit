@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit type checking..."
+
+# Run type checking on staged files
+npm run type-check
+
+# If type checking fails, prevent commit
+if [ $? -ne 0 ]; then
+  echo "❌ Type checking failed. Please fix TypeScript errors before committing."
+  exit 1
+fi
+
+echo "✅ Type checking passed!"
+
+# Run other pre-commit checks
+npm run precommit:fast

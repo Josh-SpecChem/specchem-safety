@@ -1,39 +1,34 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useUnifiedForm } from '@/hooks/useUnifiedForm'
+import { loginFormSchema } from '@/lib/schemas/unified-form-schemas'
+import { FormField, FormError, FormSubmitButton, FormContainer } from '@/components/ui/unified-form'
+import type { LoginForm } from '@/lib/schemas/unified-form-schemas'
 
 export function LoginForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  
   const { signIn } = useAuth()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    try {
-      const result = await signIn(email, password)
+  const form = useUnifiedForm({
+    initialValues: {
+      email: '',
+      password: ''
+    } as LoginForm,
+    validationSchema: loginFormSchema,
+    onSubmit: async (values: LoginForm) => {
+      const result = await signIn(values.email, values.password)
       
       if (result.error) {
-        setError(result.error)
+        throw new Error(result.error)
       }
       // Success will be handled by auth context and middleware redirect
-    } catch (err) {
-      console.error('Login error:', err)
-      setError('An unexpected error occurred. Please try again.')
-    } finally {
-      setLoading(false)
+    },
+    onError: (error: Error) => {
+      console.error('Login error:', error)
     }
-  }
+  })
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -44,52 +39,44 @@ export function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-              {error}
-            </div>
+        <FormContainer onSubmit={(e) => { e.preventDefault(); form.submitForm(); }}>
+          {form.errors.submit && (
+            <FormError error={form.errors.submit} />
           )}
           
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={loading}
-              placeholder="Enter your email"
-              className="w-full"
-            />
-          </div>
+          <FormField
+            name="email"
+            label="Email"
+            type="email"
+            value={form.values.email}
+            error={form.errors.email}
+            onChange={(value) => form.updateField('email', value as string)}
+            onBlur={() => form.validateField('email')}
+            placeholder="Enter your email"
+            disabled={form.isSubmitting}
+            required
+          />
           
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={loading}
-              placeholder="Enter your password"
-              className="w-full"
-            />
-          </div>
+          <FormField
+            name="password"
+            label="Password"
+            type="password"
+            value={form.values.password}
+            error={form.errors.password}
+            onChange={(value) => form.updateField('password', value as string)}
+            onBlur={() => form.validateField('password')}
+            placeholder="Enter your password"
+            disabled={form.isSubmitting}
+            required
+          />
           
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={loading}
+          <FormSubmitButton
+            isSubmitting={form.isSubmitting}
+            disabled={!form.isDirty}
+            loadingText="Signing In..."
           >
-            {loading ? 'Signing In...' : 'Sign In'}
-          </Button>
+            Sign In
+          </FormSubmitButton>
           
           <div className="text-center text-sm text-gray-600">
             <Link 
@@ -109,7 +96,7 @@ export function LoginForm() {
               Sign up
             </Link>
           </div>
-        </form>
+        </FormContainer>
       </CardContent>
     </Card>
   )

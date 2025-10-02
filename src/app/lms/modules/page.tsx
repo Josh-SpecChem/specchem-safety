@@ -125,7 +125,7 @@ export default function ModulesPage() {
                 <div className="mb-6">
                   <h4 className="text-xs font-medium text-fg-secondary mb-2">Key Topics:</h4>
                   <ul className="text-xs text-fg-muted space-y-1">
-                    {module.objectives.slice(0, 2).map((objective, index) => (
+                    {module.objectives.slice(0, 2).map((objective: any, index: number) => (
                       <li key={index} className="flex items-start">
                         <span className={`${colors.icon} mr-2 text-xs`}>•</span>
                         <span className="line-clamp-1">{objective}</span>

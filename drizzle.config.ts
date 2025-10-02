@@ -1,16 +1,18 @@
-import { defineConfig } from 'drizzle-kit';
-import { config } from 'dotenv';
+import { defineConfig } from "drizzle-kit";
+import { ConfigurationService } from "./src/lib/configuration";
 
-// Load environment variables from .env.local
-config({ path: '.env.local' });
+/**
+ * Drizzle Configuration - Standardized to use centralized configuration
+ * Uses centralized config service for environment variables and settings
+ */
 
 export default defineConfig({
-  schema: './src/lib/db/schema.ts',
-  out: './drizzle',
-  dialect: 'postgresql',
+  schema: "./src/contracts/schema.app.ts",
+  out: "./drizzle",
+  dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    url: ConfigurationService.getDatabaseConfig().url,
   },
-  verbose: true,
+  verbose: ConfigurationService.getNextJSConfig().isDevelopment,
   strict: true,
 });

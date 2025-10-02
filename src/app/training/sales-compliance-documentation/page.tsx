@@ -11,6 +11,17 @@ export default function SalesComplianceTrainingPage() {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [showAssessment, setShowAssessment] = useState(false)
   
+  if (!trainingModule) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Module Not Found</h1>
+          <p className="text-gray-600">The requested training module could not be found.</p>
+        </div>
+      </div>
+    )
+  }
+  
   const currentSection = trainingModule.content.sections[currentSectionIndex]
   const progress = Math.round(((currentSectionIndex + 1) / trainingModule.content.sections.length) * 100)
 
@@ -98,10 +109,10 @@ export default function SalesComplianceTrainingPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
-                {currentSection.title}
+                {currentSection?.title || 'Loading...'}
               </h2>
               <p className="text-sm text-gray-600">
-                Section {currentSectionIndex + 1} of {trainingModule.content.sections.length} • {currentSection.estimatedReadTime}
+                Section {currentSectionIndex + 1} of {trainingModule.content.sections.length} • {currentSection?.estimatedReadTime || 'Loading...'}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -125,10 +136,14 @@ export default function SalesComplianceTrainingPage() {
 
         {/* Section Content */}
         <div className="bg-white rounded-lg border border-gray-200 p-8 mb-6">
-          <div 
-            className="prose prose-lg max-w-none"
-            dangerouslySetInnerHTML={{ __html: currentSection.content }}
-          />
+          {currentSection ? (
+            <div 
+              className="prose prose-lg max-w-none"
+              dangerouslySetInnerHTML={{ __html: currentSection.content }}
+            />
+          ) : (
+            <div className="text-center text-gray-500">Loading section content...</div>
+          )}
         </div>
 
         {/* Navigation & Actions */}

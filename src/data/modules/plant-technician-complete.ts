@@ -1,6 +1,6 @@
-import { TrainingModuleContent } from '@/types/training'
+import { TrainingModule } from '@/types/domain'
 
-export const PLANT_TECHNICIAN_MODULES: TrainingModuleContent[] = [
+export const PLANT_TECHNICIAN_MODULES: TrainingModule[] = [
   {
     id: 'plant-safety-protocols',
     title: 'Safety Protocols & Emergency Procedures',
@@ -9,22 +9,16 @@ export const PLANT_TECHNICIAN_MODULES: TrainingModuleContent[] = [
     duration: '2 hours',
     difficulty: 'intermediate',
     prerequisites: [],
+    assessmentRequired: true,
     certificationEligible: true,
     lastUpdated: '2024-12-19',
-    learningObjectives: [
-      'Identify and assess common hazards in chemical manufacturing environments',
-      'Execute proper lockout/tagout procedures for equipment maintenance',
-      'Respond appropriately to chemical spills and emergency situations',
-      'Use personal protective equipment correctly and safely',
-      'Follow confined space entry procedures and safety protocols',
-      'Implement fire safety and evacuation procedures'
-    ],
     content: {
       sections: [
         {
           id: 'hazard-recognition',
           title: 'Hazard Recognition & Risk Assessment',
           estimatedReadTime: '25 min',
+          order: 1,
           content: `
             <div class="training-content">
               <h2 class="text-2xl font-bold text-federal-blue mb-6">Hazard Recognition & Risk Assessment</h2>
@@ -199,6 +193,7 @@ export const PLANT_TECHNICIAN_MODULES: TrainingModuleContent[] = [
           id: 'lockout-tagout',
           title: 'Lockout/Tagout Procedures',
           estimatedReadTime: '20 min',
+          order: 2,
           content: `
             <div class="training-content">
               <h2 class="text-2xl font-bold text-federal-blue mb-6">Lockout/Tagout (LOTO) Procedures</h2>
@@ -398,6 +393,7 @@ export const PLANT_TECHNICIAN_MODULES: TrainingModuleContent[] = [
           id: 'emergency-response',
           title: 'Emergency Response Procedures',
           estimatedReadTime: '20 min',
+          order: 3,
           content: `
             <div class="training-content">
               <h2 class="text-2xl font-bold text-federal-blue mb-6">Emergency Response Procedures</h2>

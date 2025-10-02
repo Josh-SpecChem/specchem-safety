@@ -20,7 +20,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { getLmsModule, getUserProgress, getLessonResources } from '@/features/lms/data/mock';
-import type { LmsModule, UserProgress } from '@/types/lms';
+import type { LmsModule, UserProgress } from '@/types/domain';
 import { trackLmsEvent } from '@/features/lms/analytics/client';
 
 interface ModulePageProps {
@@ -54,8 +54,8 @@ export default function ModulePage({ params }: ModulePageProps) {
   if (!moduleData || !userProgress) {
     return <div>Loading...</div>;
   }
-  const moduleProgress = userProgress.modules.find(m => m.moduleSlug === slug);
-  const completedLessons = moduleProgress?.completedLessons || [];
+  const moduleProgress = userProgress.modules.find((m: any) => m.moduleSlug === slug);
+  const completedLessons = (moduleProgress as any)?.completedLessons || [];
   const progressPercent = Math.round((completedLessons.length / moduleData.lessons.length) * 100);
 
   return (

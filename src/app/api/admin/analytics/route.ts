@@ -1,45 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getPlantStats, getCourseStats } from '@/lib/db/operations';
-import { withAdminAuth } from '@/lib/api-auth';
-import { formatErrorResponse, DatabaseError } from '@/lib/errors';
-
 /**
- * GET /api/admin/analytics - Get plant and course analytics (admin only)
+ * Admin API for analytics - Simplified Implementation
+ * GET: Get plant and course analytics
  */
+
+import { NextRequest } from 'next/server';
+import { RouteUtils } from '@/lib/route-utils';
+import { getPlantStats, getCourseStats } from '@/lib/db/operations';
+import { CommonSchemas } from '@/app/api/shared/utils/validation-utils';
+
+// GET /api/admin/analytics - Get analytics data
 export async function GET(request: NextRequest) {
-  try {
-    return withAdminAuth(async (profile, adminRoles) => {
-      const searchParams = request.nextUrl.searchParams;
-      const plantId = searchParams.get('plantId');
-      const courseId = searchParams.get('courseId');
+  return RouteUtils.handleRequest(request, async (req) => {
+    const query = RouteUtils.getValidatedQuery(req) as { plantId?: string; courseId?: string } || {};
+    
+    let analytics = {};
 
-      let analytics = {};
+    // Get plant stats
+    if (query.plantId) {
+      const plantStats = await getPlantStats(query.plantId);
+      analytics = { ...analytics, plantStats };
+    }
 
-      // Get plant stats
-      if (plantId) {
-        const plantStats = await getPlantStats(plantId);
-        analytics = { ...analytics, plantStats };
-      } else {
-        // If HR admin or dev admin, get stats for user's plant
-        const plantStats = await getPlantStats(profile.plantId);
-        analytics = { ...analytics, plantStats };
-      }
+    // Get course stats
+    if (query.courseId) {
+      const courseStats = await getCourseStats(query.courseId, query.plantId);
+      analytics = { ...analytics, courseStats };
+    }
 
-      // Get course stats
-      if (courseId) {
-        const courseStats = await getCourseStats(courseId, plantId || profile.plantId);
-        analytics = { ...analytics, courseStats };
-      }
-
-      return NextResponse.json({
-        success: true,
-        data: analytics,
-      });
-    }, 'hr_admin');
-  } catch (error) {
-    const errorResponse = formatErrorResponse(error as Error);
-    return NextResponse.json(errorResponse, { 
-      status: errorResponse.statusCode 
-    });
-  }
+    return RouteUtils.createSuccessResponse(analytics);
+  }, {
+    requireAuth: true,
+    requireRole: 'hr_admin',
+    validateQuery: CommonSchemas.analyticsFilters
+  });
 }

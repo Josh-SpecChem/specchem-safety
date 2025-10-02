@@ -9,7 +9,7 @@ import { useCourses } from '@/hooks/useCourses'
 import { useState } from 'react'
 
 function CourseAdministrationPage() {
-  const { courses, statistics, loading, error } = useCourses()
+  const { data: courses, loading, error } = useCourses()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
 
@@ -41,7 +41,8 @@ function CourseAdministrationPage() {
   }
 
   // Filter courses based on search and status
-  const filteredCourses = courses.filter(course => {
+  const coursesArray = Array.isArray(courses) ? courses : courses ? [courses] : []
+  const filteredCourses = coursesArray.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.slug.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = !statusFilter || 
@@ -49,6 +50,18 @@ function CourseAdministrationPage() {
                          (statusFilter === 'inactive' && !course.isPublished)
     return matchesSearch && matchesStatus
   })
+  
+  // Calculate statistics
+  const statistics = {
+    totalCourses: coursesArray.length,
+    activeCourses: coursesArray.filter(course => course.isPublished).length,
+    totalEnrollments: coursesArray.reduce((sum, course) => sum + (course.totalEnrollments || 0), 0),
+    completedEnrollments: coursesArray.reduce((sum, course) => sum + (course.completedEnrollments || 0), 0),
+    avgCompletionRate: coursesArray.length > 0 
+      ? Math.round(coursesArray.reduce((sum, course) => sum + (course.completionRate || 0), 0) / coursesArray.length)
+      : 0,
+  }
+  
   return (
     <ProtectedRoute requireAdmin={true}>
       <div className="container mx-auto p-6 space-y-8">
@@ -257,7 +270,7 @@ function CourseAdministrationPage() {
             {/* Pagination */}
             <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
               <div className="text-sm text-gray-500">
-                Showing {filteredCourses.length} of {courses.length} courses
+                Showing {filteredCourses.length} of {coursesArray.length} courses
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" disabled>

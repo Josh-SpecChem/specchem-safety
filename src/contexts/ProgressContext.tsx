@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react'
-import { UserModuleProgress, AssessmentResult } from '@/types/training'
+import { UserModuleProgress, AssessmentResult } from '@/types/domain'
 
 interface ProgressState {
   moduleProgress: { [moduleId: string]: UserModuleProgress }
@@ -110,9 +110,11 @@ function progressReducer(state: ProgressState, action: ProgressAction): Progress
       const currentProgress = state.moduleProgress[moduleId] || getInitialModuleProgress(moduleId)
       
       const newNote = {
+        id: `note-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         sectionId,
         content,
-        timestamp: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
 
       return {

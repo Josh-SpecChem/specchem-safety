@@ -1,73 +1,101 @@
 import { useState, useEffect, useCallback } from 'react';
-import { z } from 'zod';
 import { 
   apiGet, 
   apiPost, 
   apiPatch, 
+  handleApiError, 
   withRetryEnhanced, 
-  enhancedCache,
-  handleApiError,
-  type HookState,
-  type MutatingHookState,
-  type ApiResponse
+  enhancedCache, 
+  createCacheKey,
+  CACHE_STRATEGY
 } from '@/lib/api-utils';
+import type { ValidationSchema, UnifiedApiOptions, UnifiedApiState } from '@/types/api';
+import { 
+  courseProgressSchema, 
+  userProfileSchema,
+  type CourseProgress,
+  type UserProfile
+} from '@/lib/schemas';
 
-// ========================================
-// STANDARDIZED GET HOOK PATTERN
-// ========================================
+/**
+ * Standardized API Hooks - Unified API interaction patterns
+ * 
+ * These hooks provide consistent patterns for API interactions across the application.
+ * They include caching, error handling, retry logic, and loading states.
+ */
 
+export interface ApiOptions {
+  cacheKey?: string;
+  cacheTTL?: number;
+  enabled?: boolean;
+  retryCount?: number;
+  retryDelay?: number;
+}
+
+export interface ApiState<T> {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
+/**
+ * Hook for GET requests with caching and error handling
+ */
 export function useApiGet<T>(
-  url: string,
-  schema: z.ZodType<T>,
-  options: {
-    cacheKey?: string;
-    cacheTTL?: number;
-    enabled?: boolean;
-    dependencies?: unknown[];
-  } = {}
-): HookState<T> {
+  endpoint: string,
+  schema?: ValidationSchema,
+  options: ApiOptions = {}
+): ApiState<T> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const {
+    cacheKey = createCacheKey(endpoint),
+    cacheTTL = CACHE_STRATEGY.default,
+    enabled = true,
+    retryCount = 3,
+    retryDelay = 1000
+  } = options;
+
   const fetchData = useCallback(async () => {
-    if (options.enabled === false) return;
+    if (!enabled) return;
 
     try {
       setLoading(true);
       setError(null);
 
       // Check cache first
-      if (options.cacheKey) {
-        const cached = enhancedCache.get<T>(options.cacheKey);
-        if (cached) {
-          setData(cached);
-          setLoading(false);
-          return;
-        }
+      const cachedData = enhancedCache.get(cacheKey);
+      if (cachedData) {
+        setData(cachedData as T);
+        setLoading(false);
+        return;
       }
 
-      const result = await withRetryEnhanced(() => apiGet(url, schema));
+      // Fetch from API with retry logic
+      const result = await withRetryEnhanced(
+        () => apiGet(endpoint),
+        retryCount,
+        retryDelay
+      );
 
-      if (result.success && result.data) {
-        setData(result.data);
-        
-        // Cache the result
-        if (options.cacheKey) {
-          enhancedCache.set(options.cacheKey, result.data, {
-            ttl: options.cacheTTL || 5 * 60 * 1000, // 5 minutes default
-            key: options.cacheKey,
-          });
-        }
+      if (result.success) {
+        const validatedData = schema ? schema.parse(result.data) : result.data;
+        setData(validatedData as T);
+        enhancedCache.set(cacheKey, validatedData, { ttl: cacheTTL, key: cacheKey });
       } else {
-        setError(result.error || 'Failed to fetch data');
+        throw new Error(result.error || 'Failed to fetch data');
       }
     } catch (err) {
-      setError(handleApiError(err));
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      console.error(`API GET Error (${endpoint}):`, errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [url, options.cacheKey, options.enabled, ...(options.dependencies || [])]);
+  }, [endpoint, schema, cacheKey, cacheTTL, enabled, retryCount, retryDelay]);
 
   useEffect(() => {
     fetchData();
@@ -77,171 +105,163 @@ export function useApiGet<T>(
     data,
     loading,
     error,
-    refetch: fetchData,
+    refetch: fetchData
   };
 }
 
-// ========================================
-// STANDARDIZED MUTATION HOOK PATTERN
-// ========================================
-
-export function useApiMutation<T, U>(
-  url: string,
-  schema: z.ZodType<T>,
-  options: {
-    method: 'POST' | 'PATCH';
-    invalidateCache?: string[];
-    onSuccess?: (data: T) => void;
-    onError?: (error: string) => void;
-  }
-): MutatingHookState<T> {
-  const [data, setData] = useState<T | null>(null);
+/**
+ * Hook for POST requests with error handling
+ */
+export function useApiPost<T, R>(
+  endpoint: string,
+  schema?: ValidationSchema,
+  options: ApiOptions = {}
+) {
   const [loading, setLoading] = useState(false);
-  const [mutating, setMutating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const mutate = useCallback(async (payload: U): Promise<boolean> => {
+  const {
+    retryCount = 3,
+    retryDelay = 1000
+  } = options;
+
+  const postData = useCallback(async (payload: T): Promise<R | null> => {
     try {
-      setMutating(true);
+      setLoading(true);
       setError(null);
 
-      const result = await withRetryEnhanced(() => {
-        if (options.method === 'POST') {
-          return apiPost(url, payload, schema);
-        } else {
-          return apiPatch(url, payload, schema);
-        }
-      });
+      const result = await withRetryEnhanced(
+        () => apiPost(endpoint, payload),
+        retryCount,
+        retryDelay
+      );
 
-      if (result.success && result.data) {
-        setData(result.data);
-        
-        // Invalidate related caches
-        if (options.invalidateCache) {
-          enhancedCache.invalidate(options.invalidateCache);
-        }
-        
-        options.onSuccess?.(result.data);
-        return true;
+      if (result.success) {
+        const validatedData = schema ? schema.parse(result.data) : result.data;
+        return validatedData as R;
       } else {
-        setError(result.error || 'Operation failed');
-        options.onError?.(result.error || 'Operation failed');
-        return false;
+        throw new Error(result.error || 'Failed to post data');
       }
     } catch (err) {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
-      options.onError?.(errorMessage);
-      return false;
+      console.error(`API POST Error (${endpoint}):`, errorMessage);
+      return null;
     } finally {
-      setMutating(false);
+      setLoading(false);
     }
-  }, [url, options.method, options.invalidateCache]);
+  }, [endpoint, schema, retryCount, retryDelay]);
 
   return {
-    data,
+    postData,
     loading,
-    mutating,
-    error,
-    refetch: async () => {}, // Not applicable for mutations
-    mutate,
+    error
   };
 }
 
-// ========================================
-// STANDARDIZED LIST HOOK WITH PAGINATION
-// ========================================
+/**
+ * Hook for PATCH requests with error handling
+ */
+export function useApiPatch<T, R>(
+  endpoint: string,
+  schema?: ValidationSchema,
+  options: ApiOptions = {}
+) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-export function useApiList<T>(
-  url: string,
-  schema: z.ZodType<T[]>,
-  filters: Record<string, unknown> = {},
-  options: {
-    cacheKey?: string;
-    cacheTTL?: number;
-    pageSize?: number;
-  } = {}
-): HookState<T[]> & {
-  pagination: {
-    page: number;
-    total: number;
-    totalPages: number;
-    hasNext: boolean;
-    hasPrev: boolean;
+  const {
+    retryCount = 3,
+    retryDelay = 1000
+  } = options;
+
+  const patchData = useCallback(async (payload: T): Promise<R | null> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await withRetryEnhanced(
+        () => apiPatch(endpoint, payload),
+        retryCount,
+        retryDelay
+      );
+
+      if (result.success) {
+        const validatedData = schema ? schema.parse(result.data) : result.data;
+        return validatedData as R;
+      } else {
+        throw new Error(result.error || 'Failed to patch data');
+      }
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      console.error(`API PATCH Error (${endpoint}):`, errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [endpoint, schema, retryCount, retryDelay]);
+
+  return {
+    patchData,
+    loading,
+    error
   };
-  setPage: (page: number) => void;
-} {
-  const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    total: 0,
-    totalPages: 0,
-    hasNext: false,
-    hasPrev: false,
-  });
+}
 
-  const listState = useApiGet(
-    `${url}?${new URLSearchParams({
-      ...filters,
-      page: page.toString(),
-      limit: (options.pageSize || 20).toString(),
-    })}`,
-    schema,
+/**
+ * Hook for managing user progress data
+ */
+export function useProgress() {
+  return useApiGet<CourseProgress[]>(
+    '/api/progress',
+    courseProgressSchema.array(),
     {
-      cacheKey: options.cacheKey,
-      cacheTTL: options.cacheTTL,
-      dependencies: [page, ...Object.values(filters)],
+      cacheKey: 'user-progress',
+      cacheTTL: CACHE_STRATEGY.userData
     }
   );
+}
 
-  // Update pagination when data changes
-  useEffect(() => {
-    if (listState.data) {
-      // Assuming the API returns pagination info
-      // This would need to be adjusted based on actual API response format
-      setPagination(prev => ({
-        ...prev,
-        page,
-        hasNext: page < prev.totalPages,
-        hasPrev: page > 1,
-      }));
+/**
+ * Hook for managing course progress data
+ */
+export function useCourseProgress(courseId: string) {
+  return useApiGet<CourseProgress>(
+    `/api/courses/${courseId}/progress`,
+    courseProgressSchema,
+    {
+      cacheKey: `course-progress-${courseId}`,
+      cacheTTL: CACHE_STRATEGY.courseData,
+      enabled: !!courseId
     }
-  }, [listState.data, page]);
+  );
+}
 
-  return {
-    ...listState,
-    pagination,
-    setPage,
-  };
+/**
+ * Hook for managing user profile data
+ */
+export function useUserProfile() {
+  return useApiGet<UserProfile>(
+    '/api/user/profile',
+    userProfileSchema,
+    {
+      cacheKey: 'user-profile',
+      cacheTTL: CACHE_STRATEGY.userData
+    }
+  );
 }
 
 // ========================================
-// OPTIMISTIC UPDATES UTILITY
+// ADDITIONAL EXPORTS FOR BACKWARD COMPATIBILITY
 // ========================================
 
-export function useOptimisticUpdate<T>(
-  currentData: T | null,
-  updateFn: (data: T, updates: Partial<T>) => T
-) {
-  const [optimisticData, setOptimisticData] = useState<T | null>(currentData);
+/**
+ * Alias for useApiPost for backward compatibility
+ */
+export const useApiMutation = useApiPost;
 
-  useEffect(() => {
-    setOptimisticData(currentData);
-  }, [currentData]);
-
-  const applyOptimisticUpdate = useCallback((updates: Partial<T>) => {
-    if (optimisticData) {
-      setOptimisticData(updateFn(optimisticData, updates));
-    }
-  }, [optimisticData, updateFn]);
-
-  const revertOptimisticUpdate = useCallback(() => {
-    setOptimisticData(currentData);
-  }, [currentData]);
-
-  return {
-    data: optimisticData,
-    applyOptimisticUpdate,
-    revertOptimisticUpdate,
-  };
-}
+/**
+ * Alias for useApiGet for backward compatibility
+ */
+export const useApiList = useApiGet;

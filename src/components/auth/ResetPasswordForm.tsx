@@ -4,20 +4,45 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useUnifiedForm } from '@/hooks/useUnifiedForm'
+import { resetPasswordFormSchema } from '@/lib/schemas/unified-form-schemas'
+import { FormField, FormError, FormSuccess, FormSubmitButton, FormContainer } from '@/components/ui/unified-form'
+import type { ResetPasswordForm } from '@/lib/schemas/unified-form-schemas'
 
 export function ResetPasswordForm() {
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [validSession, setValidSession] = useState(false)
+  const [sessionError, setSessionError] = useState('')
   
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  const form = useUnifiedForm({
+    initialValues: {
+      password: '',
+      confirmPassword: ''
+    } as ResetPasswordForm,
+    validationSchema: resetPasswordFormSchema,
+    onSubmit: async (values: ResetPasswordForm) => {
+      const { error } = await supabase.auth.updateUser({
+        password: values.password
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      setSuccess(true)
+      // Redirect to login after successful password reset
+      setTimeout(() => {
+        router.push('/login?message=Password updated successfully')
+      }, 2000)
+    },
+    onError: (error: Error) => {
+      console.error('Password reset error:', error)
+    }
+  })
 
   useEffect(() => {
     // Check if we have the required URL parameters for password reset
@@ -34,67 +59,17 @@ export function ResetPasswordForm() {
         if (!error) {
           setValidSession(true)
         } else {
-          setError('Invalid or expired reset link. Please request a new password reset.')
+          setSessionError('Invalid or expired reset link. Please request a new password reset.')
         }
       } else {
-        setError('Invalid reset link. Please request a new password reset.')
+        setSessionError('Invalid reset link. Please request a new password reset.')
       }
     }
 
     checkSession()
   }, [searchParams])
 
-  const validatePasswords = (): string | null => {
-    if (!password || !confirmPassword) {
-      return 'Please fill in both password fields'
-    }
-
-    if (password.length < 8) {
-      return 'Password must be at least 8 characters long'
-    }
-
-    if (password !== confirmPassword) {
-      return 'Passwords do not match'
-    }
-
-    return null
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    const validationError = validatePasswords()
-    if (validationError) {
-      setError(validationError)
-      setLoading(false)
-      return
-    }
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: password
-      })
-
-      if (error) {
-        setError(error.message)
-      } else {
-        setSuccess(true)
-        // Redirect to login after successful password reset
-        setTimeout(() => {
-          router.push('/login?message=Password updated successfully')
-        }, 2000)
-      }
-    } catch (err) {
-      console.error('Password reset error:', err)
-      setError('An unexpected error occurred. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (!validSession && !error) {
+  if (!validSession && !sessionError) {
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardContent className="pt-6">
@@ -107,7 +82,7 @@ export function ResetPasswordForm() {
     )
   }
 
-  if (error && !validSession) {
+  if (sessionError) {
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="space-y-1">
@@ -135,19 +110,21 @@ export function ResetPasswordForm() {
             </div>
           </div>
           <p className="text-sm text-gray-600 mb-6">
-            {error}
+            {sessionError}
           </p>
           <div className="space-y-3">
-            <Button asChild className="w-full">
-              <Link href="/forgot-password">
-                Request New Reset Link
-              </Link>
-            </Button>
-            <Button variant="outline" asChild className="w-full">
-              <Link href="/login">
-                Back to Login
-              </Link>
-            </Button>
+            <Link
+              href="/forgot-password"
+              className="block w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center"
+            >
+              Request New Reset Link
+            </Link>
+            <Link
+              href="/login"
+              className="block w-full bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors text-center"
+            >
+              Back to Login
+            </Link>
           </div>
         </CardContent>
       </Card>
@@ -184,11 +161,12 @@ export function ResetPasswordForm() {
           <p className="text-sm text-gray-600 mb-4">
             Redirecting to login page...
           </p>
-          <Button asChild className="w-full">
-            <Link href="/login">
-              Sign In with New Password
-            </Link>
-          </Button>
+          <Link
+            href="/login"
+            className="block w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center"
+          >
+            Sign In with New Password
+          </Link>
         </CardContent>
       </Card>
     )
@@ -203,54 +181,44 @@ export function ResetPasswordForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-              {error}
-            </div>
+        <FormContainer onSubmit={(e) => { e.preventDefault(); form.submitForm(); }}>
+          {form.errors.submit && (
+            <FormError error={form.errors.submit} />
           )}
           
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-gray-700">
-              New Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={loading}
-              placeholder="At least 8 characters"
-              className="w-full"
-              minLength={8}
-            />
-          </div>
+          <FormField
+            name="password"
+            label="New Password"
+            type="password"
+            value={form.values.password}
+            error={form.errors.password}
+            onChange={(value) => form.updateField('password', value as string)}
+            onBlur={() => form.validateField('password')}
+            placeholder="At least 8 characters with uppercase, lowercase, and number"
+            disabled={form.isSubmitting}
+            required
+          />
           
-          <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-              Confirm New Password
-            </label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              disabled={loading}
-              placeholder="Confirm your new password"
-              className="w-full"
-              minLength={8}
-            />
-          </div>
+          <FormField
+            name="confirmPassword"
+            label="Confirm New Password"
+            type="password"
+            value={form.values.confirmPassword}
+            error={form.errors.confirmPassword}
+            onChange={(value) => form.updateField('confirmPassword', value as string)}
+            onBlur={() => form.validateField('confirmPassword')}
+            placeholder="Confirm your new password"
+            disabled={form.isSubmitting}
+            required
+          />
           
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={loading}
+          <FormSubmitButton
+            isSubmitting={form.isSubmitting}
+            disabled={!form.isDirty}
+            loadingText="Updating Password..."
           >
-            {loading ? 'Updating Password...' : 'Update Password'}
-          </Button>
+            Update Password
+          </FormSubmitButton>
           
           <div className="text-center text-sm text-gray-600">
             <Link 
@@ -260,7 +228,7 @@ export function ResetPasswordForm() {
               Back to Login
             </Link>
           </div>
-        </form>
+        </FormContainer>
       </CardContent>
     </Card>
   )
