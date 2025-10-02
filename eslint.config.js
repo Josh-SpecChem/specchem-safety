@@ -21,6 +21,7 @@ export default [
       "drizzle/*",
       "dist/",
       "build/",
+      "tests-backup/**", // Ignore tests-backup directory
       "**/*.gen.ts",
       "**/*.d.ts",
       "**/*.cjs", // Ignore CommonJS files
