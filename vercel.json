@@ -6,6 +6,11 @@
   "framework": "nextjs",
   "outputDirectory": ".next",
   "regions": ["iad1"],
+  "build": {
+    "env": {
+      "NODE_VERSION": "20"
+    }
+  },
   "functions": {
     "src/app/api/**": {
       "maxDuration": 30
