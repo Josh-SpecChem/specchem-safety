@@ -424,7 +424,7 @@ async function runTests() {
 }
 
 // Run tests if this file is executed directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   runTests().catch(error => {
     console.error('Test suite failed:', error);
     process.exit(1);

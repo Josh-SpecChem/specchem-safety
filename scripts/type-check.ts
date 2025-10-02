@@ -198,7 +198,8 @@ Examples:
   }
 }
 
-if (require.main === module) {
+// Check if this module is being run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }
 

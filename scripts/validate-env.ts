@@ -50,7 +50,7 @@ function validateEnvironment() {
 }
 
 // Run validation
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const isValid = validateEnvironment();
   process.exit(isValid ? 0 : 1);
 }
